@@ -2,11 +2,14 @@ import { Container, MenuItem, Select, FormControl, Button, Box, Typography, Sele
 import { useSMContext } from '../context/smContext.tsx';
 import React, { useEffect } from 'react';
 import { races } from '../data/races.ts';
-import { Character, Race } from '../sharedInterfaces/sharedInterfaces.tsx';
+import { Character, Profession, Race } from '../sharedInterfaces/sharedInterfaces.tsx';
 import { professions } from '../data/professions.ts';
 
 const CreateCharacter: React.FC = (): React.ReactElement => {
-    const { gameObject, setGameObject } = useSMContext();
+    const { 
+        gameObject, setGameObject,
+        setView 
+    } = useSMContext();
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setGameObject({
@@ -130,7 +133,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                                 }}
                             >
                                 <MenuItem value="" disabled>Select an option</MenuItem>
-                                {professions.map((option: Race) => (
+                                {professions.map((option: Profession) => (
                                     <MenuItem key={option.name} value={option.name}>
                                         {option.name}
                                     </MenuItem>
@@ -144,7 +147,10 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => console.log('clicked to preBattle')}
+                                onClick={() => {
+                                    console.log('clicked to preBattle');
+                                    setView('play');
+                                }}
                             >
                                 Start the Adventure
                             </Button>

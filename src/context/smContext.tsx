@@ -28,17 +28,39 @@ export const SMProvider: FC<Props> = ({ children }): ReactElement => {
                 strength: 10,
                 dexterity: 8,
                 toughness: 12,
+                perception: 5,
                 magic: 5,
                 abilities: [],
                 skills: []
             },
-            location: { x: 0, y: 0 },
+            location: { x: 50, y: 50 },
             world: 'Earth',
             zone: 'Sector 1',
             hitPoints: 100,
             maxHitPoints: 100,
             magicPoints: 50,
             endurancePoints: 50,
+                armours:  {
+                    head: '',
+                    upperBody: '',
+                    hands: '',
+                    legs: '',
+                    feet: ''
+                },
+                weapons: {
+                    leftHand: '',
+                    rightHand: ''
+                },
+                npc: false,
+                aggressive: false,
+                status: [],
+                active: true,
+                enemies: [],
+                friends: [],
+                canTalk: true,
+                action: 'wait',
+                actionTarget: '',
+                inventory: []
         })
     });
 

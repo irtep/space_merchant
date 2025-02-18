@@ -1,4 +1,5 @@
 import Menu from './components/Menu.tsx';
+import PlayScreen from './components/PlayScreen.tsx';
 import { useSMContext } from './context/smContext.tsx';
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
         }
         {
           (view === 'play') 
-          ? <>menu</>
+          ? <PlayScreen/>
           : <></>
         }
         {
