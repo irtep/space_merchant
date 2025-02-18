@@ -29,6 +29,7 @@ export const SMProvider: FC<Props> = ({ children }): ReactElement => {
                 dexterity: 8,
                 toughness: 12,
                 perception: 5,
+                size: 30,
                 magic: 5,
                 abilities: [],
                 skills: []

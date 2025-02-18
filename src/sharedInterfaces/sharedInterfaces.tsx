@@ -14,6 +14,7 @@ export interface Stats {
     dexterity: number;
     toughness: number;
     perception: number;
+    size: number;
     magic: number;
     abilities: Ability[];
     skills: Skill[];
