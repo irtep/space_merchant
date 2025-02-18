@@ -1,15 +1,32 @@
 import { Box, Container, Typography } from '@mui/material';
 import React, { useEffect, useRef } from 'react';
 import { useSMContext } from '../context/smContext';
+import { draw } from '../functions/draw';
+import { arenaHeight, arenaWidth } from '../measures/measures';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const {
         gameObject
     } = useSMContext();
+    const canvas = canvasRef.current;
+
 
     useEffect( () => {
         console.log('go: ', gameObject);
+        if (!canvas) return;
+
+        canvas.width = arenaWidth;  
+        canvas.height = arenaHeight;    
+
+        // generate random npc:s to the area
+
+        // start the loop
+        // loop
+        // draw
+        draw(canvas, canvasRef.);
+        // complete orders
+
     }, []);
 
     return (
