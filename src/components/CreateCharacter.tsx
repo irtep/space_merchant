@@ -2,7 +2,7 @@ import { Container, MenuItem, Select, FormControl, Button, Box, Typography, Sele
 import { useSMContext } from '../context/smContext.tsx';
 import React, { useEffect } from 'react';
 import { races } from '../data/races.ts';
-import { Race } from '../sharedInterfaces/sharedInterfaces.tsx';
+import { Character, Race } from '../sharedInterfaces/sharedInterfaces.tsx';
 import { professions } from '../data/professions.ts';
 
 const CreateCharacter: React.FC = (): React.ReactElement => {
@@ -11,20 +11,20 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setGameObject({
             ...gameObject,
-            playerCharacter: {
-                ...gameObject.playerCharacter,
-                [event.target.name]: event.target.value
-            }
+            playerCharacter: new Character({
+                ...gameObject.playerCharacter, // Spread current character properties
+                [event.target.name]: event.target.value // Update the changed property
+            })
         });
     };
 
     const handleSelectChange = (event: SelectChangeEvent<string>) => {
         setGameObject({
             ...gameObject,
-            playerCharacter: {
-                ...gameObject.playerCharacter,
-                [event.target.name]: event.target.value
-            }
+            playerCharacter: new Character({
+                ...gameObject.playerCharacter, // Keep existing properties
+                [event.target.name]: event.target.value // Update changed field
+            })
         });
     };
 
@@ -74,13 +74,13 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                         />
 
                         <Typography>
-                            Name your crew:
+                            Name your ship:
                         </Typography>
                         <input
                             id="selectName"
-                            name="crew"
+                            name="ship"
                             type="text"
-                            value={gameObject.playerCharacter.crew}
+                            value={gameObject.playerCharacter.ship}
                             onChange={handleInputChange}
                             style={{
                                 backgroundColor: 'black',

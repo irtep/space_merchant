@@ -1,5 +1,5 @@
 import { createContext, useState, ReactNode, FC, ReactElement, useContext } from 'react';
-import { GameObject } from '../sharedInterfaces/sharedInterfaces';
+import { Character, GameObject } from '../sharedInterfaces/sharedInterfaces';
 
 
 interface SMContextType {
@@ -18,12 +18,28 @@ interface Props {
 export const SMProvider: FC<Props> = ({ children }): ReactElement => {
     const [view, setView] = useState<'menu' | 'play' | 'after'>('menu');
     const [gameObject, setGameObject] = useState<GameObject>({
-            playerCharacter: {
-                name: '',
-                race: '',
-                profession: '',
-                crew: ''
-            }
+        playerCharacter: new Character({
+            title: '',
+            name: '',
+            race: '',
+            profession: '', 
+            ship: '',
+            stats: {
+                strength: 10,
+                dexterity: 8,
+                toughness: 12,
+                magic: 5,
+                abilities: [],
+                skills: []
+            },
+            location: { x: 0, y: 0 },
+            world: 'Earth',
+            zone: 'Sector 1',
+            hitPoints: 100,
+            maxHitPoints: 100,
+            magicPoints: 50,
+            endurancePoints: 50,
+        })
     });
 
     return (
