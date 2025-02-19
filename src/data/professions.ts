@@ -1,4 +1,4 @@
-import { Profession } from "../sharedInterfaces/sharedInterfaces";
+import { Profession } from "../interfaces/sharedInterfaces";
 
 export const professions: Profession[] = [
     {name: 'merchant'},

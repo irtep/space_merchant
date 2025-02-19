@@ -141,7 +141,9 @@ export class Character {
 
 
 export interface GameObject {
-    playerCharacter: Character
+    playerCharacter: Character;
+    mouseNowX: number;
+    mouseNowY: number;
 };
 
 export interface Race {

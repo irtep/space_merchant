@@ -1,4 +1,4 @@
-import { Race } from "../sharedInterfaces/sharedInterfaces";
+import { Race } from "../interfaces/sharedInterfaces";
 
 export const races: Race[] = [
     {name: 'human'},
