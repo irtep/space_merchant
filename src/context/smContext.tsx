@@ -1,5 +1,5 @@
 import { createContext, useState, ReactNode, FC, ReactElement, useContext } from 'react';
-import { Character, GameObject } from '../sharedInterfaces/sharedInterfaces';
+import { Character, GameObject } from '../interfaces/sharedInterfaces';
 
 
 interface SMContextType {
@@ -62,7 +62,9 @@ export const SMProvider: FC<Props> = ({ children }): ReactElement => {
                 action: 'wait',
                 actionTarget: '',
                 inventory: []
-        })
+        }),
+        mouseNowX: 0,
+        mouseNowY: 0
     });
 
     return (

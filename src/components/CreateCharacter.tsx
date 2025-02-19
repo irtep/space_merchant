@@ -2,7 +2,7 @@ import { Container, MenuItem, Select, FormControl, Button, Box, Typography, Sele
 import { useSMContext } from '../context/smContext.tsx';
 import React, { useEffect } from 'react';
 import { races } from '../data/races.ts';
-import { Character, Profession, Race } from '../sharedInterfaces/sharedInterfaces.tsx';
+import { Character, Profession, Race } from '../interfaces/sharedInterfaces.tsx';
 import { professions } from '../data/professions.ts';
 
 const CreateCharacter: React.FC = (): React.ReactElement => {

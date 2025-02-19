@@ -1,31 +1,88 @@
 import { Box, Container, Typography } from '@mui/material';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSMContext } from '../context/smContext';
 import { draw } from '../functions/draw';
 import { arenaHeight, arenaWidth } from '../measures/measures';
+import { GameObject } from '../interfaces/sharedInterfaces';
+import { handleKeyDown, handleMouseDown } from '../functions/gameControls';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const {
         gameObject
     } = useSMContext();
-    const canvas = canvasRef.current;
+    const [message, setMessage] = useState<string>('');
+    const [pause, setPause] = useState<boolean>(true);
+    const pauseRef: React.MutableRefObject<boolean> = useRef<boolean>(pause); // UseRef to store latest pause state
 
 
     useEffect( () => {
+        const canvas: HTMLCanvasElement | null = canvasRef.current;
         console.log('go: ', gameObject);
+        console.log('canvas: ', canvas);
         if (!canvas) return;
+        if (!canvasRef) return;
 
         canvas.width = arenaWidth;  
         canvas.height = arenaHeight;    
-
+        
         // generate random npc:s to the area
 
-        // start the loop
-        // loop
-        // draw
-        draw(canvas, canvasRef.);
-        // complete orders
+        // create copy, that will be updated in game loop
+        let liveGameObject: GameObject = JSON.parse(JSON.stringify(gameObject));
+
+        /*
+        * event listeners
+        */ 
+        console.log('handlers');
+        const keyDownHandler = (e: KeyboardEvent) => handleKeyDown(e, setPause, pauseRef, setMessage);
+        const mouseDownHandler = (e: MouseEvent) => handleMouseDown(e, canvasRef, liveGameObject);
+
+        window.addEventListener('keydown', keyDownHandler); 
+        canvas.addEventListener('mousedown', mouseDownHandler);
+        canvas.addEventListener('mousemove', (e: MouseEvent) => {
+            const rect: DOMRect = canvas.getBoundingClientRect();
+            liveGameObject.mouseNowX = e.clientX - rect.left;
+            liveGameObject.mouseNowY = e.clientY - rect.top;
+        });
+
+        /* 
+        *       update function
+        */
+
+        const update = (): void => {
+            console.log('update');
+            //liveGameObject.updateCounter++;
+
+            // update movements
+            //liveGameObject = updateTeamMovements(liveGameObject);
+            
+            // shoot
+
+            // close combat
+
+            // update bullets
+            draw(canvas, liveGameObject);
+
+        };
+
+        const loop = (): void => {
+            //console.log('loop');
+            if (!pauseRef.current) {
+                console.log('not in pause');
+                update();
+            }
+            requestAnimationFrame(loop);
+        };
+
+        console.log('loop should start');
+        loop();
+
+        return () => {
+            window.removeEventListener('keydown', keyDownHandler);
+            //window.removeEventListener('keyup', handleKeyUp);
+            canvas.removeEventListener('mousedown', mouseDownHandler);
+        };
 
     }, []);
 
@@ -50,6 +107,8 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                         alignItems: 'center',
                     }}
                 >
+                    {message}
+
                     <canvas
                         ref={canvasRef}
                         style={{
