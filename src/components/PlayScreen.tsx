@@ -13,7 +13,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
     } = useSMContext();
     const [message, setMessage] = useState<string>('');
     const [pause, setPause] = useState<boolean>(true);
-    const pauseRef: React.MutableRefObject<boolean> = useRef<boolean>(pause); // UseRef to store latest pause state
+    const pauseRef: React.RefObject<boolean> = useRef<boolean>(pause); // UseRef to store latest pause state
 
 
     useEffect( () => {
@@ -36,7 +36,12 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         */ 
         console.log('handlers');
         const keyDownHandler = (e: KeyboardEvent) => handleKeyDown(e, setPause, pauseRef, setMessage);
-        const mouseDownHandler = (e: MouseEvent) => handleMouseDown(e, canvasRef, liveGameObject);
+        const mouseDownHandler = (e: MouseEvent) => {
+            if (!canvasRef.current) return; // Ensure it's not null
+            handleMouseDown(e, canvasRef as React.RefObject<HTMLCanvasElement>, liveGameObject);
+        };
+        
+        
 
         window.addEventListener('keydown', keyDownHandler); 
         canvas.addEventListener('mousedown', mouseDownHandler);
