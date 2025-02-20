@@ -1,6 +1,7 @@
-import { Race } from "../interfaces/sharedInterfaces";
+//import { Race } from "../interfaces/sharedInterfaces";
 
-export const races: Race[] = [
+// any for now, will be Race[] later
+export const races: any[] = [
     {name: 'human'},
     {name: 'elf'},
     {name: 'dwarf'},

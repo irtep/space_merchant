@@ -7,7 +7,7 @@ import { professions } from '../data/professions.ts';
 
 const CreateCharacter: React.FC = (): React.ReactElement => {
     const [initialCharacter, setInitialCharacter] = useState<Character>({
-        id: 'p0',
+        id: '0',
         title: '',
         name: '',
         race: '',

@@ -3,8 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSMContext } from '../context/smContext';
 import { draw } from '../functions/draw';
 import { arenaHeight, arenaWidth } from '../measures/measures';
-import { GameObject } from '../interfaces/sharedInterfaces';
+import { Character, GameObject } from '../interfaces/sharedInterfaces';
 import { handleKeyDown, handleMouseDown } from '../functions/gameControls';
+import { npcs } from '../data/npcs';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,18 +20,16 @@ const PlayScreen: React.FC = (): React.ReactElement => {
     useEffect( () => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         console.log('go: ', gameObject);
-        console.log('canvas: ', canvas);
         if (!canvas) return;
         if (!canvasRef) return;
-
-        canvas.width = arenaWidth;  
-        canvas.height = arenaHeight;    
         
-        // generate random npc:s to the area
-
         // create copy, that will be updated in game loop
         let liveGameObject: GameObject = JSON.parse(JSON.stringify(gameObject));
-
+        // generate random npc:s to the area
+        // temporarily all npcs
+        npcs.forEach( (c: Character) => {
+            liveGameObject.characters.push(c);
+        });
         /*
         * event listeners
         */ 
@@ -68,7 +67,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
 
             // update bullets
             draw(canvas, liveGameObject);
-
+            console.log('lgo: ', liveGameObject);
         };
 
         const loop = (): void => {
@@ -88,7 +87,6 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             //window.removeEventListener('keyup', handleKeyUp);
             canvas.removeEventListener('mousedown', mouseDownHandler);
         };
-
     }, []);
 
     return (
@@ -116,9 +114,9 @@ const PlayScreen: React.FC = (): React.ReactElement => {
 
                     <canvas
                         ref={canvasRef}
+                        width={arenaWidth}
+                        height={arenaHeight}
                         style={{
-                            width: '700px',
-                            height: '550px',
                             border: '1px solid black',
                             background: '#9A7B4D',
                             backgroundRepeat: 'no-repeat',
