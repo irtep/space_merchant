@@ -1,35 +1,82 @@
 import { Container, MenuItem, Select, FormControl, Button, Box, Typography, SelectChangeEvent } from '@mui/material';
 import { useSMContext } from '../context/smContext.tsx';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { races } from '../data/races.ts';
 import { Character, Profession, Race } from '../interfaces/sharedInterfaces.tsx';
 import { professions } from '../data/professions.ts';
 
 const CreateCharacter: React.FC = (): React.ReactElement => {
-    const { 
+    const [initialCharacter, setInitialCharacter] = useState<Character>({
+        id: 'p0',
+        title: '',
+        name: '',
+        race: '',
+        profession: '',
+        team: '',
+        stats: {
+            strength: 10,
+            dexterity: 8,
+            toughness: 12,
+            perception: 5,
+            size: 10,
+            magic: 5,
+            abilities: [],
+            skills: []
+        },
+        location: { x: 50, y: 50 },
+        world: 'Earth',
+        zone: 'Sector 1',
+        hitPoints: 100,
+        maxHitPoints: 100,
+        magicPoints: 50,
+        endurancePoints: 50,
+        armours: {
+            head: '',
+            upperBody: '',
+            hands: '',
+            legs: '',
+            feet: ''
+        },
+        weapons: {
+            leftHand: '',
+            rightHand: ''
+        },
+        npc: false,
+        aggressive: false,
+        status: [],
+        active: true,
+        enemies: [],
+        friends: [],
+        canTalk: true,
+        action: 'wait',
+        actionTarget: '',
+        targetLocation: {x: 0, y: 0},
+        inventory: [],
+        isPlayer: true,
+        selected: false
+    });
+    const {
         gameObject, setGameObject,
-        setView 
+        setView
     } = useSMContext();
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setGameObject({
-            ...gameObject,
-            playerCharacter: new Character({
-                ...gameObject.playerCharacter, // Spread current character properties
-                [event.target.name]: event.target.value // Update the changed property
-            })
+        setInitialCharacter({
+            ...initialCharacter, // Spread current character properties
+            [event.target.name]: event.target.value // Update the changed property
         });
     };
 
     const handleSelectChange = (event: SelectChangeEvent<string>) => {
-        setGameObject({
-            ...gameObject,
-            playerCharacter: new Character({
-                ...gameObject.playerCharacter, // Keep existing properties
-                [event.target.name]: event.target.value // Update changed field
-            })
+        setInitialCharacter({
+            ...initialCharacter, // Keep existing properties
+            [event.target.name]: event.target.value // Update changed field
         });
     };
+
+    useEffect(() => {
+
+    }, []);
 
     useEffect(() => {
         console.log('go: ', gameObject);
@@ -68,7 +115,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                             id="selectName"
                             name="name"
                             type="text"
-                            value={gameObject.playerCharacter.name}
+                            value={initialCharacter.name}
                             onChange={handleInputChange}
                             style={{
                                 backgroundColor: 'black',
@@ -77,13 +124,13 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                         />
 
                         <Typography>
-                            Name your ship:
+                            Name your team:
                         </Typography>
                         <input
                             id="selectName"
-                            name="ship"
+                            name="team"
                             type="text"
-                            value={gameObject.playerCharacter.ship}
+                            value={initialCharacter.team}
                             onChange={handleInputChange}
                             style={{
                                 backgroundColor: 'black',
@@ -98,7 +145,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                             <Select
                                 id="selectRace"
                                 name="race"
-                                value={gameObject.playerCharacter.race}
+                                value={initialCharacter.race}
                                 onChange={handleSelectChange}
                                 sx={{
                                     color: 'white',
@@ -123,7 +170,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                             <Select
                                 id="selectProfession"
                                 name="profession"
-                                value={gameObject.playerCharacter.profession}
+                                value={initialCharacter.profession}
                                 onChange={handleSelectChange}
                                 sx={{
                                     color: 'white',
@@ -143,12 +190,16 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
 
 
                         {/* Start Button */}
-                        {gameObject.playerCharacter.name && gameObject.playerCharacter.race && gameObject.playerCharacter.profession ? (
+                        {initialCharacter.name && initialCharacter.race && initialCharacter.profession ? (
                             <Button
                                 variant="contained"
                                 color="primary"
                                 onClick={() => {
                                     console.log('clicked to preBattle');
+                                    setGameObject({
+                                        ...gameObject,
+                                        characters:[initialCharacter]
+                                    });
                                     setView('play');
                                 }}
                             >
@@ -175,26 +226,26 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                 >
                     <Box display="flex" flexDirection="column" alignItems="center" textAlign="center" gap={2} mt={4}>
                         {
-                            (gameObject.playerCharacter.name !== '')
+                            (initialCharacter.name !== '')
                                 ?
                                 <Typography>
-                                    {`Greetings master ${gameObject.playerCharacter.name}`}
+                                    {`Greetings master ${initialCharacter.name}`}
                                 </Typography>
                                 : <></>
                         }
                         {
-                            (gameObject.playerCharacter.race !== '')
+                            (initialCharacter.race !== '')
                                 ?
                                 <Typography>
-                                    {`${gameObject.playerCharacter.race} is an excellent choice.`}
+                                    {`${initialCharacter.race} is an excellent choice.`}
                                 </Typography>
                                 : <></>
                         }
                         {
-                            (gameObject.playerCharacter.profession !== '')
+                            (initialCharacter.profession !== '')
                                 ?
                                 <Typography>
-                                    {`${gameObject.playerCharacter.profession} is an intresting choice.`}
+                                    {`${initialCharacter.profession} is an intresting choice.`}
                                 </Typography>
                                 : <></>
                         }

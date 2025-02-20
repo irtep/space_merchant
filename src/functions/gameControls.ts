@@ -1,8 +1,9 @@
-import { GameObject } from "../interfaces/sharedInterfaces";
+import { Character, Coordinates, GameObject } from "../interfaces/sharedInterfaces";
 //import { shoot } from "./fireWeapon";
 
 // Keyboard state
 // supports arrows and wsad
+/*
 export const keys: { [key: string]: boolean } = {
     ArrowUp: false,
     ArrowDown: false,
@@ -13,7 +14,7 @@ export const keys: { [key: string]: boolean } = {
     a: false,
     d: false,
 };
-
+*/
 // Event listeners for keyboard
 /*
 export const handleKeyDown = (e: KeyboardEvent) => {
@@ -43,18 +44,36 @@ export const handleKeyDown = (
 
 export const handleMouseDown = (
     e: MouseEvent,
-    canvasRef: React.RefObject<HTMLCanvasElement> | null,
+    canvasRef: React.RefObject<HTMLCanvasElement>,
     gameObject: GameObject
 ) => {
-    if (!canvasRef) return;
+    if (!canvasRef.current) return;
+    
     const canvas = canvasRef.current;
-    if (!canvas) return;
     const rect: DOMRect = canvas.getBoundingClientRect();
     const mouseX: number = e.clientX - rect.left;
     const mouseY: number = e.clientY - rect.top;
-
+    const player: Character | undefined = gameObject.characters.find( (c: Character, i: number) => c.isPlayer === true );
+    let playersTeam: string = '';
+    let clickedPlayersTeam: boolean = false;
+    let clickedNPC: boolean = false;
+    if (player) { playersTeam = player.team };
     gameObject.mouseNowX = mouseX;
     gameObject.mouseNowY = mouseY;
+    const clickedLocation: Coordinates = {x: mouseX, y: mouseY}
+    console.log('clicked: ', mouseX, mouseY);
+
+    // check if any of players team is clicked
+
+        // if is, then put all selected to false, and select this
+    
+    // if not, then check if any other npc is clicked
+
+        // if is, check if any of players team is selected
+
+            // if is, select id of this clicked as target of selected team guy
+
+
     //const playerRig: Vehicle | undefined = gameObject.vehicles.find(v => v.role === 'player')?.vehicle;
     //const aiRig: Vehicle | undefined = gameObject.vehicles.find(v => v.role === 'ai')?.vehicle;
 

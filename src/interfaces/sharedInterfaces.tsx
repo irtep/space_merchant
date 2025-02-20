@@ -72,6 +72,39 @@ export interface Weapons {
     rightHand: Weapon | '';
 };
 
+export interface Character {
+    id: string;
+    title: string;
+    name: string;
+    race: string;
+    profession: string;
+    team: string;
+    stats: Stats;
+    location: Coordinates;
+    world: string;
+    zone: string;
+    hitPoints: number;
+    maxHitPoints: number;
+    magicPoints: number;
+    endurancePoints: number;
+    armours: Armours;
+    weapons: Weapons;
+    npc: boolean;
+    aggressive: boolean;
+    status: string[];
+    active: boolean;
+    enemies: string[];
+    friends: string[];
+    canTalk: boolean;
+    action: string;
+    actionTarget: string;
+    targetLocation: Coordinates;
+    inventory: Weapons[] | Armours[] | Item[];
+    isPlayer: boolean;
+    selected: boolean;
+};
+
+/*
 export class Character {
     title: string;
     name: string;
@@ -138,12 +171,25 @@ export class Character {
         console.log(`${this.name} moves to (${newLocation.x}, ${newLocation.y})`);
     }
 };
-
+*/
 
 export interface GameObject {
-    playerCharacter: Character;
+    characters: Character[];
     mouseNowX: number;
     mouseNowY: number;
+};
+
+export interface Circle {
+    x: number;
+    y: number;
+    size: number;
+};
+
+export interface Rect {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
 };
 
 export interface Race {
