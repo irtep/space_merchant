@@ -1,4 +1,5 @@
 import { Character, Coordinates, GameObject } from "../interfaces/sharedInterfaces";
+import { isCircleColliding } from "./collisions";
 //import { shoot } from "./fireWeapon";
 
 // Keyboard state
@@ -48,65 +49,80 @@ export const handleMouseDown = (
     gameObject: GameObject
 ) => {
     if (!canvasRef.current) return;
-    
+    const clickSize: number = 1;
     const canvas = canvasRef.current;
     const rect: DOMRect = canvas.getBoundingClientRect();
     const mouseX: number = e.clientX - rect.left;
     const mouseY: number = e.clientY - rect.top;
-    const player: Character | undefined = gameObject.characters.find( (c: Character, i: number) => c.isPlayer === true );
-    let playersTeam: string = '';
-    let clickedPlayersTeam: boolean = false;
-    let clickedNPC: boolean = false;
+    const player: Character | undefined = gameObject.characters.find((c: Character, i: number) => c.isPlayer === true);
+    let playersTeam: string = gameObject.characters[0].team;
+    let indexOfSelected: number | undefined = undefined;
+    let indexOfClicked: number | undefined = undefined;
     if (player) { playersTeam = player.team };
-    gameObject.mouseNowX = mouseX;
-    gameObject.mouseNowY = mouseY;
-    const clickedLocation: Coordinates = {x: mouseX, y: mouseY}
+    //gameObject.mouseNowX = mouseX; just for hover, i think these
+    //gameObject.mouseNowY = mouseY;
+    const clickedLocation: Coordinates = { x: mouseX, y: mouseY }
     console.log('clicked: ', mouseX, mouseY);
 
-    // check if any of players team is clicked
+    // check if any of characters where clicked
+    gameObject.characters.forEach((c: Character, i: number) => {
+        const collisionResult: boolean = isCircleColliding(
+            {
+                x: clickedLocation.x,
+                y: clickedLocation.y,
+                size: clickSize
+            },
+            {
+                x: c.location.x,
+                y: c.location.y,
+                size: c.stats.size
+            });
+        if (collisionResult) {
+            indexOfClicked = i;
+            console.log('found in index: ', i);
+        } else {
+            /*
+            console.log('no collision: ',
+                clickedLocation.x,
+                clickedLocation.y,
+                clickSize,
+                ' vs ',
+                c.location.x,
+                c.location.y,
+                c.stats.size
+            );
+            */
+        };
+        // check also, just in case, who is selected
+        if (c.selected) { indexOfSelected = i; };
+    });
+    // if is character, check if it is of players team
+    if (indexOfClicked !== undefined) {
+        console.log('hit');
+        console.log('comparing: ', gameObject.characters[indexOfClicked].team, ' vs ', playersTeam);
+        if (gameObject.characters[indexOfClicked].team === playersTeam) {
+            console.log('in players team');
+            // set all unselected
+            gameObject.characters.forEach((c: Character) => { c.selected = false });
+            // set this clicked as selected
+            gameObject.characters[indexOfClicked].selected = true;
+            indexOfSelected = indexOfClicked;
+        } else {
+            // make this targeted, target of selected
+            if (indexOfSelected) {
+                gameObject.characters.forEach((c: Character) => {
+                    if (c.selected && indexOfClicked) {
+                        c.actionTarget = gameObject.characters[indexOfClicked].id;
+                    }
+                });
+            }
+        }
+    } else {
+        // if walking, then target location
+        console.log('no indexOfClicked');
+        if (indexOfSelected && gameObject.characters[indexOfSelected].action === 'move') {
+            gameObject.characters[indexOfSelected].targetLocation = { x: mouseX, y: mouseY };
+        };
 
-        // if is, then put all selected to false, and select this
-    
-    // if not, then check if any other npc is clicked
-
-        // if is, check if any of players team is selected
-
-            // if is, select id of this clicked as target of selected team guy
-
-
-    //const playerRig: Vehicle | undefined = gameObject.vehicles.find(v => v.role === 'player')?.vehicle;
-    //const aiRig: Vehicle | undefined = gameObject.vehicles.find(v => v.role === 'ai')?.vehicle;
-
-    // player shooting:
-    //if (playerRig && aiRig) {
-    //const turretsAngle: number = Math.atan2(mouseY - playerRig.y, mouseX - playerRig.x);
-    //
-    // Calculate the angle to the mouse position
-    //   const mouseAngle: number = Math.atan2(mouseY - playerRig.y, mouseX - playerRig.x);
-    //   const forwardAngle: number = playerRig.angle;
-
-    // Define the arc range (±π/8 radians for a 45-degree arc)
-    // const arcRange: number = Math.PI / 8;
-
-    // Normalize angles to [0, 2π] for comparison
-    //  const normalizeAngle = (angle: number) => (angle + Math.PI * 2) % (Math.PI * 2);
-    //  const normalizedMouseAngle = normalizeAngle(mouseAngle);
-    //  const normalizedForwardAngle = normalizeAngle(forwardAngle);
-
-    // Check if the mouse is within the front arc
-    //const isInFrontArc =
-    //    Math.abs(normalizedMouseAngle - normalizedForwardAngle) <= arcRange ||
-    //    Math.abs(normalizedMouseAngle - normalizedForwardAngle - Math.PI * 2) <= arcRange;
-    //        
-    //console.log('in front: ', isInFrontArc);
-    /*
-    const checkingRadar: CollisionReport = radarCheck(
-      gameObject,
-      'player',
-      0,
-      'check for front weapons'
-    );
-    */
-    // shoot(playerRig, gameObject, mouseAngle, isInFrontArc/*checkingRadar*/, true);
-
+    }
 };

@@ -13,15 +13,23 @@ export const draw = (
     // draw buildings
 
     // draw characters
-    gameObject.characters.forEach( (c: Character) => {
+    gameObject.characters.forEach((c: Character) => {
         ctx.fillStyle = 'black';
         ctx.beginPath();
         ctx.arc(c.location.x, c.location.y, c.stats.size, 0, Math.PI * 2);
         ctx.fill();
-    
+
         ctx.font = '14px Arial';
         ctx.fillStyle = 'cyan';
-        ctx.fillText('characteri', c.location.x, c.location.y - 10);
-    });
+        ctx.fillText(c.name, c.location.x, c.location.y - 10);
 
+        // green circle if selected
+        if (c.selected) {
+            ctx.strokeStyle = 'green';
+            ctx.beginPath();
+            ctx.arc(c.location.x, c.location.y, c.stats.size + 10, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+    });
 };
