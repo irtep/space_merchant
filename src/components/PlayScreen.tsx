@@ -6,49 +6,57 @@ import { arenaHeight, arenaWidth } from '../measures/measures';
 import { Character, GameObject } from '../interfaces/sharedInterfaces';
 import { handleKeyDown, handleMouseDown } from '../functions/gameControls';
 import { npcs } from '../data/npcs';
+import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const {
-        gameObject
+        gameObject,
+        setGameObject
     } = useSMContext();
     const [message, setMessage] = useState<string>('');
     const [pause, setPause] = useState<boolean>(true);
     const pauseRef: React.RefObject<boolean> = useRef<boolean>(pause); // UseRef to store latest pause state
+    let liveGameObject: GameObject = {
+        characters: [],
+        mouseNowX: 0,
+        mouseNowY: 0
+    };
+    //const canvas: HTMLCanvasElement | null = canvasRef.current;
 
-
-    useEffect( () => {
+    useEffect(() => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         console.log('go: ', gameObject);
         if (!canvas) return;
         if (!canvasRef) return;
-        
-        // create copy, that will be updated in game loop
-        let liveGameObject: GameObject = JSON.parse(JSON.stringify(gameObject));
+
+        console.log('copying go to live go');
+        liveGameObject = JSON.parse(JSON.stringify(gameObject));
         // generate random npc:s to the area
         // temporarily all npcs
-        npcs.forEach( (c: Character) => {
+        npcs.forEach((c: Character) => {
+            console.log('adding: ', c.name);
             liveGameObject.characters.push(c);
         });
         /*
         * event listeners
-        */ 
+        */
         console.log('handlers');
         const keyDownHandler = (e: KeyboardEvent) => handleKeyDown(e, setPause, pauseRef, setMessage);
         const mouseDownHandler = (e: MouseEvent) => {
             if (!canvasRef.current) return; // Ensure it's not null
             handleMouseDown(e, canvasRef as React.RefObject<HTMLCanvasElement>, liveGameObject);
         };
-        
-        
 
-        window.addEventListener('keydown', keyDownHandler); 
+        window.addEventListener('keydown', keyDownHandler);
         canvas.addEventListener('mousedown', mouseDownHandler);
         canvas.addEventListener('mousemove', (e: MouseEvent) => {
             const rect: DOMRect = canvas.getBoundingClientRect();
             liveGameObject.mouseNowX = e.clientX - rect.left;
             liveGameObject.mouseNowY = e.clientY - rect.top;
         });
+
+        draw(canvas, liveGameObject);
 
         /* 
         *       update function
@@ -60,7 +68,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
 
             // update movements
             //liveGameObject = updateTeamMovements(liveGameObject);
-            
+
             // shoot
 
             // close combat
@@ -75,6 +83,9 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             if (!pauseRef.current) {
                 console.log('not in pause');
                 update();
+            } else {
+                // could try to update state variables here
+                setGameObject(liveGameObject);
             }
             requestAnimationFrame(loop);
         };
@@ -88,6 +99,12 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             canvas.removeEventListener('mousedown', mouseDownHandler);
         };
     }, []);
+
+    useEffect( () => {
+        const canvas: HTMLCanvasElement | null = canvasRef.current;
+        if (!canvas) return;
+        draw(canvas, gameObject);
+    },[gameObject]);
 
     return (
         <Container maxWidth="lg">
@@ -135,9 +152,13 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                         textAlign: 'center',
                     }}
                 >
-                    <Typography sx={{ color: 'white' }}>
-                        Kaupunki
-                    </Typography>
+                    <PlayerControlPanel
+                        pause={pause}
+                        setPause={setPause}
+                        gameObject={gameObject}
+                        setGameObject={setGameObject}
+                        liveGameObject={liveGameObject}
+                    />
                 </Box>
             </Box>
         </Container>
