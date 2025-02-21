@@ -1,7 +1,6 @@
 import { createContext, useState, ReactNode, FC, ReactElement, useContext } from 'react';
 import { GameObject } from '../interfaces/sharedInterfaces';
 
-
 interface SMContextType {
     view: 'menu' | 'play' | 'after';
     setView: React.Dispatch<React.SetStateAction<'menu' | 'play' | 'after'>>;
