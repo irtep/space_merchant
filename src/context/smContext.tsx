@@ -6,6 +6,10 @@ interface SMContextType {
     setView: React.Dispatch<React.SetStateAction<'menu' | 'play' | 'after'>>;
     gameObject: GameObject;
     setGameObject: React.Dispatch<React.SetStateAction<GameObject>>;
+    charIsSelected: boolean;
+    setCharIsSelected: React.Dispatch<React.SetStateAction<boolean>>;
+    indexOfSelected: number;
+    setIndexOfSelected: React.Dispatch<React.SetStateAction<number>>;
 };
 
 export const SMContext = createContext<SMContextType | undefined>(undefined);
@@ -21,11 +25,15 @@ export const SMProvider: FC<Props> = ({ children }): ReactElement => {
         mouseNowX: 0,
         mouseNowY: 0
     });
+    const [charIsSelected, setCharIsSelected] = useState<boolean>(false);
+    const [indexOfSelected, setIndexOfSelected] = useState<number>(0);
 
     return (
         <SMContext.Provider value={{
             view, setView,
-            gameObject, setGameObject
+            gameObject, setGameObject,
+            charIsSelected, setCharIsSelected,
+            indexOfSelected, setIndexOfSelected
         }}>
             {children}
         </SMContext.Provider>

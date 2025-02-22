@@ -1,25 +1,24 @@
 import { Container, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Character, GameObject } from '../interfaces/sharedInterfaces';
+import CharacterOptions from './CharacterOptions';
+import { useSMContext } from '../context/smContext';
 
 interface PCPprops {
     pause: boolean;
     setPause: React.Dispatch<React.SetStateAction<boolean>>;
-    gameObject: GameObject;
-    setGameObject: React.Dispatch<React.SetStateAction<GameObject>>;
-    liveGameObject: GameObject;
+    liveGameObject: GameObject
 };
 
-const PlayerControlPanel: React.FC<PCPprops> = ({
-    pause,
-    setPause,
-    gameObject,
-    setGameObject,
-    liveGameObject
-}): React.ReactElement => {
-    const [charIsSelected, setCharIsSelected] = useState<boolean>(false);
-    const [indexOfSelected, setIndexOfSelected] = useState<number>(0);
-
+const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObject }): React.ReactElement => {
+    const {
+        gameObject,
+        setGameObject,
+        charIsSelected,
+        setCharIsSelected,
+        setIndexOfSelected
+    } = useSMContext();
+    
     useEffect( () => {
         gameObject.characters.forEach( (c: Character, i: number) => {
             if (c.selected && !charIsSelected) {
@@ -84,9 +83,9 @@ const PlayerControlPanel: React.FC<PCPprops> = ({
             {
                 (charIsSelected)
                 ?
-                <>
-                    selected char {indexOfSelected}
-                </>
+                <CharacterOptions
+                    liveGameObject={liveGameObject}
+                />
                 :
                 <>
                     not selected
