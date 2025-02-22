@@ -100,11 +100,13 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         };
     }, []);
 
-    useEffect( () => {
+    useEffect(() => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (!canvas) return;
         draw(canvas, gameObject);
-    },[gameObject]);
+        
+        //liveGameObject = gameObject;
+    }, [gameObject]);
 
     return (
         <Container maxWidth="lg">
@@ -155,8 +157,6 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                     <PlayerControlPanel
                         pause={pause}
                         setPause={setPause}
-                        gameObject={gameObject}
-                        setGameObject={setGameObject}
                         liveGameObject={liveGameObject}
                     />
                 </Box>

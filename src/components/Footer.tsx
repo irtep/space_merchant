@@ -15,7 +15,7 @@ const Footer: React.FC = (): React.ReactElement => {
         }}>
 
             <p>
-                Version: 0.0.8
+                Version: 0.0.9
             </p>
         </div>
     );

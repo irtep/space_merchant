@@ -121,8 +121,10 @@ export const handleMouseDown = (
         // if walking, then target location
         console.log('no indexOfClicked');
         if (indexOfSelected && gameObject.characters[indexOfSelected].action === 'move') {
+            console.log('move target to ', gameObject.characters[indexOfSelected]);
             gameObject.characters[indexOfSelected].targetLocation = { x: mouseX, y: mouseY };
-        };
-
+        } else {
+            console.log('i o s & action: ', indexOfSelected, gameObject.characters);
+        }
     }
 };
