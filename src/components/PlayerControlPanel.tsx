@@ -3,14 +3,16 @@ import React, { useEffect } from 'react';
 import { Character, GameObject } from '../interfaces/sharedInterfaces';
 import CharacterOptions from './CharacterOptions';
 import { useSMContext } from '../context/smContext';
+import { draw } from '../functions/draw';
 
 interface PCPprops {
     pause: boolean;
     setPause: React.Dispatch<React.SetStateAction<boolean>>;
-    liveGameObject: GameObject
+    liveGameObject: GameObject,
+    canvas: HTMLCanvasElement | null
 };
 
-const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObject }): React.ReactElement => {
+const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObject, canvas }): React.ReactElement => {
     const {
         gameObject,
         setGameObject,
@@ -18,13 +20,13 @@ const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObjec
         setCharIsSelected,
         setIndexOfSelected
     } = useSMContext();
-    
-    useEffect( () => {
-        gameObject.characters.forEach( (c: Character, i: number) => {
+
+    useEffect(() => {
+        gameObject.characters.forEach((c: Character, i: number) => {
             if (c.selected && !charIsSelected) {
                 setCharIsSelected(true);
                 setIndexOfSelected(i);
-            } 
+            }
         });
     }, [gameObject]);
 
@@ -43,9 +45,9 @@ const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObjec
                                         >
                                             <button
                                                 onClick={() => {
-                                                    const oldGameObject: GameObject = {...gameObject}
+                                                    const oldGameObject: GameObject = { ...gameObject }
                                                     // unselect all
-                                                    oldGameObject.characters.forEach( (cha: Character) => {
+                                                    oldGameObject.characters.forEach((cha: Character) => {
                                                         cha.selected = false;
                                                     });
                                                     // select this
@@ -54,6 +56,8 @@ const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObjec
                                                     // update
                                                     liveGameObject = oldGameObject;
                                                     setGameObject(oldGameObject);
+                                                    if (!canvas) return;
+                                                    draw(canvas, liveGameObject);
                                                 }}
                                                 style={{
                                                 }}
@@ -72,7 +76,7 @@ const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObjec
                             not paused
                         </Typography>
                         <button
-                            onClick={ () => {
+                            onClick={() => {
                                 setPause(!pause);
                             }}
                         >
@@ -82,14 +86,14 @@ const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObjec
             }
             {
                 (charIsSelected)
-                ?
-                <CharacterOptions
-                    liveGameObject={liveGameObject}
-                />
-                :
-                <>
-                    not selected
-                </>
+                    ?
+                    <CharacterOptions
+                        liveGameObject={liveGameObject}
+                    />
+                    :
+                    <>
+                        not selected
+                    </>
             }
         </Container>
     );

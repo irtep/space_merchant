@@ -21,8 +21,18 @@ export const draw = (
 
         ctx.font = '14px Arial';
         ctx.fillStyle = 'cyan';
-        ctx.fillText(c.name, c.location.x, c.location.y - 10);
-
+        ctx.fillText(c.name, c.location.x, c.location.y - 14);
+        ctx.fillText(c.action, c.location.x, c.location.y);
+        if (c.action === 'move' && c.selected === true) {
+            ctx.fillText('to where?', c.location.x, c.location.y + 14);
+        }
+        else if (c.action === 'attack' && c.selected === true) {
+            if (c.actionTarget === '') {
+                ctx.fillText('who?', c.location.x, c.location.y + 14);
+            } else {
+                ctx.fillText(c.actionTarget, c.location.x, c.location.y + 14);
+            }
+        }
         // green circle if selected
         if (c.selected) {
             ctx.strokeStyle = 'green';
