@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSMContext } from '../context/smContext';
 import { draw } from '../functions/draw';
@@ -6,13 +6,15 @@ import { arenaHeight, arenaWidth } from '../measures/measures';
 import { Character, GameObject } from '../interfaces/sharedInterfaces';
 import { handleKeyDown, handleMouseDown } from '../functions/gameControls';
 import { npcs } from '../data/npcs';
-import PlayerControlPanel from './PlayerControlPanel';
+//import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const {
         gameObject,
-        setGameObject
+        setGameObject,
+        indexOfSelected,
+        setIndexOfSelected
     } = useSMContext();
     const [message, setMessage] = useState<string>('');
     const [pause, setPause] = useState<boolean>(true);
@@ -42,10 +44,10 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         * event listeners
         */
         console.log('handlers');
-        const keyDownHandler = (e: KeyboardEvent) => handleKeyDown(e, setPause, pauseRef, setMessage);
+        const keyDownHandler = (e: KeyboardEvent) => handleKeyDown(e, setPause, pauseRef, setMessage, liveGameObject, setGameObject);
         const mouseDownHandler = (e: MouseEvent) => {
             if (!canvasRef.current) return; // Ensure it's not null
-            handleMouseDown(e, canvasRef as React.RefObject<HTMLCanvasElement>, liveGameObject);
+            handleMouseDown(e, canvasRef as React.RefObject<HTMLCanvasElement>, liveGameObject, indexOfSelected, setIndexOfSelected/*, setPause, pause*/);
         };
 
         window.addEventListener('keydown', keyDownHandler);
@@ -67,7 +69,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             //liveGameObject.updateCounter++;
 
             // update movements
-            //liveGameObject = updateTeamMovements(liveGameObject);
+            liveGameObject = updateTeamMovements(liveGameObject);
 
             // shoot
 
@@ -103,7 +105,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
     useEffect(() => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (!canvas) return;
-        draw(canvas, gameObject);
+        draw(canvas, liveGameObject);
         
         //liveGameObject = gameObject;
     }, [gameObject]);
@@ -154,11 +156,14 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                         textAlign: 'center',
                     }}
                 >
+                    { /*
                     <PlayerControlPanel
                         pause={pause}
                         setPause={setPause}
                         liveGameObject={liveGameObject}
+                        canvas={canvasRef.current}
                     />
+                    */ }
                 </Box>
             </Box>
         </Container>

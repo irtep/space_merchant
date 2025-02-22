@@ -55,6 +55,7 @@ const clonedDefaultChar: Character = JSON.parse(JSON.stringify(defaultCharacter)
 export const npcs: Character[] = [
     {
         ...clonedDefaultChar,
+        id: 'durk1',
         name: 'Durk Darkhammer',
         race: 'dwarf',
         profession: 'mercenary',
@@ -63,6 +64,7 @@ export const npcs: Character[] = [
     },
     {
         ...clonedDefaultChar,
+        id: 'swift1',
         name: 'Mister Swift',
         race: 'elf',
         profession: 'wizard',
