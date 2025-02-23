@@ -6,6 +6,7 @@ import { arenaHeight, arenaWidth } from '../measures/measures';
 import { Character, GameObject } from '../interfaces/sharedInterfaces';
 import { handleKeyDown, handleMouseDown } from '../functions/gameControls';
 import { npcs } from '../data/npcs';
+import { updateTeamMovements } from '../functions/updateTeamMovements';
 //import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
@@ -47,7 +48,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         const keyDownHandler = (e: KeyboardEvent) => handleKeyDown(e, setPause, pauseRef, setMessage, liveGameObject, setGameObject);
         const mouseDownHandler = (e: MouseEvent) => {
             if (!canvasRef.current) return; // Ensure it's not null
-            handleMouseDown(e, canvasRef as React.RefObject<HTMLCanvasElement>, liveGameObject, indexOfSelected, setIndexOfSelected/*, setPause, pause*/);
+            handleMouseDown(e, canvasRef as React.RefObject<HTMLCanvasElement>, liveGameObject, /*indexOfSelected, setIndexOfSelected, setPause, pause*/);
         };
 
         window.addEventListener('keydown', keyDownHandler);
@@ -65,7 +66,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         */
 
         const update = (): void => {
-            console.log('update');
+            //console.log('update');
             //liveGameObject.updateCounter++;
 
             // update movements
@@ -77,13 +78,13 @@ const PlayScreen: React.FC = (): React.ReactElement => {
 
             // update bullets
             draw(canvas, liveGameObject);
-            console.log('lgo: ', liveGameObject);
+            //console.log('lgo: ', liveGameObject);
         };
 
         const loop = (): void => {
             //console.log('loop');
             if (!pauseRef.current) {
-                console.log('not in pause');
+                //console.log('not in pause');
                 update();
             } else {
                 // could try to update state variables here
