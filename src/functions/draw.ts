@@ -7,10 +7,53 @@ export const draw = (
     if (!ctx) return;
     // clear
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //console.log('gameO: ', gameObject);
 
-    //console.log('loca y size ', p.r.location, p.r.stats.size);    
+    // Draw buildings (rectObstacles)
+    gameObject.map.rectObstacles.forEach((building) => {
+        ctx.fillStyle = building.color || 'black';
+        ctx.fillRect(building.x, building.y, building.w, building.h);
 
-    // draw buildings
+        // Draw door
+        if (building.door) {
+            ctx.fillStyle = 'brown';
+            ctx.fillRect(building.door.x - 5, building.door.y - 5, 10, 10);
+        }
+
+        // Draw building name
+        if (building.name) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = 'white';
+            ctx.fillText(building.name, building.x + building.w / 2 - ctx.measureText(building.name).width / 2, building.y - 5);
+        }
+
+    });
+
+    // Draw circular obstacles (e.g., watchtowers, trees)
+    gameObject.map.circleObstacles.forEach((obstacle) => {
+        ctx.fillStyle = obstacle.color || 'black';
+        ctx.beginPath();
+        ctx.arc(obstacle.x, obstacle.y, obstacle.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw name
+        ctx.font = '14px Arial';
+        ctx.fillStyle = 'white';
+        ctx.fillText(obstacle.name, obstacle.x - ctx.measureText(obstacle.name).width / 2, obstacle.y - obstacle.size - 5);
+    });
+
+    // Draw loots
+    gameObject.map.loots.forEach((loot) => {
+        ctx.fillStyle = 'gold';
+        ctx.beginPath();
+        ctx.arc(loot.x, loot.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw loot name
+        ctx.font = '12px Arial';
+        ctx.fillStyle = 'yellow';
+        ctx.fillText(loot.what.name, loot.x - ctx.measureText(loot.what.name).width / 2, loot.y - 10);
+    });
 
     // draw characters
     gameObject.characters.forEach((c: Character) => {

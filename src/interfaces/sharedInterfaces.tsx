@@ -28,10 +28,12 @@ export interface Coordinates {
 
 export interface Item {
     name: string;
-    type: 'item';
+    shortName: string;
+    type: 'item' | 'money';
     desc: string;
     value: number;
     weight: number;
+    rarity: string;
 };
 
 export interface StatMod {
@@ -41,22 +43,43 @@ export interface StatMod {
 
 export interface Armour {
     name: string;
+    shortName: string;
     desc: string;
     type: 'armour';
     slots: string[];
     value: number;
     weight: number;
     stats: StatMod[];
+    rarity: string;
+};
+
+export interface DamageTypes {
+    physical?: number;
+    magic?: number;
+    fire?: number;
+    poison?: number;
+    cold?: number;
+    psionic?: number;
 };
 
 export interface Weapon {
     name: string;
+    shortName: string;
     desc: string;
     type: 'weapon';
-    slots: string[];
+    handlingSkill: string;
+    range: number;
+    rangedWeapon: boolean;
+    slotsNeeded: number;
     value: number;
     weight: number;
     stats: StatMod[];
+    combatSpeed: number;
+    effects: string[];
+    damage: DamageTypes;
+    coolDownCounter: number;
+    rarity: string;
+    armourPiercing: number;
 };
 
 export interface Armours {
@@ -102,6 +125,73 @@ export interface Character {
     inventory: Weapons[] | Armours[] | Item[];
     isPlayer: boolean;
     selected: boolean;
+};
+
+export interface Loot {
+    x: number;
+    y: number;
+    what: Weapon | Armour | Item
+};
+
+export interface RectObstacle {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    color: string;
+    door?: Coordinates;
+    name?: string;
+};
+
+export interface CircleObstacle {
+    x: number;
+    y: number;
+    size: number;
+    color: string;
+    door?: Coordinates;
+    name: string;
+};
+
+export interface GameMap {
+    rectObstacles: RectObstacle[];
+    circleObstacles: CircleObstacle[];
+    loots: Loot[];
+};
+
+export interface GameObject {
+    characters: Character[];
+    mouseNowX: number;
+    mouseNowY: number;
+    map: GameMap;
+};
+
+export interface Circle {
+    x: number;
+    y: number;
+    size: number;
+};
+
+export interface Rect {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+};
+
+export interface Race {
+    name: string;
+    desc: string;
+    stats: Stats;
+    skills: Skill[];
+    abilities: Ability[];
+};
+
+export interface Profession {
+    name: string;
+};
+
+export interface Background {
+    name: string;
 };
 
 /*
@@ -172,51 +262,3 @@ export class Character {
     }
 };
 */
-
-export interface RectObstacle {
-    w: number;
-    h: number;
-    color: string;
-    door?: Coordinates;
-    name?: string;
-};
-
-export interface Map {
-    rectObstacles: RectObstacle;
-};
-
-export interface GameObject {
-    characters: Character[];
-    mouseNowX: number;
-    mouseNowY: number;
-    map: Map
-};
-
-export interface Circle {
-    x: number;
-    y: number;
-    size: number;
-};
-
-export interface Rect {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-};
-
-export interface Race {
-    name: string;
-    desc: string;
-    stats: Stats;
-    skills: Skill[];
-    abilities: Ability[];
-};
-
-export interface Profession {
-    name: string;
-};
-
-export interface Background {
-    name: string;
-};

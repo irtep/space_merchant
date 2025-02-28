@@ -14,17 +14,13 @@ const PlayScreen: React.FC = (): React.ReactElement => {
     const {
         gameObject,
         setGameObject,
-        indexOfSelected,
-        setIndexOfSelected
+        //indexOfSelected,
+        //setIndexOfSelected
     } = useSMContext();
     const [message, setMessage] = useState<string>('');
     const [pause, setPause] = useState<boolean>(true);
     const pauseRef: React.RefObject<boolean> = useRef<boolean>(pause); // UseRef to store latest pause state
-    let liveGameObject: GameObject = {
-        characters: [],
-        mouseNowX: 0,
-        mouseNowY: 0
-    };
+    let liveGameObject: GameObject = gameObject;
     //const canvas: HTMLCanvasElement | null = canvasRef.current;
 
     useEffect(() => {
@@ -118,7 +114,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                 flexDirection: 'row',
                 gap: 2,
                 p: 3,
-                background: 'black',
+                background: 'rgb(66, 64, 64)',
                 color: 'red',
                 height: '100vh', // Ensure full height
             }}>
