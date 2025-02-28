@@ -7,7 +7,7 @@ import { Character, GameObject } from '../interfaces/sharedInterfaces';
 import { handleKeyDown, handleMouseDown } from '../functions/mouseAndKeyControls';
 import { npcs } from '../data/npcs';
 import { updateTeamMovements } from '../functions/updateTeamMovements';
-import { drawConsole } from '../functions/drawConsole';
+import { drawConsole, handleMouseDownToConsole } from '../functions/drawConsole';
 //import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
@@ -51,9 +51,13 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             if (!canvasRef.current) return; // Ensure it's not null
             handleMouseDown(e, canvasRef as React.RefObject<HTMLCanvasElement>, liveGameObject, /*indexOfSelected, setIndexOfSelected, setPause, pause*/);
         };
-
+        const mouseDownHandlerConsole = (e: MouseEvent) => {
+            if (!canvasRef2.current) return;
+            handleMouseDownToConsole(e, canvas2, liveGameObject)
+        };
         window.addEventListener('keydown', keyDownHandler);
         canvas.addEventListener('mousedown', mouseDownHandler);
+        canvas2.addEventListener('mousedown', mouseDownHandlerConsole);
         canvas.addEventListener('mousemove', (e: MouseEvent) => {
             const rect: DOMRect = canvas.getBoundingClientRect();
             liveGameObject.mouseNowX = e.clientX - rect.left;
@@ -90,6 +94,8 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             } else {
                 // could try to update state variables here
                 setGameObject(liveGameObject);
+                draw(canvas, liveGameObject); // map
+                drawConsole(canvas2, liveGameObject); // console at right side
             }
             requestAnimationFrame(loop);
         };
@@ -101,6 +107,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             window.removeEventListener('keydown', keyDownHandler);
             //window.removeEventListener('keyup', handleKeyUp);
             canvas.removeEventListener('mousedown', mouseDownHandler);
+            canvas2.removeEventListener('mousedown', mouseDownHandlerConsole);
         };
     }, []);
 

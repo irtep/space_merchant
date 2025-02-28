@@ -66,11 +66,12 @@ export const handleMouseDown = (
     const player: Character | undefined = gameObject.characters.find((c: Character) => c.isPlayer === true);
     let playersTeam: string = gameObject.characters[0].team;
     let indexOfSelected: number | undefined = undefined;
-    let indexOfClicked: number | undefined = undefined;
+    //let gameObject.clickedCharacterIndex: number | undefined = undefined;
     if (player) { playersTeam = player.team };
     //gameObject.mouseNowX = mouseX; just for hover, i think these
     //gameObject.mouseNowY = mouseY;
     const clickedLocation: Coordinates = { x: mouseX, y: mouseY };
+    let hitToCharacter: boolean = false;
     console.log('clicked: ', mouseX, mouseY);
     console.log('go: ', gameObject);
 
@@ -91,37 +92,38 @@ export const handleMouseDown = (
                 size: c.stats.size
             });
         if (collisionResult) {
-            indexOfClicked = i;
+            gameObject.clickedCharacterIndex = i;
             console.log('found in index: ', i);
+            hitToCharacter = true;
         }
     });
 
     // if is character, check if it is of players team
-    if (indexOfClicked !== undefined) {
+    if (hitToCharacter) {
 
         console.log('hit');
-        //console.log('comparing: ', gameObject.characters[indexOfClicked].team, ' vs ', playersTeam);
+        //console.log('comparing: ', gameObject.characters[gameObject.clickedCharacterIndex].team, ' vs ', playersTeam);
 
-        if (gameObject.characters[indexOfClicked].team === playersTeam) {
+        if (gameObject.characters[gameObject.clickedCharacterIndex].team === playersTeam) {
             // clicked is in players team
             console.log('in players team');
             // if already was selected
-            if (indexOfClicked === indexOfSelected) {
+            if (gameObject.clickedCharacterIndex === indexOfSelected) {
                 // switch to next action
-                if (gameObject.characters[indexOfClicked].action === 'wait') {
-                    gameObject.characters[indexOfClicked].action = 'move';
-                } else if (gameObject.characters[indexOfClicked].action === 'move') {
-                    gameObject.characters[indexOfClicked].action = 'attack';
-                } else if (gameObject.characters[indexOfClicked].action === 'attack') {
-                    gameObject.characters[indexOfClicked].action = 'wait';
+                if (gameObject.characters[gameObject.clickedCharacterIndex].action === 'wait') {
+                    gameObject.characters[gameObject.clickedCharacterIndex].action = 'move';
+                } else if (gameObject.characters[gameObject.clickedCharacterIndex].action === 'move') {
+                    gameObject.characters[gameObject.clickedCharacterIndex].action = 'attack';
+                } else if (gameObject.characters[gameObject.clickedCharacterIndex].action === 'attack') {
+                    gameObject.characters[gameObject.clickedCharacterIndex].action = 'wait';
                 }
             } else {
             // set all unselected
             console.log('not in players team');
             gameObject.characters.forEach((c: Character) => { c.selected = false });
             // set this clicked as selected
-            gameObject.characters[indexOfClicked].selected = true;
-            indexOfSelected = indexOfClicked;
+            gameObject.characters[gameObject.clickedCharacterIndex].selected = true;
+            indexOfSelected = gameObject.clickedCharacterIndex;
             }
             console.log('in players team');
 
@@ -130,15 +132,15 @@ export const handleMouseDown = (
             // make this targeted, target of selected
             if (indexOfSelected !== undefined) {
                 gameObject.characters.forEach((c: Character) => {
-                    if (c.selected && indexOfClicked) {
-                        c.actionTarget = gameObject.characters[indexOfClicked].id;
+                    if (c.selected && gameObject.clickedCharacterIndex) {
+                        c.actionTarget = gameObject.characters[gameObject.clickedCharacterIndex].id;
                     }
                 });
             }
         }
     } else {
         // if walking, then target location
-        console.log('no indexOfClicked, indexOfSelected:', indexOfSelected);
+        console.log('no gameObject.clickedCharacterIndex, indexOfSelected:', indexOfSelected);
         if (indexOfSelected !== undefined && gameObject.characters[indexOfSelected].action === 'move') {
             console.log('move target to ', gameObject.characters[indexOfSelected]);
             gameObject.characters[indexOfSelected].targetLocation = { x: mouseX, y: mouseY };

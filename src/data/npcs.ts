@@ -16,7 +16,13 @@ export const defaultCharacter: Character = {
         size: mediumBase,
         magic: 5,
         abilities: [],
-        skills: []
+        skills: [],
+        physicalResistance: 0,
+        magicResistance: 0,
+        fireResistance: 0,
+        poisonResistance: 0,
+        coldResistance: 0,
+        psionicResistance: 0
     },
     location: { x: 0, y: 0 },
     world: 'Earth',
@@ -61,7 +67,121 @@ export const npcs: Character[] = [
         race: 'dwarf',
         profession: 'mercenary',
         team: 'amorcitos',
-        location: { x: 150, y: 150 }
+        location: { x: 150, y: 150 },
+        stats: {
+            ...clonedDefaultChar.stats,
+            skills: [
+                {
+                    name: 'short blades',
+                    level: 3,
+                    learnPoints: 0,
+                    desc: 'Skill to use short blades like daggers, knives and short sword in combat.'
+                },
+                {
+                    name: 'dodge',
+                    level: 3,
+                    learnPoints: 0,
+                    desc: 'Dodge skill helps to avoid getting hit in combat.'
+                },
+                {
+                    name: 'close combat',
+                    level: 1,
+                    learnPoints: 0,
+                    desc: 'General skill for close combat.'
+                }
+            ]
+        },
+        armours: {
+            head: 
+            {
+                name: 'a steel helmet',
+                shortName: 'helmet',
+                desc: `A shiny steel helmet with nose protector.`,
+                type: 'armour',
+                slot: 'head',
+                value: 30,
+                weight: 1,
+                stats: [
+                    {
+                        stat: 'toughness',
+                        value: 1
+                    },
+                    {
+                        stat: 'physical resistance',
+                        value: 1
+                    }
+                ],
+                rarity: 'uncommon',
+                effects: ['head protected']
+            },
+            upperBody: 
+            {
+                name: 'a steel breastplate',
+                shortName: 'breastplate',
+                desc: `A good looking shiny steel breastplate, that grants fine protections.`,
+                type: 'armour',
+                slot: 'upperBody',
+                value: 50,
+                weight: 10,
+                stats: [
+                    {
+                        stat: 'toughness',
+                        value: 5
+                    },
+                    {
+                        stat: 'physical resistance',
+                        value: 5
+                    }
+                ],
+                rarity: 'uncommon',
+                effects: []
+            },
+            hands: '',
+            legs: '',
+            feet: ''
+        },
+        weapons: {
+            leftHand: 
+            {
+                name: 'a wooden medium shield',
+                shortName: 'shield',
+                desc: 'A solid and quite light shield, made of birch.',
+                type: 'weapon',
+                handlingSkill: 'shields',
+                range: 5,
+                rangedWeapon: false,
+                slotsNeeded: 1,
+                value: 3,
+                weight: 2.2,
+                stats: [],
+                combatSpeed: 2,
+                effects: ['shield', 'defensive'],
+                damage: { physical: 1 },
+                coolDownCounter: 0,
+                rarity: 'common',
+                armourPiercing: 0
+            },
+            rightHand:     {
+                name: 'a heavy warhammer',
+                shortName: 'warhammer',
+                desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
+                type: 'weapon',
+                handlingSkill: 'bludgeons',
+                range: 12,
+                rangedWeapon: false,
+                slotsNeeded: 1,
+                value: 8,
+                weight: 3.5,
+                stats: [],
+                combatSpeed: 5,
+                effects: ['armor breaker'],
+                damage: { physical: 25 },
+                coolDownCounter: 0,
+                rarity: 'uncommon',
+                armourPiercing: 5
+            }
+        },
+        desc: `Badass looking armoured dwarf warrior.`
     },
     {
         ...clonedDefaultChar,
@@ -70,7 +190,59 @@ export const npcs: Character[] = [
         race: 'elf',
         profession: 'wizard',
         team: 'enemigos',
-        location: { x: 350, y: 450 }
+        stats: {
+            ...clonedDefaultChar.stats,
+            skills: [
+                {
+                    name: 'short blades',
+                    level: 3,
+                    learnPoints: 0,
+                    desc: 'Skill to use short blades like daggers, knives and short sword in combat.'
+                },
+                {
+                    name: 'dodge',
+                    level: 3,
+                    learnPoints: 0,
+                    desc: 'Dodge skill helps to avoid getting hit in combat.'
+                },
+                {
+                    name: 'close combat',
+                    level: 1,
+                    learnPoints: 0,
+                    desc: 'General skill for close combat.'
+                }
+            ]
+        },
+        armours: {
+            head: '',
+            upperBody: '',
+            hands: '',
+            legs: '',
+            feet: ''
+        },
+        weapons: {
+            leftHand: '',
+            rightHand:     {
+                name: 'a heavy warhammer',
+                shortName: 'warhammer',
+                desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
+                type: 'weapon',
+                handlingSkill: 'bludgeons',
+                range: 12,
+                rangedWeapon: false,
+                slotsNeeded: 1,
+                value: 8,
+                weight: 3.5,
+                stats: [],
+                combatSpeed: 5,
+                effects: ['armor breaker'],
+                damage: { physical: 25 },
+                coolDownCounter: 0,
+                rarity: 'uncommon',
+                armourPiercing: 5
+            }
+        },
+        location: { x: 350, y: 450 },
     },
     {
         ...clonedDefaultChar,
@@ -87,7 +259,13 @@ export const npcs: Character[] = [
             size: smallBase,
             magic: 5,
             abilities: [],
-            skills: []
+            skills: [],
+            physicalResistance: 0,
+            magicResistance: 0,
+            fireResistance: 0,
+            poisonResistance: 0,
+            coldResistance: 0,
+            psionicResistance: 0
         },
         location: { x: 350, y: 22 }
     },
@@ -103,7 +281,63 @@ export const npcs: Character[] = [
             size: largeBase,
             magic: 5,
             abilities: [],
-            skills: []
+            skills: [],
+            physicalResistance: 5,
+            magicResistance: 0,
+            fireResistance: 0,
+            poisonResistance: 0,
+            coldResistance: 0,
+            psionicResistance: 0
+        },
+        armours: {
+            head: '',
+            upperBody: 
+            {
+                name: 'an iron breastplate',
+                shortName: 'breastplate',
+                desc: `A heavy, but should protect you nicely!.`,
+                type: 'armour',
+                slot: 'upperBody',
+                value: 10,
+                weight: 20,
+                stats: [
+                    {
+                        stat: 'toughness',
+                        value: 1
+                    },
+                    {
+                        stat: 'physical resistance',
+                        value: 2
+                    }
+                ],
+                rarity: 'common',
+                effects: []
+            },
+            hands: '',
+            legs: '',
+            feet: ''
+        },
+        weapons: {
+            leftHand: '',
+            rightHand:     {
+                name: 'a heavy warhammer',
+                shortName: 'warhammer',
+                desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
+                type: 'weapon',
+                handlingSkill: 'bludgeons',
+                range: 12,
+                rangedWeapon: false,
+                slotsNeeded: 1,
+                value: 8,
+                weight: 3.5,
+                stats: [],
+                combatSpeed: 5,
+                effects: ['armor breaker'],
+                damage: { physical: 25 },
+                coolDownCounter: 0,
+                rarity: 'uncommon',
+                armourPiercing: 5
+            }
         },
         race: 'ogre',
         profession: 'mercenary',

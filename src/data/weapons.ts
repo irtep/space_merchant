@@ -99,7 +99,7 @@ export const weapons: Weapon[] = [
     {
         name: 'a chipped spear',
         shortName: 'spear',
-        desc: 'A wooden spear with a dull iron tip. Versatile, allowing for thrusts or throws.',
+        desc: 'A long wooden spear with a dull iron tip. Versatile, allowing for thrusts or throws.',
         type: 'weapon',
         handlingSkill: 'polearms',
         range: 20,
@@ -152,5 +152,24 @@ export const weapons: Weapon[] = [
         coolDownCounter: 0,
         rarity: 'uncommon',
         armourPiercing: 2
+    },
+    {
+        name: 'a wooden medium shield',
+        shortName: 'shield',
+        desc: 'A solid and quite light shield, made of birch.',
+        type: 'weapon',
+        handlingSkill: 'shields',
+        range: 5,
+        rangedWeapon: false,
+        slotsNeeded: 1,
+        value: 3,
+        weight: 2.2,
+        stats: [],
+        combatSpeed: 2,
+        effects: ['shield', 'defensive'],
+        damage: { physical: 1 },
+        coolDownCounter: 0,
+        rarity: 'common',
+        armourPiercing: 0
     }
 ];

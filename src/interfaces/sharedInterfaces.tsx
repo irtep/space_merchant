@@ -5,8 +5,9 @@ export interface Ability {
 
 export interface Skill {
     name: string;
-    desc: string;
     level: number;
+    learnPoints: number;
+    desc: string;
 };
 
 export interface Stats {
@@ -18,6 +19,12 @@ export interface Stats {
     magic: number;
     abilities: Ability[];
     skills: Skill[];
+    physicalResistance: number;
+    magicResistance: number;
+    fireResistance: number;
+    poisonResistance: number;
+    coldResistance: number;
+    psionicResistance: number;
 };
 
 export interface Coordinates {
@@ -46,11 +53,12 @@ export interface Armour {
     shortName: string;
     desc: string;
     type: 'armour';
-    slots: string[];
+    slot: string;
     value: number;
     weight: number;
     stats: StatMod[];
     rarity: string;
+    effects: string[];
 };
 
 export interface DamageTypes {
@@ -125,6 +133,7 @@ export interface Character {
     inventory: Weapons[] | Armours[] | Item[];
     isPlayer: boolean;
     selected: boolean;
+    desc?: string;
 };
 
 export interface Loot {
@@ -163,6 +172,7 @@ export interface GameObject {
     mouseNowX: number;
     mouseNowY: number;
     map: GameMap;
+    clickedCharacterIndex: number;
 };
 
 export interface Circle {
