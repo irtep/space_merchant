@@ -1,5 +1,7 @@
 import { createContext, useState, ReactNode, FC, ReactElement, useContext } from 'react';
 import { GameObject } from '../interfaces/sharedInterfaces';
+//import { weapons } from '../data/weapons';
+import { jyvaskylaTown } from '../data/maps';
 
 interface SMContextType {
     view: 'menu' | 'play' | 'after';
@@ -24,10 +26,7 @@ export const SMProvider: FC<Props> = ({ children }): ReactElement => {
         characters: [],
         mouseNowX: 0,
         mouseNowY: 0,
-        map: {
-         rectObstacles: [],
-         loots: []   
-        }
+        map: jyvaskylaTown
     });
     const [charIsSelected, setCharIsSelected] = useState<boolean>(false);
     const [indexOfSelected, setIndexOfSelected] = useState<number>(0);
