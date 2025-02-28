@@ -28,7 +28,7 @@ export const jyvaskylaTown: GameMap = {
             h: 300,
             color: 'black',
             door: { x: 650, y: 80 },
-            name: 'The Great Hall of Harjula'
+            name: 'The Great Hall of Jyvaskyla'
         },
         {
             x: 30,

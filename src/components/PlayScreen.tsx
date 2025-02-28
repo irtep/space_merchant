@@ -4,13 +4,15 @@ import { useSMContext } from '../context/smContext';
 import { draw } from '../functions/draw';
 import { arenaHeight, arenaWidth } from '../measures/measures';
 import { Character, GameObject } from '../interfaces/sharedInterfaces';
-import { handleKeyDown, handleMouseDown } from '../functions/gameControls';
+import { handleKeyDown, handleMouseDown } from '../functions/mouseAndKeyControls';
 import { npcs } from '../data/npcs';
 import { updateTeamMovements } from '../functions/updateTeamMovements';
+import { drawConsole } from '../functions/drawConsole';
 //import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasRef2 = useRef<HTMLCanvasElement>(null);
     const {
         gameObject,
         setGameObject,
@@ -25,9 +27,12 @@ const PlayScreen: React.FC = (): React.ReactElement => {
 
     useEffect(() => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
+        const canvas2: HTMLCanvasElement | null = canvasRef2.current;
         console.log('go: ', gameObject);
         if (!canvas) return;
         if (!canvasRef) return;
+        if (!canvas2) return;
+        if (!canvasRef2) return;
 
         console.log('copying go to live go');
         liveGameObject = JSON.parse(JSON.stringify(gameObject));
@@ -72,8 +77,8 @@ const PlayScreen: React.FC = (): React.ReactElement => {
 
             // close combat
 
-            // update bullets
-            draw(canvas, liveGameObject);
+            draw(canvas, liveGameObject); // map
+            drawConsole(canvas2, liveGameObject); // console at right side
             //console.log('lgo: ', liveGameObject);
         };
 
@@ -153,14 +158,17 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                         textAlign: 'center',
                     }}
                 >
-                    { /*
-                    <PlayerControlPanel
-                        pause={pause}
-                        setPause={setPause}
-                        liveGameObject={liveGameObject}
-                        canvas={canvasRef.current}
+                    <canvas
+                        ref={canvasRef2}
+                        width="300"
+                        height={arenaHeight}
+                        style={{
+                            border: '1px solid black',
+                            background: '#9A7B4D',
+                            backgroundRepeat: 'no-repeat',
+                            margin: 1
+                        }}
                     />
-                    */ }
                 </Box>
             </Box>
         </Container>
