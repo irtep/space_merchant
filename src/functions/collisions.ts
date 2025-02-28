@@ -11,6 +11,18 @@ export const isCircleColliding = (
     return distance <= (circle1.size + circle2.size);
 };
 
+export const isRectColliding = (circle: { x: number, y: number, size: number }, rect: { x: number, y: number, w: number, h: number }): boolean => {
+    const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.w));
+    const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.h));
+
+    const dx = circle.x - closestX;
+    const dy = circle.y - closestY;
+
+    return (dx * dx + dy * dy) < (circle.size / 2) * (circle.size / 2);
+};
+
+
+/*
 export const isCircleRectColliding = (
     circle: Circle, // Circle: x, y, radius
     rect: Rect,
@@ -27,3 +39,4 @@ export const isCircleRectColliding = (
 
     return distanceSquared <= (circle.size * circle.size);
 };
+*/

@@ -1,5 +1,5 @@
 import { Character, Coordinates, GameObject } from "../interfaces/sharedInterfaces";
-import { isCircleColliding } from "./collisions";
+import { isCircleColliding, isRectColliding } from "./collisions";
 import { getDistance } from "./gamePlay";
 
 interface MovementTestResult {
@@ -49,6 +49,36 @@ const makeMovement = (direction: string, speed: number, locationATM: Coordinates
 };
 
 export const testCollisions = (c: Character, gameObject: GameObject, locationToTest: Coordinates): boolean => {
+    // Check collision with other characters
+    const collidesWithCharacter = gameObject.characters.some((ch: Character) =>
+        c.id !== ch.id &&
+        isCircleColliding(
+            { x: locationToTest.x, y: locationToTest.y, size: c.stats.size },
+            { x: ch.location.x, y: ch.location.y, size: ch.stats.size }
+        )
+    );
+
+    // Check collision with circular obstacles (e.g., watchtowers)
+    const collidesWithCircleObstacle = gameObject.map.circleObstacles.some((obstacle) =>
+        isCircleColliding(
+            { x: locationToTest.x, y: locationToTest.y, size: c.stats.size },
+            { x: obstacle.x, y: obstacle.y, size: obstacle.size }
+        )
+    );
+
+    // Check collision with rectangular obstacles (e.g., buildings)
+    const collidesWithRectObstacle = gameObject.map.rectObstacles.some((obstacle) =>
+        isRectColliding(
+            { x: locationToTest.x, y: locationToTest.y, size: c.stats.size }, // Character as a small box
+            { x: obstacle.x, y: obstacle.y, w: obstacle.w, h: obstacle.h } // Obstacle rectangle
+        )
+    );
+
+    return collidesWithCharacter || collidesWithCircleObstacle || collidesWithRectObstacle;
+};
+
+/*
+export const testCollisions = (c: Character, gameObject: GameObject, locationToTest: Coordinates): boolean => {
     return gameObject.characters.some((ch: Character) =>
         c.id !== ch.id &&
         isCircleColliding(
@@ -57,10 +87,11 @@ export const testCollisions = (c: Character, gameObject: GameObject, locationToT
         )
     );
 };
+*/
 
 export const updateTeamMovements = (gameObject: GameObject) => {
     gameObject.characters.forEach((c: Character) => {
-        const movementSpeed: number = (c.stats.dexterity * c.stats.size) / 10;
+        const movementSpeed: number = (c.stats.dexterity * c.stats.size) / 100;
 
         if (c.action === 'move' && c.targetLocation.x !== 0 && c.targetLocation.y !== 0) {
             // Test all movement directions
