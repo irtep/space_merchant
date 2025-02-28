@@ -23,7 +23,11 @@ export const SMProvider: FC<Props> = ({ children }): ReactElement => {
     const [gameObject, setGameObject] = useState<GameObject>({
         characters: [],
         mouseNowX: 0,
-        mouseNowY: 0
+        mouseNowY: 0,
+        map: {
+         rectObstacles: [],
+         loots: []   
+        }
     });
     const [charIsSelected, setCharIsSelected] = useState<boolean>(false);
     const [indexOfSelected, setIndexOfSelected] = useState<number>(0);

@@ -173,10 +173,23 @@ export class Character {
 };
 */
 
+export interface RectObstacle {
+    w: number;
+    h: number;
+    color: string;
+    door?: Coordinates;
+    name?: string;
+};
+
+export interface Map {
+    rectObstacles: RectObstacle;
+};
+
 export interface GameObject {
     characters: Character[];
     mouseNowX: number;
     mouseNowY: number;
+    map: Map
 };
 
 export interface Circle {
