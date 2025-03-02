@@ -8,7 +8,7 @@ import { handleKeyDown, handleMouseDown } from '../functions/mouseAndKeyControls
 import { npcs } from '../data/npcs';
 import { updateTeamMovements } from '../functions/updateTeamMovements';
 import { drawConsole, handleMouseDownToConsole } from '../functions/drawConsole';
-import DetailsDialog from './DetailsDialog';
+import InventoryDialog from './InventoryDialog';
 //import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
@@ -170,7 +170,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                         }}
                     />
 
-                    <DetailsDialog/>
+                    <InventoryDialog/>
                 </Box>
 
                 {/* Right Column: Texts (20%) */}

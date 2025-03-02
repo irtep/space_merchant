@@ -92,6 +92,7 @@ export interface Weapon {
 
 export interface Armours {
     head: Armour | '';
+    neck: Armour | '';
     upperBody: Armour | '';
     legs: Armour | '';
     hands: Armour | '';
@@ -130,7 +131,7 @@ export interface Character {
     action: string;
     actionTarget: string;
     targetLocation: Coordinates;
-    inventory: Weapons[] | Armours[] | Item[];
+    inventory: (Weapon | Armour | Item)[];
     isPlayer: boolean;
     selected: boolean;
     desc?: string;
