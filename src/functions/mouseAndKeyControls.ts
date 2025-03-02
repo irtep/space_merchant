@@ -1,36 +1,13 @@
 import { Character, Coordinates, GameObject } from "../interfaces/sharedInterfaces";
 import { isCircleColliding } from "./collisions";
 import { draw } from "./draw";
-//import { shoot } from "./fireWeapon";
 
-// Keyboard state
-// supports arrows and wsad
-/*
-export const keys: { [key: string]: boolean } = {
-    ArrowUp: false,
-    ArrowDown: false,
-    ArrowLeft: false,
-    ArrowRight: false,
-    w: false,
-    s: false,
-    a: false,
-    d: false,
-};
-*/
-// Event listeners for keyboard
-/*
-export const handleKeyDown = (e: KeyboardEvent) => {
-    if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
-};
+// for canvas 2 (the console) controls are in drawConsole
 
-export const handleKeyUp = (e: KeyboardEvent) => {
-    if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
-};
-*/
 export const handleKeyDown = (
     e: KeyboardEvent,
     setPause: React.Dispatch<React.SetStateAction<boolean>>,
-    pauseRef: React.MutableRefObject<boolean>,
+    pauseRef: React.RefObject<boolean>,
     setMessage: React.Dispatch<React.SetStateAction<string>>,
     liveGameObject: GameObject,
     setGameObject: React.Dispatch<React.SetStateAction<GameObject>>

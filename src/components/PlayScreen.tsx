@@ -1,4 +1,4 @@
-import { Box, Container } from '@mui/material';
+import { Box, Container, Dialog } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSMContext } from '../context/smContext';
 import { draw } from '../functions/draw';
@@ -8,6 +8,7 @@ import { handleKeyDown, handleMouseDown } from '../functions/mouseAndKeyControls
 import { npcs } from '../data/npcs';
 import { updateTeamMovements } from '../functions/updateTeamMovements';
 import { drawConsole, handleMouseDownToConsole } from '../functions/drawConsole';
+import DetailsDialog from './DetailsDialog';
 //import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
@@ -16,6 +17,8 @@ const PlayScreen: React.FC = (): React.ReactElement => {
     const {
         gameObject,
         setGameObject,
+        dialogOpen,
+        setDialogOpen
         //indexOfSelected,
         //setIndexOfSelected
     } = useSMContext();
@@ -53,7 +56,16 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         };
         const mouseDownHandlerConsole = (e: MouseEvent) => {
             if (!canvasRef2.current) return;
-            handleMouseDownToConsole(e, canvas2, liveGameObject)
+            handleMouseDownToConsole(
+                e,
+                canvas2,
+                liveGameObject,
+                setDialogOpen,
+                setPause,
+                pauseRef,
+                setMessage,
+                setGameObject
+                );
         };
         window.addEventListener('keydown', keyDownHandler);
         canvas.addEventListener('mousedown', mouseDownHandler);
@@ -111,13 +123,17 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         };
     }, []);
 
-    useEffect(() => {
+    useEffect( () => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (!canvas) return;
         draw(canvas, liveGameObject);
         
         //liveGameObject = gameObject;
     }, [gameObject]);
+
+    useEffect( () => {
+        setGameObject(liveGameObject);
+    }, [pause, dialogOpen]);
 
     return (
         <Container maxWidth="lg">
@@ -153,6 +169,8 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                             margin: 5
                         }}
                     />
+
+                    <DetailsDialog/>
                 </Box>
 
                 {/* Right Column: Texts (20%) */}
