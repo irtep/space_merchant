@@ -1,24 +1,26 @@
 import { Box, Button, Dialog, Typography } from '@mui/material';
 import React from 'react';
 import { useSMContext } from '../context/smContext';
+import { Armours, Weapons } from '../interfaces/sharedInterfaces';
 
-const DetailsDialog: React.FC = (): React.ReactElement => {
+const InventoryDialog: React.FC = (): React.ReactElement => {
     const { gameObject, setGameObject, dialogOpen, setDialogOpen } = useSMContext();
     const selectedCharacter = gameObject.characters[gameObject.clickedCharacterIndex];
 
-    const unequipItem = (slot: keyof typeof selectedCharacter.armours | keyof typeof selectedCharacter.weapons) => {
+    const unequipArmour = (slot: keyof Armours) => {
         console.log('un equip: ', ' from slot ', slot);
-        /*
+        console.log('selected char: ', selectedCharacter);
         setGameObject(prevState => {
-            const updatedCharacter = { ...selectedCharacter };
-            const unequippedItem = updatedCharacter.armours[slot] || updatedCharacter.weapons[slot];
-            if (!unequippedItem) return prevState; // No item to unequip
-            updatedCharacter.inventory.push(unequippedItem);
-            updatedCharacter.armours[slot] = '';
-            updatedCharacter.weapons[slot] = '';
+            const character = prevState.characters[gameObject.clickedCharacterIndex];
+            const armourItem = character.armours[slot]; // Get the armour in the slot
+    
+            if (armourItem) {
+                character.inventory.push(armourItem);
+                character.armours[slot] = ''; // Mark as unequipped
+            }
+    
             return { ...prevState };
         });
-        */
     };
 
     const equipItem = (item: any, slot: keyof typeof selectedCharacter.armours | keyof typeof selectedCharacter.weapons) => {
@@ -67,13 +69,23 @@ const DetailsDialog: React.FC = (): React.ReactElement => {
                     {Object.entries(selectedCharacter.armours).map(([slot, item]) => item && (
                         <Box key={slot}>
                             <Typography>{slot}: {item.name}</Typography>
-                            <Button onClick={() => unequipItem(slot)}>Unequip</Button>
+                            <Button onClick={() => {
+                                if (slot !== '') {
+                                    unequipArmour(slot as keyof typeof selectedCharacter.armours);
+                                }
+                            }}>Unequip</Button>
                         </Box>
                     ))}
                     {Object.entries(selectedCharacter.weapons).map(([slot, item]) => item && (
                         <Box key={slot}>
                             <Typography>{slot}: {item.name}</Typography>
-                            <Button onClick={() => unequipItem(slot)}>Unequip</Button>
+                            <Button 
+                            onClick={() => { /*
+                                unequipItem(slot, 'weapon')}
+                                */
+                            }}>
+                            Unequip
+                            </Button>
                         </Box>
                     ))}
                 </Box>
@@ -93,9 +105,9 @@ const DetailsDialog: React.FC = (): React.ReactElement => {
                 {/* Items on Ground */}
                 <Box sx={{ flex: 1.66 }}>
                     <Typography>On Ground</Typography>
-                    {gameObject.map.loots.filter(loot => loot.location === selectedCharacter.location).map(item => (
-                        <Box key={item.name}>
-                            <Typography>{item.name}</Typography>
+                    {gameObject.map.loots.filter(loot => loot.x === selectedCharacter.location.x && loot.y === selectedCharacter.location.y).map(item => (
+                        <Box key={item.what.name}>
+                            <Typography>{item.what.name}</Typography>
                             <Button onClick={() => pickUpItem(item)}>Pick Up</Button>
                         </Box>
                     ))}
@@ -105,4 +117,4 @@ const DetailsDialog: React.FC = (): React.ReactElement => {
     );
 }
 
-export default DetailsDialog;
+export default InventoryDialog;
