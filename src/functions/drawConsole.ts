@@ -1,30 +1,40 @@
 import { Character, GameObject } from "../interfaces/sharedInterfaces";
 
-const buttonWidth = 120;
-const buttonHeight = 30;
-let buttonX = 0;
-let buttonY = 0;
+const buttonWidth: number = 120;
+const buttonHeight: number = 30;
+let detailsButtonX: number = 0;
+let detailsButtonY: number = 0;
+let pauseButtonX: number = 0;
+let pauseButtonY: number = 0;
 
 export const handleMouseDownToConsole = (
     event: MouseEvent,
     canvas: HTMLCanvasElement,
-    gameObject: GameObject) => {
+    gameObject: GameObject,
+    setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    setPause: React.Dispatch<React.SetStateAction<boolean>>,
+    pauseRef: React.RefObject<boolean>,
+    setMessage: React.Dispatch<React.SetStateAction<string>>,
+    setGameObject: React.Dispatch<React.SetStateAction<GameObject>>
+) => {
     const rect = canvas.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
     const clickY = event.clientY - rect.top;
     console.log('x and y ', clickX, clickY);
-        console.log('console listens');
+    console.log('console listens');
+
     // Check if click is inside the "More Details" button
     if (
-        clickX >= buttonX &&
-        clickX <= buttonX + buttonWidth &&
-        clickY >= buttonY &&
-        clickY <= buttonY + buttonHeight
+        clickX >= detailsButtonX &&
+        clickX <= detailsButtonX + buttonWidth &&
+        clickY >= detailsButtonY &&
+        clickY <= detailsButtonY + buttonHeight
     ) {
         // Get clicked character
         const clickedCharacter = gameObject.characters[gameObject.clickedCharacterIndex];
 
         if (clickedCharacter) {
+            /*
             alert(
                 `More Details:\n` +
                 `Name: ${clickedCharacter.name}\n` +
@@ -32,7 +42,27 @@ export const handleMouseDownToConsole = (
                 `Profession: ${clickedCharacter.profession}\n` +
                 `Description: ${clickedCharacter.desc}\n`
             );
+            */
+            setDialogOpen(true);
         }
+    }
+
+    // Check if click is inside the "pause" button
+    if (
+        clickX >= pauseButtonX &&
+        clickX <= pauseButtonX + buttonWidth &&
+        clickY >= pauseButtonY &&
+        clickY <= pauseButtonY + buttonHeight
+    ) {
+        setPause((prevPause) => {
+            const newPauseState = !prevPause;
+            pauseRef.current = newPauseState; // Ensure pauseRef is updated
+            console.log('Paused:', newPauseState);
+            setMessage(newPauseState ? 'PAUSED' : 'not in pause');
+            return newPauseState;
+        });
+        
+        setGameObject(gameObject); // ref to gameObject is actually liveGameObject
     }
 };
 
@@ -98,13 +128,22 @@ export const drawConsole = (
             });
             // Draw "More Details" Button
             lines += 2;
-            buttonX = marginLeft;
-            buttonY = marginTop + lines * fontSize;
+            detailsButtonX = marginLeft;
+            detailsButtonY = marginTop + lines * fontSize;
             ctx.fillStyle = "blue"; // Button color
-            ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+            ctx.fillRect(detailsButtonX, detailsButtonY, buttonWidth, buttonHeight);
             ctx.fillStyle = "white"; // Text color
             ctx.font = "14px Arial";
-            ctx.fillText("More Details", buttonX + 10, buttonY + 20);
+            ctx.fillText("More Details", detailsButtonX + 10, detailsButtonY + 20);
+            // Draw "Pause toggle button" Button
+            lines += 3;
+            pauseButtonX = marginLeft;
+            pauseButtonY = marginTop + lines * fontSize;
+            ctx.fillStyle = "green"; // Button color
+            ctx.fillRect(pauseButtonX, pauseButtonY, buttonWidth, buttonHeight);
+            ctx.fillStyle = "white"; // Text color
+            ctx.font = "14px Arial";
+            ctx.fillText("Pause/unpause", pauseButtonX + 10, pauseButtonY + 20);
         }
     });
 };

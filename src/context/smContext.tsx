@@ -12,6 +12,8 @@ interface SMContextType {
     setCharIsSelected: React.Dispatch<React.SetStateAction<boolean>>;
     indexOfSelected: number;
     setIndexOfSelected: React.Dispatch<React.SetStateAction<number>>;
+    dialogOpen: boolean;
+    setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const SMContext = createContext<SMContextType | undefined>(undefined);
@@ -31,13 +33,15 @@ export const SMProvider: FC<Props> = ({ children }): ReactElement => {
     });
     const [charIsSelected, setCharIsSelected] = useState<boolean>(false);
     const [indexOfSelected, setIndexOfSelected] = useState<number>(0);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
     return (
         <SMContext.Provider value={{
             view, setView,
             gameObject, setGameObject,
             charIsSelected, setCharIsSelected,
-            indexOfSelected, setIndexOfSelected
+            indexOfSelected, setIndexOfSelected,
+            dialogOpen, setDialogOpen
         }}>
             {children}
         </SMContext.Provider>
