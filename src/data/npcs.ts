@@ -33,6 +33,7 @@ export const defaultCharacter: Character = {
     endurancePoints: 50,
     armours: {
         head: '',
+        neck: '',
         upperBody: '',
         hands: '',
         legs: '',
@@ -114,6 +115,7 @@ export const npcs: Character[] = [
                 rarity: 'uncommon',
                 effects: ['head protected']
             },
+            neck: '',
             upperBody: 
             {
                 name: 'a steel breastplate',
@@ -215,6 +217,7 @@ export const npcs: Character[] = [
         },
         armours: {
             head: '',
+            neck: '',
             upperBody: '',
             hands: '',
             legs: '',
@@ -291,6 +294,7 @@ export const npcs: Character[] = [
         },
         armours: {
             head: '',
+            neck: '',
             upperBody: 
             {
                 name: 'an iron breastplate',

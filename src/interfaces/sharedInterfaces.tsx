@@ -172,7 +172,7 @@ export interface GameObject {
     characters: Character[];
     mouseNowX: number;
     mouseNowY: number;
-    map: GameMap;
+    gameMap: GameMap;
     clickedCharacterIndex: number;
 };
 

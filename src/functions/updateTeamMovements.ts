@@ -59,7 +59,7 @@ export const testCollisions = (c: Character, gameObject: GameObject, locationToT
     );
 
     // Check collision with circular obstacles (e.g., watchtowers)
-    const collidesWithCircleObstacle = gameObject.map.circleObstacles.some((obstacle) =>
+    const collidesWithCircleObstacle = gameObject.gameMap.circleObstacles.some((obstacle) =>
         isCircleColliding(
             { x: locationToTest.x, y: locationToTest.y, size: c.stats.size },
             { x: obstacle.x, y: obstacle.y, size: obstacle.size }
@@ -67,7 +67,7 @@ export const testCollisions = (c: Character, gameObject: GameObject, locationToT
     );
 
     // Check collision with rectangular obstacles (e.g., buildings)
-    const collidesWithRectObstacle = gameObject.map.rectObstacles.some((obstacle) =>
+    const collidesWithRectObstacle = gameObject.gameMap.rectObstacles.some((obstacle) =>
         isRectColliding(
             { x: locationToTest.x, y: locationToTest.y, size: c.stats.size }, // Character as a small box
             { x: obstacle.x, y: obstacle.y, w: obstacle.w, h: obstacle.h } // Obstacle rectangle

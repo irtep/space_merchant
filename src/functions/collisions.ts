@@ -1,4 +1,4 @@
-import { Circle, Rect } from "../interfaces/sharedInterfaces";
+import { Circle } from "../interfaces/sharedInterfaces";
 
 export const isCircleColliding = (
     circle1: Circle, 

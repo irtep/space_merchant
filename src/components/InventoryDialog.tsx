@@ -1,7 +1,7 @@
 import { Box, Button, Dialog, Typography } from '@mui/material';
 import React from 'react';
 import { useSMContext } from '../context/smContext';
-import { Armours, Weapons } from '../interfaces/sharedInterfaces';
+import { Armour, Armours, Item, Weapon, Weapons } from '../interfaces/sharedInterfaces';
 
 const InventoryDialog: React.FC = (): React.ReactElement => {
     const { gameObject, setGameObject, dialogOpen, setDialogOpen } = useSMContext();
@@ -13,12 +13,28 @@ const InventoryDialog: React.FC = (): React.ReactElement => {
         setGameObject(prevState => {
             const character = prevState.characters[gameObject.clickedCharacterIndex];
             const armourItem = character.armours[slot]; // Get the armour in the slot
-    
+
             if (armourItem) {
                 character.inventory.push(armourItem);
                 character.armours[slot] = ''; // Mark as unequipped
             }
-    
+            //liveGameObject = prevState;
+            return { ...prevState };
+        });
+    };
+
+    const unequipWeapon = (slot: keyof Weapons) => {
+        console.log('un equip: ', ' from slot ', slot);
+        console.log('selected char: ', selectedCharacter);
+        setGameObject(prevState => {
+            const character = prevState.characters[gameObject.clickedCharacterIndex];
+            const weaponInCase = character.weapons[slot]; // Get the wep in the slot
+
+            if (weaponInCase) {
+                character.inventory.push(weaponInCase);
+                character.weapons[slot] = ''; // Mark as unequipped
+            }
+            //liveGameObject = prevState;
             return { ...prevState };
         });
     };
@@ -36,17 +52,49 @@ const InventoryDialog: React.FC = (): React.ReactElement => {
         */
     };
 
-    const dropItem = (item: any) => {
+    const dropItem = (item: Weapon | Armour | Item) => {
         console.log('drop: ', item);
-        /*
+
         setGameObject(prevState => {
-            const updatedCharacter = { ...selectedCharacter };
-            updatedCharacter.inventory = updatedCharacter.inventory.filter(i => i !== item);
-            prevState.map.loots.push({ ...item, location: selectedCharacter.location });
-            return { ...prevState };
+            //let updatedObject = {};
+            const updatedCharacters = prevState.characters.map((char, index) =>
+                index === gameObject.clickedCharacterIndex
+                    ? {
+                        ...char,
+                        inventory: char.inventory.filter(i => i !== item)
+                    }
+                    : char
+            );
+
+            const updatedLoots = [
+                ...prevState.gameMap.loots,
+                { 
+                    what: item,
+                    x: JSON.parse(JSON.stringify(selectedCharacter.location.x)),
+                    y: JSON.parse(JSON.stringify(selectedCharacter.location.y)) }
+            ];
+            /*
+            updatedObject = {
+                ...prevState,
+                characters: updatedCharacters,
+                gameMap: {
+                    ...prevState.gameMap,
+                    loots: updatedLoots
+                }
+            };
+            */
+            //liveGameObject = updatedObject;
+            return {
+                ...prevState,
+                characters: updatedCharacters,
+                gameMap: {
+                    ...prevState.gameMap,
+                    loots: updatedLoots
+                }
+            };
         });
-        */
     };
+
 
     const pickUpItem = (item: any) => {
         console.log('pick up: ', item);
@@ -67,7 +115,7 @@ const InventoryDialog: React.FC = (): React.ReactElement => {
                 <Box sx={{ flex: 1.66 }}>
                     <Typography>Equipped by {selectedCharacter.name}</Typography>
                     {Object.entries(selectedCharacter.armours).map(([slot, item]) => item && (
-                        <Box key={slot}>
+                        <Box key={`${slot} equipped `}>
                             <Typography>{slot}: {item.name}</Typography>
                             <Button onClick={() => {
                                 if (slot !== '') {
@@ -77,14 +125,13 @@ const InventoryDialog: React.FC = (): React.ReactElement => {
                         </Box>
                     ))}
                     {Object.entries(selectedCharacter.weapons).map(([slot, item]) => item && (
-                        <Box key={slot}>
+                        <Box key={`${slot}imte `}>
                             <Typography>{slot}: {item.name}</Typography>
-                            <Button 
-                            onClick={() => { /*
-                                unequipItem(slot, 'weapon')}
-                                */
-                            }}>
-                            Unequip
+                            <Button
+                                onClick={() => {
+                                    unequipWeapon(slot as keyof typeof selectedCharacter.weapons);
+                                }}>
+                                Unequip
                             </Button>
                         </Box>
                     ))}
@@ -94,7 +141,7 @@ const InventoryDialog: React.FC = (): React.ReactElement => {
                 <Box sx={{ flex: 1.66 }}>
                     <Typography>Inventory of {selectedCharacter.name}</Typography>
                     {selectedCharacter.inventory.map(item => (
-                        <Box key={item.name}>
+                        <Box key={`${item.name} chars item `}>
                             <Typography>{item.name}</Typography>
                             <Button onClick={() => equipItem(item, item.type === 'armour' ? 'head' : 'rightHand')}>Equip</Button>
                             <Button onClick={() => dropItem(item)}>Drop</Button>
@@ -105,8 +152,8 @@ const InventoryDialog: React.FC = (): React.ReactElement => {
                 {/* Items on Ground */}
                 <Box sx={{ flex: 1.66 }}>
                     <Typography>On Ground</Typography>
-                    {gameObject.map.loots.filter(loot => loot.x === selectedCharacter.location.x && loot.y === selectedCharacter.location.y).map(item => (
-                        <Box key={item.what.name}>
+                    {gameObject.gameMap.loots.filter(loot => loot.x === selectedCharacter.location.x && loot.y === selectedCharacter.location.y).map(item => (
+                        <Box key={`${item.what.name} onG `}>
                             <Typography>{item.what.name}</Typography>
                             <Button onClick={() => pickUpItem(item)}>Pick Up</Button>
                         </Box>
