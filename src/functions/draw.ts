@@ -1,4 +1,4 @@
-import { Character, GameObject } from "../interfaces/sharedInterfaces";
+import { Character, CircleObstacle, GameObject, RectObstacle } from "../interfaces/sharedInterfaces";
 
 export const draw = (
     canvas: HTMLCanvasElement,
@@ -10,7 +10,7 @@ export const draw = (
     //console.log('gameO: ', gameObject);
 
     // Draw buildings (rectObstacles)
-    gameObject.map.rectObstacles.forEach((building) => {
+    gameObject.gameMap.rectObstacles.forEach((building: RectObstacle) => {
         ctx.fillStyle = building.color || 'black';
         ctx.fillRect(building.x, building.y, building.w, building.h);
 
@@ -30,7 +30,7 @@ export const draw = (
     });
 
     // Draw circular obstacles (e.g., watchtowers, trees)
-    gameObject.map.circleObstacles.forEach((obstacle) => {
+    gameObject.gameMap.circleObstacles.forEach((obstacle: CircleObstacle) => {
         ctx.fillStyle = obstacle.color || 'black';
         ctx.beginPath();
         ctx.arc(obstacle.x, obstacle.y, obstacle.size, 0, Math.PI * 2);
@@ -43,7 +43,7 @@ export const draw = (
     });
 
     // Draw loots
-    gameObject.map.loots.forEach((loot) => {
+    gameObject.gameMap.loots.forEach((loot) => {
         ctx.fillStyle = 'gold';
         ctx.beginPath();
         ctx.arc(loot.x, loot.y, 5, 0, Math.PI * 2);

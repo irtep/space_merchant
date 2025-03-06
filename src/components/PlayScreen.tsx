@@ -1,4 +1,4 @@
-import { Box, Container, Dialog } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSMContext } from '../context/smContext';
 import { draw } from '../functions/draw';
@@ -105,7 +105,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                 update();
             } else {
                 // could try to update state variables here
-                setGameObject(liveGameObject);
+                //setGameObject(liveGameObject);
                 draw(canvas, liveGameObject); // map
                 drawConsole(canvas2, liveGameObject); // console at right side
             }
@@ -127,13 +127,11 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (!canvas) return;
         draw(canvas, liveGameObject);
-        
-        //liveGameObject = gameObject;
     }, [gameObject]);
 
     useEffect( () => {
         setGameObject(liveGameObject);
-    }, [pause, dialogOpen]);
+    }, [dialogOpen]);
 
     return (
         <Container maxWidth="lg">
@@ -170,7 +168,9 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                         }}
                     />
 
-                    <InventoryDialog/>
+                    <InventoryDialog
+                       // liveGameObject={liveGameObject}
+                    />
                 </Box>
 
                 {/* Right Column: Texts (20%) */}
