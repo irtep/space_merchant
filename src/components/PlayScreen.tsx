@@ -63,8 +63,8 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                 setDialogOpen,
                 setPause,
                 pauseRef,
-                setMessage,
-                setGameObject
+                setMessage/*,
+                setGameObject*/
                 );
         };
         window.addEventListener('keydown', keyDownHandler);
@@ -148,7 +148,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                 {/* Left Column: Canvas (80%) */}
                 <Box
                     sx={{
-                        flex: 4, // 80% width
+                        flex: 2.5, // 80% width
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -176,7 +176,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                 {/* Right Column: Texts (20%) */}
                 <Box
                     sx={{
-                        flex: 1, // 20% width
+                        flex: 2.5, // 20% width
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -185,7 +185,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                 >
                     <canvas
                         ref={canvasRef2}
-                        width="300"
+                        width="450"
                         height={arenaHeight}
                         style={{
                             border: '1px solid black',

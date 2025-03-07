@@ -2,10 +2,15 @@ import { Character, GameObject } from "../interfaces/sharedInterfaces";
 
 const buttonWidth: number = 120;
 const buttonHeight: number = 30;
+const smallButtonWidth: number = 80;
+const smallButtonHeight: number = 14;
+const fontSize: number = 14;
 let detailsButtonX: number = 0;
 let detailsButtonY: number = 0;
 let pauseButtonX: number = 0;
 let pauseButtonY: number = 0;
+const unequipButtons: { x: number; y: number; slot: string; type: "weapon" | "armour" }[] = [];
+const dropButtons: { x: number; y: number; itemIndex: number }[] = [];
 
 export const handleMouseDownToConsole = (
     event: MouseEvent,
@@ -14,8 +19,8 @@ export const handleMouseDownToConsole = (
     setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,
     setPause: React.Dispatch<React.SetStateAction<boolean>>,
     pauseRef: React.RefObject<boolean>,
-    setMessage: React.Dispatch<React.SetStateAction<string>>,
-    setGameObject: React.Dispatch<React.SetStateAction<GameObject>>
+    setMessage: React.Dispatch<React.SetStateAction<string>>/*,
+    setGameObject: React.Dispatch<React.SetStateAction<GameObject>>*/
 ) => {
     const rect = canvas.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
@@ -61,9 +66,68 @@ export const handleMouseDownToConsole = (
             setMessage(newPauseState ? 'PAUSED' : 'not in pause');
             return newPauseState;
         });
-        
-        setGameObject(gameObject); // ref to gameObject is actually liveGameObject
+
+        //setGameObject(gameObject); // ref to gameObject is actually liveGameObject
     }
+
+    // Check for "Unequip" button clicks
+    unequipButtons.forEach(({ x, y, slot, type }) => {
+        if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
+            const character = gameObject.characters[gameObject.clickedCharacterIndex];
+            if (character) {
+                if (type === "weapon") {
+                    console.log('Unequipping:', character.weapons[slot as keyof typeof character.weapons]);
+
+                    // Store the item before clearing it
+                    const unequippedWeapon = character.weapons[slot as keyof typeof character.weapons];
+                    if (unequippedWeapon) {
+                        character.inventory.push(unequippedWeapon);
+                    }
+
+                    // Clear the slot
+                    character.weapons[slot as keyof typeof character.weapons] = "" as any;
+                } else {
+                    console.log('Unequipping Armour:', character.armours[slot as keyof typeof character.armours]);
+
+                    const unequippedArmour = character.armours[slot as keyof typeof character.armours];
+                    if (unequippedArmour) {
+                        character.inventory.push(unequippedArmour);
+                    }
+
+                    character.armours[slot as keyof typeof character.armours] = "" as any;
+                }
+
+                //setGameObject({ ...gameObject });
+            }
+        }
+    });
+
+    // Check for "Drop" button clicks
+    dropButtons.forEach(({ x, y, itemIndex }) => {
+        if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
+            const character = gameObject.characters[gameObject.clickedCharacterIndex];
+            if (character) {
+                // Ensure itemIndex is within the valid inventory range
+                if (itemIndex >= 0 && itemIndex < character.inventory.length) {
+                    // Retrieve the item before removing it
+                    const droppedItem = character.inventory[itemIndex];
+
+                    if (droppedItem) {
+                        // Add dropped item to the gameMap loots
+                        gameObject.gameMap.loots.push({
+                            x: character.location.x, // Assuming character has a position
+                            y: character.location.y,
+                            what: droppedItem
+                        });
+
+                        // Remove from inventory
+                        character.inventory.splice(itemIndex, 1);
+                    }
+                }
+            }
+        }
+    });
+
 };
 
 export const drawConsole = (
@@ -73,7 +137,6 @@ export const drawConsole = (
     const marginLeft: number = 20;
     const marginTop: number = 20;
     let lines: number = 0;
-    const fontSize: number = 14;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -102,30 +165,52 @@ export const drawConsole = (
                 lines++;
             }
 
-            // Weapons
-            if (c.weapons.leftHand !== "") {
-                ctx.fillText(`Wielded in left:`, marginLeft, marginTop + lines * fontSize);
-                lines++;
-                ctx.fillText(`${c.weapons.leftHand.name}`, marginLeft, marginTop + lines * fontSize);
-                lines++;
-            }
-            if (c.weapons.rightHand !== "") {
-                ctx.fillText(`Wielded in right:`, marginLeft, marginTop + lines * fontSize);
-                lines++;
-                ctx.fillText(`${c.weapons.rightHand.name}`, marginLeft, marginTop + lines * fontSize);
-                lines++;
-            }
+            ["leftHand", "rightHand"].forEach((slot) => {
+                const weapon = c.weapons[slot as keyof typeof c.weapons];
+                if (weapon) {
+                    ctx.fillText(`Wielded in ${slot}: ${weapon.name}`, marginLeft, marginTop + lines * fontSize);
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
+                    ctx.fillStyle = "white";
+                    ctx.fillText("Unequip", marginLeft + 210, marginTop + lines * fontSize);
+                    unequipButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, slot, type: "weapon" });
+                    lines++;
+                }
+            });
 
-            // Armours
             lines++;
             ctx.fillText(`Armours:`, marginLeft, marginTop + lines * fontSize);
             lines++;
             Object.entries(c.armours).forEach(([slot, armour]) => {
-                if (armour && typeof armour === "object" && "name" in armour) {
+                if (armour) {
                     ctx.fillText(`${armour.name} (${slot})`, marginLeft, marginTop + lines * fontSize);
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
+                    ctx.fillStyle = "white";
+                    ctx.fillText("Unequip", marginLeft + 210, marginTop + lines * fontSize);
+                    unequipButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, slot, type: "armour" });
                     lines++;
                 }
             });
+
+            lines++;
+            ctx.fillText(`Inventory:`, marginLeft, marginTop + lines * fontSize);
+            lines++;
+            c.inventory.forEach((item, index) => {
+                ctx.fillText(`${item.name}`, marginLeft, marginTop + lines * fontSize);
+                ctx.fillStyle = "yellow";
+                ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
+                ctx.fillStyle = "black";
+                ctx.fillText("Drop", marginLeft + 210, marginTop + lines * fontSize);
+                dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemIndex: index });
+                lines++;
+            });
+            // ground
+            lines++;
+            ctx.fillText(`On ground near:`, marginLeft, marginTop + lines * fontSize);
+            lines++;
+            // code to check if something near
+
             // Draw "More Details" Button
             lines += 2;
             detailsButtonX = marginLeft;
