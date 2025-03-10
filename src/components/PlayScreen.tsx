@@ -154,7 +154,6 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                         alignItems: 'center',
                     }}
                 >
-                    {message}
 
                     <canvas
                         ref={canvasRef}

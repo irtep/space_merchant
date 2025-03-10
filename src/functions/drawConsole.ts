@@ -168,12 +168,12 @@ export const drawConsole = (
             ["leftHand", "rightHand"].forEach((slot) => {
                 const weapon = c.weapons[slot as keyof typeof c.weapons];
                 if (weapon) {
-                    ctx.fillText(`Wielded in ${slot}: ${weapon.name}`, marginLeft, marginTop + lines * fontSize);
+                    ctx.fillText(`in ${slot}: ${weapon.name}`, marginLeft, marginTop + lines * fontSize);
                     ctx.fillStyle = "red";
-                    ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
+                    ctx.fillRect(marginLeft + 250, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
                     ctx.fillStyle = "white";
-                    ctx.fillText("Unequip", marginLeft + 210, marginTop + lines * fontSize);
-                    unequipButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, slot, type: "weapon" });
+                    ctx.fillText("Unequip", marginLeft + 260, marginTop + lines * fontSize);
+                    unequipButtons.push({ x: marginLeft + 250, y: marginTop + lines * fontSize - 10, slot, type: "weapon" });
                     lines++;
                 }
             });
@@ -192,7 +192,8 @@ export const drawConsole = (
                     lines++;
                 }
             });
-
+            // saatava inventoryyn equip myös
+            // dropissa bugi, se droppaa koko inventoryn
             lines++;
             ctx.fillText(`Inventory:`, marginLeft, marginTop + lines * fontSize);
             lines++;
