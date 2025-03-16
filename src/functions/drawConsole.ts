@@ -1,4 +1,5 @@
-import { Character, GameObject } from "../interfaces/sharedInterfaces";
+import { Character, GameObject, Loot } from "../interfaces/sharedInterfaces";
+import { isCircleColliding } from "./collisions";
 
 const buttonWidth: number = 120;
 const buttonHeight: number = 30;
@@ -12,6 +13,7 @@ let pauseButtonY: number = 0;
 const unequipButtons: { x: number; y: number; slot: string; type: "weapon" | "armour" }[] = [];
 const dropButtons: { x: number; y: number; itemIndex: number }[] = [];
 const equipButtons: { x: number; y: number; itemIndex: number }[] = [];
+const pickUpButtons: { x: number; y: number; lootIndex: number }[] = [];
 
 export const handleMouseDownToConsole = (
     event: MouseEvent,
@@ -179,7 +181,29 @@ export const handleMouseDownToConsole = (
         }
     });
 
+    // Check for "Pick Up" button clicks
+    pickUpButtons.forEach(({ x, y, lootIndex }) => {
+        if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
+            const character = gameObject.characters[gameObject.clickedCharacterIndex];
 
+            if (character) {
+                // Ensure valid index
+                if (lootIndex >= 0 && lootIndex < gameObject.gameMap.loots.length) {
+                    const lootToPickUp = gameObject.gameMap.loots[lootIndex];
+
+                    if (lootToPickUp) {
+                        // Add item to character's inventory
+                        character.inventory.push(lootToPickUp.what);
+
+                        // Remove the picked-up loot from the map
+                        gameObject.gameMap.loots.splice(lootIndex, 1);
+
+                        console.log(`Picked up: ${lootToPickUp.what.name}`);
+                    }
+                }
+            }
+        }
+    });
 };
 
 export const drawConsole = (
@@ -197,6 +221,7 @@ export const drawConsole = (
     unequipButtons.length = 0;
     dropButtons.length = 0;
     equipButtons.length = 0;
+    pickUpButtons.length = 0;
 
     gameObject.characters.forEach((c: Character, i: number) => {
         if (i === gameObject.clickedCharacterIndex) {
@@ -247,8 +272,7 @@ export const drawConsole = (
                     lines++;
                 }
             });
-            // saatava inventoryyn equip myös
-            // dropissa bugi, se droppaa koko inventoryn
+
             lines++;
             ctx.fillText(`Inventory:`, marginLeft, marginTop + lines * fontSize);
             lines++;
@@ -289,6 +313,30 @@ export const drawConsole = (
             ctx.fillText(`On ground near:`, marginLeft, marginTop + lines * fontSize);
             lines++;
             // code to check if something near
+
+            gameObject.gameMap.loots.forEach((loot: Loot, i: number) => {
+                // c.stats.size
+                // loot size is 5
+                const colDetect: boolean = isCircleColliding(
+                    { x: c.location.x, y: c.location.y, size: c.stats.size },
+                    { x: loot.x, y: loot.y, size: 5 }
+                );
+                if (colDetect) {
+                    lines++;
+                    ctx.fillText(`${loot.what.name}`, marginLeft, marginTop + lines * fontSize);
+                    // Draw "Pick Up" button
+                    const pickUpX = marginLeft + 200;
+                    const pickUpY = marginTop + lines * fontSize - 10;
+
+                    ctx.fillStyle = "blue";
+                    ctx.fillRect(pickUpX, pickUpY, smallButtonWidth, smallButtonHeight);
+                    ctx.fillStyle = "white";
+                    ctx.fillText("Pick Up", pickUpX + 10, pickUpY + 10);
+
+                    // Store button in an array for interaction
+                    pickUpButtons.push({ x: pickUpX, y: pickUpY, lootIndex: i });
+                }
+            });
 
             // Draw "More Details" Button
             lines += 2;
