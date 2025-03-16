@@ -17,7 +17,7 @@ export const handleMouseDownToConsole = (
     event: MouseEvent,
     canvas: HTMLCanvasElement,
     gameObject: GameObject,
-    setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,       
+    setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,
     setPause: React.Dispatch<React.SetStateAction<boolean>>,
     pauseRef: React.RefObject<boolean>,
     setMessage: React.Dispatch<React.SetStateAction<string>>/*,
@@ -28,6 +28,9 @@ export const handleMouseDownToConsole = (
     const clickY = event.clientY - rect.top;
     console.log('x and y ', clickX, clickY);
     console.log('console listens');
+    console.log('dropB: ', dropButtons);
+    console.log('equipB: ', equipButtons);
+    console.log('unEb: ', unequipButtons);
 
     // Check if click is inside the "More Details" button
     if (
@@ -109,10 +112,10 @@ export const handleMouseDownToConsole = (
             if (character) {
                 // Find the actual item in inventory
                 const itemToEquip = character.inventory[itemIndex];
-    
+
                 if (itemToEquip) {
                     let equipped = false; // Track if we successfully equipped
-    
+
                     if (itemToEquip.type === "weapon") {
                         if (!character.weapons.rightHand) {
                             character.weapons.rightHand = itemToEquip;
@@ -132,7 +135,7 @@ export const handleMouseDownToConsole = (
                             console.log(`Slot ${slot} is occupied!`);
                         }
                     }
-    
+
                     // Remove from inventory only if equipped
                     if (equipped) {
                         const index = character.inventory.findIndex((item) => item === itemToEquip);
@@ -144,7 +147,7 @@ export const handleMouseDownToConsole = (
                 }
             }
         }
-    });     
+    });
 
     // Check for "Drop" button clicks
     dropButtons.forEach(({ x, y, itemIndex }) => {
@@ -154,7 +157,7 @@ export const handleMouseDownToConsole = (
                 // Ensure valid index
                 if (itemIndex >= 0 && itemIndex < character.inventory.length) {
                     const itemToDrop = character.inventory[itemIndex];
-    
+
                     if (itemToDrop) {
                         // Drop only that item
                         gameObject.gameMap.loots.push({
@@ -162,20 +165,20 @@ export const handleMouseDownToConsole = (
                             y: character.location.y,
                             what: itemToDrop
                         });
-    
+
                         // Remove only the dropped item from inventory
                         const index = character.inventory.findIndex((item) => item === itemToDrop);
                         if (index !== -1) {
                             character.inventory.splice(index, 1);
                         }
-    
+
                         console.log(`Dropped: ${itemToDrop.name}`);
                     }
                 }
             }
         }
     });
-    
+
 
 };
 
@@ -191,6 +194,9 @@ export const drawConsole = (
 
     // clear
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    unequipButtons.length = 0;
+    dropButtons.length = 0;
+    equipButtons.length = 0;
 
     gameObject.characters.forEach((c: Character, i: number) => {
         if (i === gameObject.clickedCharacterIndex) {
@@ -246,38 +252,38 @@ export const drawConsole = (
             lines++;
             ctx.fillText(`Inventory:`, marginLeft, marginTop + lines * fontSize);
             lines++;
-            
+
             c.inventory.forEach((item, index) => {
                 lines++;
                 ctx.fillText(`${item.name}`, marginLeft, marginTop + lines * fontSize);
-                
+
                 // Draw Drop button
                 ctx.fillStyle = "yellow";
                 ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
                 ctx.fillStyle = "black";
                 ctx.fillText("Drop", marginLeft + 210, marginTop + lines * fontSize);
-            
+
                 // Draw Equip button
                 ctx.fillStyle = "green";
                 ctx.fillRect(marginLeft + 290, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
                 ctx.fillStyle = "white";
                 ctx.fillText("Equip", marginLeft + 300, marginTop + lines * fontSize);
-            
+
                 // Store button positions
                 dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemIndex: index });
                 equipButtons.push({ x: marginLeft + 290, y: marginTop + lines * fontSize - 10, itemIndex: index });
             });
-                /*
-            c.inventory.forEach((item, index) => {
-                ctx.fillText(`${item.name}`, marginLeft, marginTop + lines * fontSize);
-                ctx.fillStyle = "yellow";
-                ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
-                ctx.fillStyle = "black";
-                ctx.fillText("Drop", marginLeft + 210, marginTop + lines * fontSize);
-                dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemIndex: index });
-                lines++;
-            });
-            */
+            /*
+        c.inventory.forEach((item, index) => {
+            ctx.fillText(`${item.name}`, marginLeft, marginTop + lines * fontSize);
+            ctx.fillStyle = "yellow";
+            ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
+            ctx.fillStyle = "black";
+            ctx.fillText("Drop", marginLeft + 210, marginTop + lines * fontSize);
+            dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemIndex: index });
+            lines++;
+        });
+        */
             // ground
             lines++;
             ctx.fillText(`On ground near:`, marginLeft, marginTop + lines * fontSize);
