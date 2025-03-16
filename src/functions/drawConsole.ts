@@ -11,12 +11,13 @@ let pauseButtonX: number = 0;
 let pauseButtonY: number = 0;
 const unequipButtons: { x: number; y: number; slot: string; type: "weapon" | "armour" }[] = [];
 const dropButtons: { x: number; y: number; itemIndex: number }[] = [];
+const equipButtons: { x: number; y: number; itemIndex: number }[] = [];
 
 export const handleMouseDownToConsole = (
     event: MouseEvent,
     canvas: HTMLCanvasElement,
     gameObject: GameObject,
-    setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,       
     setPause: React.Dispatch<React.SetStateAction<boolean>>,
     pauseRef: React.RefObject<boolean>,
     setMessage: React.Dispatch<React.SetStateAction<string>>/*,
@@ -102,31 +103,79 @@ export const handleMouseDownToConsole = (
         }
     });
 
+    equipButtons.forEach(({ x, y, itemIndex }) => {
+        if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
+            const character = gameObject.characters[gameObject.clickedCharacterIndex];
+            if (character) {
+                // Find the actual item in inventory
+                const itemToEquip = character.inventory[itemIndex];
+    
+                if (itemToEquip) {
+                    let equipped = false; // Track if we successfully equipped
+    
+                    if (itemToEquip.type === "weapon") {
+                        if (!character.weapons.rightHand) {
+                            character.weapons.rightHand = itemToEquip;
+                            equipped = true;
+                        } else if (!character.weapons.leftHand) {
+                            character.weapons.leftHand = itemToEquip;
+                            equipped = true;
+                        } else {
+                            console.log("Hands are full!");
+                        }
+                    } else if (itemToEquip.type === "armour") {
+                        const slot = itemToEquip.slot as keyof typeof character.armours;
+                        if (!character.armours[slot]) {
+                            character.armours[slot] = itemToEquip;
+                            equipped = true;
+                        } else {
+                            console.log(`Slot ${slot} is occupied!`);
+                        }
+                    }
+    
+                    // Remove from inventory only if equipped
+                    if (equipped) {
+                        const index = character.inventory.findIndex((item) => item === itemToEquip);
+                        if (index !== -1) {
+                            character.inventory.splice(index, 1);
+                        }
+                        console.log(`Equipped: ${itemToEquip.name}`);
+                    }
+                }
+            }
+        }
+    });     
+
     // Check for "Drop" button clicks
     dropButtons.forEach(({ x, y, itemIndex }) => {
         if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
             const character = gameObject.characters[gameObject.clickedCharacterIndex];
             if (character) {
-                // Ensure itemIndex is within the valid inventory range
+                // Ensure valid index
                 if (itemIndex >= 0 && itemIndex < character.inventory.length) {
-                    // Retrieve the item before removing it
-                    const droppedItem = character.inventory[itemIndex];
-
-                    if (droppedItem) {
-                        // Add dropped item to the gameMap loots
+                    const itemToDrop = character.inventory[itemIndex];
+    
+                    if (itemToDrop) {
+                        // Drop only that item
                         gameObject.gameMap.loots.push({
-                            x: character.location.x, // Assuming character has a position
+                            x: character.location.x,
                             y: character.location.y,
-                            what: droppedItem
+                            what: itemToDrop
                         });
-
-                        // Remove from inventory
-                        character.inventory.splice(itemIndex, 1);
+    
+                        // Remove only the dropped item from inventory
+                        const index = character.inventory.findIndex((item) => item === itemToDrop);
+                        if (index !== -1) {
+                            character.inventory.splice(index, 1);
+                        }
+    
+                        console.log(`Dropped: ${itemToDrop.name}`);
                     }
                 }
             }
         }
     });
+    
 
 };
 
@@ -197,6 +246,28 @@ export const drawConsole = (
             lines++;
             ctx.fillText(`Inventory:`, marginLeft, marginTop + lines * fontSize);
             lines++;
+            
+            c.inventory.forEach((item, index) => {
+                lines++;
+                ctx.fillText(`${item.name}`, marginLeft, marginTop + lines * fontSize);
+                
+                // Draw Drop button
+                ctx.fillStyle = "yellow";
+                ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
+                ctx.fillStyle = "black";
+                ctx.fillText("Drop", marginLeft + 210, marginTop + lines * fontSize);
+            
+                // Draw Equip button
+                ctx.fillStyle = "green";
+                ctx.fillRect(marginLeft + 290, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
+                ctx.fillStyle = "white";
+                ctx.fillText("Equip", marginLeft + 300, marginTop + lines * fontSize);
+            
+                // Store button positions
+                dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemIndex: index });
+                equipButtons.push({ x: marginLeft + 290, y: marginTop + lines * fontSize - 10, itemIndex: index });
+            });
+                /*
             c.inventory.forEach((item, index) => {
                 ctx.fillText(`${item.name}`, marginLeft, marginTop + lines * fontSize);
                 ctx.fillStyle = "yellow";
@@ -206,6 +277,7 @@ export const drawConsole = (
                 dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemIndex: index });
                 lines++;
             });
+            */
             // ground
             lines++;
             ctx.fillText(`On ground near:`, marginLeft, marginTop + lines * fontSize);
