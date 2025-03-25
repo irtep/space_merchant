@@ -15,10 +15,9 @@ export interface Stats {
     dexterity: number;
     toughness: number;
     perception: number;
+    learning: number;
     size: number;
     magic: number;
-    abilities: Ability[];
-    skills: Skill[];
     physicalResistance: number;
     magicResistance: number;
     fireResistance: number;
@@ -135,6 +134,8 @@ export interface Character {
     isPlayer: boolean;
     selected: boolean;
     desc?: string;
+    abilities: Ability[];
+    skills: Skill[];
 };
 
 export interface Loot {

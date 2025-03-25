@@ -20,8 +20,13 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
             perception: 5,
             size: 10,
             magic: 5,
-            abilities: [],
-            skills: []
+            learning: 10,
+            physicalResistance: 0,
+            magicResistance: 0,
+            fireResistance: 0,
+            poisonResistance: 0,
+            coldResistance: 0,
+            psionicResistance: 0
         },
         location: { x: 50, y: 50 },
         world: 'Earth',
@@ -32,6 +37,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         endurancePoints: 50,
         armours: {
             head: '',
+            neck: '',
             upperBody: '',
             hands: '',
             legs: '',
@@ -53,7 +59,9 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         targetLocation: {x: 0, y: 0},
         inventory: [],
         isPlayer: true,
-        selected: false
+        selected: false,
+        abilities: [],
+        skills: [],
     });
     const {
         gameObject, setGameObject,
