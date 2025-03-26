@@ -200,6 +200,10 @@ export interface Race {
 
 export interface Profession {
     name: string;
+    desc: string;
+    stats: Stats;
+    skills: Skill[];
+    abilities: Ability[];
 };
 
 export interface Background {

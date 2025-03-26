@@ -79,7 +79,7 @@ export const races: Race[] = [
                 desc: 'Things you need to know how to use ranged weapons like bows and rifles etc.'
             },
             {
-                name: 'unarmed combat',
+                name: 'combat style: unarmed combat',
                 level: 10,
                 learnPoints: 0,
                 desc: 'How to fight without wielded weapons.'
@@ -199,10 +199,10 @@ export const races: Race[] = [
                 desc: 'weapon skill for axe weapons'
             },
             {
-                name: 'weapon and shield',
+                name: 'combat style: weapon and shield',
                 level: 5,
                 learnPoints: 0,
-                desc: 'skill to fight with weapon and shield combined.'
+                desc: 'skill to fight with weapon in other hand and shield in other.'
             },
             {
                 name: 'crossbow',
