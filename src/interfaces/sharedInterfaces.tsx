@@ -35,7 +35,7 @@ export interface Coordinates {
 export interface Item {
     name: string;
     shortName: string;
-    type: 'item' | 'money';
+    type: 'item' | 'money' | 'ammunition';
     desc: string;
     value: number;
     weight: number;
