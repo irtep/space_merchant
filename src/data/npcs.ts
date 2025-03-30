@@ -13,10 +13,9 @@ export const defaultCharacter: Character = {
         dexterity: 8,
         toughness: 12,
         perception: 5,
+        learning: 0,
         size: mediumBase,
         magic: 5,
-        abilities: [],
-        skills: [],
         physicalResistance: 0,
         magicResistance: 0,
         fireResistance: 0,
@@ -55,7 +54,9 @@ export const defaultCharacter: Character = {
     targetLocation: { x: 0, y: 0 },
     inventory: [],
     isPlayer: true,
-    selected: false
+    selected: false,
+    abilities: [],
+    skills: [],
 };
 
 const clonedDefaultChar: Character = JSON.parse(JSON.stringify(defaultCharacter));
@@ -70,30 +71,10 @@ export const npcs: Character[] = [
         team: 'amorcitos',
         location: { x: 150, y: 150 },
         stats: {
-            ...clonedDefaultChar.stats,
-            skills: [
-                {
-                    name: 'short blades',
-                    level: 3,
-                    learnPoints: 0,
-                    desc: 'Skill to use short blades like daggers, knives and short sword in combat.'
-                },
-                {
-                    name: 'dodge',
-                    level: 3,
-                    learnPoints: 0,
-                    desc: 'Dodge skill helps to avoid getting hit in combat.'
-                },
-                {
-                    name: 'close combat',
-                    level: 1,
-                    learnPoints: 0,
-                    desc: 'General skill for close combat.'
-                }
-            ]
+            ...clonedDefaultChar.stats
         },
         armours: {
-            head: 
+            head:
             {
                 name: 'a steel helmet',
                 shortName: 'helmet',
@@ -116,7 +97,7 @@ export const npcs: Character[] = [
                 effects: ['head protected']
             },
             neck: '',
-            upperBody: 
+            upperBody:
             {
                 name: 'a steel breastplate',
                 shortName: 'breastplate',
@@ -140,10 +121,10 @@ export const npcs: Character[] = [
             },
             hands: '',
             legs: '',
-            feet: ''
+            feet: '',
         },
         weapons: {
-            leftHand: 
+            leftHand:
             {
                 name: 'a wooden medium shield',
                 shortName: 'shield',
@@ -163,7 +144,7 @@ export const npcs: Character[] = [
                 rarity: 'common',
                 armourPiercing: 0
             },
-            rightHand:     {
+            rightHand: {
                 name: 'a heavy warhammer',
                 shortName: 'warhammer',
                 desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
@@ -193,27 +174,7 @@ export const npcs: Character[] = [
         profession: 'wizard',
         team: 'enemigos',
         stats: {
-            ...clonedDefaultChar.stats,
-            skills: [
-                {
-                    name: 'short blades',
-                    level: 3,
-                    learnPoints: 0,
-                    desc: 'Skill to use short blades like daggers, knives and short sword in combat.'
-                },
-                {
-                    name: 'dodge',
-                    level: 3,
-                    learnPoints: 0,
-                    desc: 'Dodge skill helps to avoid getting hit in combat.'
-                },
-                {
-                    name: 'close combat',
-                    level: 1,
-                    learnPoints: 0,
-                    desc: 'General skill for close combat.'
-                }
-            ]
+            ...clonedDefaultChar.stats
         },
         armours: {
             head: '',
@@ -225,7 +186,7 @@ export const npcs: Character[] = [
         },
         weapons: {
             leftHand: '',
-            rightHand:     {
+            rightHand: {
                 name: 'a heavy warhammer',
                 shortName: 'warhammer',
                 desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
@@ -246,6 +207,27 @@ export const npcs: Character[] = [
             }
         },
         location: { x: 350, y: 450 },
+        skills: [
+            {
+                name: 'short blades',
+                level: 3,
+                learnPoints: 0,
+                desc: 'Skill to use short blades like daggers, knives and short sword in combat.'
+            },
+            {
+                name: 'dodge',
+                level: 3,
+                learnPoints: 0,
+                desc: 'Dodge skill helps to avoid getting hit in combat.'
+            },
+            {
+                name: 'close combat',
+                level: 1,
+                learnPoints: 0,
+                desc: 'General skill for close combat.'
+            }
+        ],
+        abilities: []
     },
     {
         ...clonedDefaultChar,
@@ -259,10 +241,9 @@ export const npcs: Character[] = [
             dexterity: 8,
             toughness: 12,
             perception: 5,
+            learning: 0,
             size: smallBase,
             magic: 5,
-            abilities: [],
-            skills: [],
             physicalResistance: 0,
             magicResistance: 0,
             fireResistance: 0,
@@ -281,10 +262,9 @@ export const npcs: Character[] = [
             dexterity: 8,
             toughness: 12,
             perception: 5,
+            learning: 0,
             size: largeBase,
             magic: 5,
-            abilities: [],
-            skills: [],
             physicalResistance: 5,
             magicResistance: 0,
             fireResistance: 0,
@@ -295,7 +275,7 @@ export const npcs: Character[] = [
         armours: {
             head: '',
             neck: '',
-            upperBody: 
+            upperBody:
             {
                 name: 'an iron breastplate',
                 shortName: 'breastplate',
@@ -323,7 +303,7 @@ export const npcs: Character[] = [
         },
         weapons: {
             leftHand: '',
-            rightHand:     {
+            rightHand: {
                 name: 'a heavy warhammer',
                 shortName: 'warhammer',
                 desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
@@ -346,6 +326,27 @@ export const npcs: Character[] = [
         race: 'ogre',
         profession: 'mercenary',
         team: 'big guns',
-        location: { x: 450, y: 123 }
+        location: { x: 450, y: 123 },
+        skills: [
+            {
+                name: 'short blades',
+                level: 3,
+                learnPoints: 0,
+                desc: 'Skill to use short blades like daggers, knives and short sword in combat.'
+            },
+            {
+                name: 'dodge',
+                level: 3,
+                learnPoints: 0,
+                desc: 'Dodge skill helps to avoid getting hit in combat.'
+            },
+            {
+                name: 'close combat',
+                level: 1,
+                learnPoints: 0,
+                desc: 'General skill for close combat.'
+            }
+        ],
+        abilities: []
     },
 ];

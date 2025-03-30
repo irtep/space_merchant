@@ -93,6 +93,7 @@ export const updateTeamMovements = (gameObject: GameObject) => {
     gameObject.characters.forEach((c: Character) => {
         const movementSpeed: number = (c.stats.dexterity * c.stats.size) / 100;
 
+        // ACTION === MOVE
         if (c.action === 'move' && c.targetLocation.x !== 0 && c.targetLocation.y !== 0) {
             // Test all movement directions
             const tests: MovementTestResult[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'].map((direction) => {
@@ -113,7 +114,37 @@ export const updateTeamMovements = (gameObject: GameObject) => {
             if (bestMove && !bestMove.result) {
                 c.location = bestMove.location; // Move character to best position
             }
-        }
+        };
+
+        // ACTION === ATTACK
+        if (c.action === 'action' && c.actionTarget !== '') {
+
+            // get location of target
+            //const locationOfTarget = ''
+
+            // if not find or close enough already, don't move
+                // else
+
+            // Test all movement directions
+            const tests: MovementTestResult[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'].map((direction) => {
+                const location = makeMovement(direction, movementSpeed, c.location);
+                return {
+                    direction,
+                    location,
+                    result: testCollisions(c, gameObject, location),
+                    distanceToTarget: getDistance(c.targetLocation, location)
+                };
+            });
+
+            // Find the best movement option
+            const bestMove = tests
+                .filter((test) => !test.result) // No collision
+                .reduce((best, current) => (current.distanceToTarget < best.distanceToTarget ? current : best), tests[0]);
+
+            if (bestMove && !bestMove.result) {
+                c.location = bestMove.location; // Move character to best position
+            }
+        };
     });
 
     return gameObject;

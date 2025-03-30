@@ -15,10 +15,9 @@ export interface Stats {
     dexterity: number;
     toughness: number;
     perception: number;
+    learning: number;
     size: number;
     magic: number;
-    abilities: Ability[];
-    skills: Skill[];
     physicalResistance: number;
     magicResistance: number;
     fireResistance: number;
@@ -36,7 +35,7 @@ export interface Coordinates {
 export interface Item {
     name: string;
     shortName: string;
-    type: 'item' | 'money';
+    type: 'item' | 'money' | 'ammunition';
     desc: string;
     value: number;
     weight: number;
@@ -135,6 +134,8 @@ export interface Character {
     isPlayer: boolean;
     selected: boolean;
     desc?: string;
+    abilities: Ability[];
+    skills: Skill[];
 };
 
 export interface Loot {
@@ -199,6 +200,10 @@ export interface Race {
 
 export interface Profession {
     name: string;
+    desc: string;
+    stats: Stats;
+    skills: Skill[];
+    abilities: Ability[];
 };
 
 export interface Background {

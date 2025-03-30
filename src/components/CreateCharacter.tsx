@@ -2,7 +2,7 @@ import { Container, MenuItem, Select, FormControl, Button, Box, Typography, Sele
 import { useSMContext } from '../context/smContext.tsx';
 import React, { useEffect, useState } from 'react';
 import { races } from '../data/races.ts';
-import { Character, Profession, Race } from '../interfaces/sharedInterfaces.tsx';
+import { Ability, Character, Profession, Race, Skill, Stats } from '../interfaces/sharedInterfaces.tsx';
 import { professions } from '../data/professions.ts';
 
 const CreateCharacter: React.FC = (): React.ReactElement => {
@@ -14,14 +14,19 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         profession: '',
         team: '',
         stats: {
-            strength: 10,
-            dexterity: 8,
-            toughness: 12,
-            perception: 5,
-            size: 10,
-            magic: 5,
-            abilities: [],
-            skills: []
+            strength: 0,
+            dexterity: 0,
+            toughness: 0,
+            perception: 0,
+            size: 0,
+            magic: 0,
+            learning: 0,
+            physicalResistance: 0,
+            magicResistance: 0,
+            fireResistance: 0,
+            poisonResistance: 0,
+            coldResistance: 0,
+            psionicResistance: 0
         },
         location: { x: 50, y: 50 },
         world: 'Earth',
@@ -32,6 +37,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         endurancePoints: 50,
         armours: {
             head: '',
+            neck: '',
             upperBody: '',
             hands: '',
             legs: '',
@@ -50,15 +56,71 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         canTalk: true,
         action: 'wait',
         actionTarget: '',
-        targetLocation: {x: 0, y: 0},
+        targetLocation: { x: 0, y: 0 },
         inventory: [],
         isPlayer: true,
-        selected: false
+        selected: false,
+        abilities: [],
+        skills: [],
     });
     const {
         gameObject, setGameObject,
         setView
     } = useSMContext();
+
+
+    const mergeSkills = (raceSkills: Skill[] = [], professionSkills: Skill[] = []): Skill[] => {
+        const skillMap = new Map<string, Skill>();
+
+        [...raceSkills, ...professionSkills].forEach((skill) => {
+            if (skillMap.has(skill.name)) {
+                // Sum the levels if the skill already exists
+                skillMap.set(skill.name, {
+                    ...skill,
+                    level: skillMap.get(skill.name)!.level + skill.level,
+                });
+            } else {
+                skillMap.set(skill.name, skill);
+            }
+        });
+
+        return Array.from(skillMap.values());
+    };
+
+    const mergeAbilities = (raceAbilities: Ability[] = [], professionAbilities: Ability[] = []): Ability[] => {
+        // Use a Set to remove duplicates based on ability name
+        const abilitySet = new Map<string, Ability>();
+        [...raceAbilities, ...professionAbilities].forEach((ability) => {
+            abilitySet.set(ability.name, ability);
+        });
+
+        return Array.from(abilitySet.values());
+    };
+
+
+    // Function to merge stats
+    const mergeStats = (raceStats: Partial<Stats> = {}, professionStats: Partial<Stats> = {}): Stats => {
+        return {
+            strength: (raceStats.strength || 0) + (professionStats.strength || 0),
+            dexterity: (raceStats.dexterity || 0) + (professionStats.dexterity || 0),
+            toughness: (raceStats.toughness || 0) + (professionStats.toughness || 0),
+            perception: (raceStats.perception || 0) + (professionStats.perception || 0),
+            size: (raceStats.size || 0) + (professionStats.size || 0),
+            magic: (raceStats.magic || 0) + (professionStats.magic || 0),
+            learning: (raceStats.learning || 0) + (professionStats.learning || 0),
+            physicalResistance: (raceStats.physicalResistance || 0) + (professionStats.physicalResistance || 0),
+            magicResistance: (raceStats.magicResistance || 0) + (professionStats.magicResistance || 0),
+            fireResistance: (raceStats.fireResistance || 0) + (professionStats.fireResistance || 0),
+            poisonResistance: (raceStats.poisonResistance || 0) + (professionStats.poisonResistance || 0),
+            coldResistance: (raceStats.coldResistance || 0) + (professionStats.coldResistance || 0),
+            psionicResistance: (raceStats.psionicResistance || 0) + (professionStats.psionicResistance || 0),
+        };
+    };
+
+    // Function to merge skills and abilities (avoids duplicates)
+    const mergeArrays = <T,>(raceArray: T[] = [], professionArray: T[] = []): T[] => {
+        return Array.from(new Set([...raceArray, ...professionArray])); // Ensures no duplicates
+    };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInitialCharacter({
@@ -68,12 +130,64 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
     };
 
     const handleSelectChange = (event: SelectChangeEvent<string>) => {
+        const { name, value } = event.target;
+
+        let updatedCharacter = { ...initialCharacter, [name]: value };
+
+        if (name === 'race') {
+            const selectedRace = races.find((r) => r.name === value);
+            if (selectedRace) {
+                updatedCharacter = {
+                    ...updatedCharacter,
+                    stats: mergeStats(
+                        selectedRace.stats,
+                        initialCharacter.profession ? professions.find((p) => p.name === initialCharacter.profession)?.stats : {}
+                    ),
+                    skills: mergeSkills(
+                        selectedRace.skills,
+                        initialCharacter.profession ? professions.find((p) => p.name === initialCharacter.profession)?.skills : []
+                    ),
+                    abilities: mergeAbilities(
+                        selectedRace.abilities,
+                        initialCharacter.profession ? professions.find((p) => p.name === initialCharacter.profession)?.abilities : []
+                    )
+                };
+            }
+        }
+
+        if (name === 'profession') {
+            const selectedProfession = professions.find((p) => p.name === value);
+            if (selectedProfession) {
+                updatedCharacter = {
+                    ...updatedCharacter,
+                    stats: mergeStats(
+                        initialCharacter.race ? races.find((r) => r.name === initialCharacter.race)?.stats : {},
+                        selectedProfession.stats
+                    ),
+                    skills: mergeSkills(
+                        initialCharacter.race ? races.find((r) => r.name === initialCharacter.race)?.skills : [],
+                        selectedProfession.skills
+                    ),
+                    abilities: mergeAbilities(
+                        initialCharacter.race ? races.find((r) => r.name === initialCharacter.race)?.abilities : [],
+                        selectedProfession.abilities
+                    )
+                };
+            }
+        }
+
+        setInitialCharacter(updatedCharacter);
+    };
+
+
+    /*
+    const handleSelectChange = (event: SelectChangeEvent<string>) => {
         setInitialCharacter({
             ...initialCharacter, // Keep existing properties
             [event.target.name]: event.target.value // Update changed field
         });
     };
-
+*/
     useEffect(() => {
 
     }, []);
@@ -198,7 +312,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                                     console.log('clicked to preBattle');
                                     setGameObject({
                                         ...gameObject,
-                                        characters:[initialCharacter]
+                                        characters: [initialCharacter]
                                     });
                                     setView('play');
                                 }}
