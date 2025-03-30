@@ -1,4 +1,5 @@
 import { Character, Coordinates, GameObject } from "../interfaces/sharedInterfaces";
+import { meleeDistance, movementSpeedMultiplier } from "../measures/measures";
 import { isCircleColliding, isRectColliding } from "./collisions";
 import { getDistance } from "./gamePlay";
 
@@ -91,7 +92,7 @@ export const testCollisions = (c: Character, gameObject: GameObject, locationToT
 
 export const updateTeamMovements = (gameObject: GameObject) => {
     gameObject.characters.forEach((c: Character) => {
-        const movementSpeed: number = (c.stats.dexterity * c.stats.size) / 100;
+        const movementSpeed: number = (c.stats.dexterity * c.stats.size) / movementSpeedMultiplier;
 
         // ACTION === MOVE
         if (c.action === 'move' && c.targetLocation.x !== 0 && c.targetLocation.y !== 0) {
@@ -112,38 +113,53 @@ export const updateTeamMovements = (gameObject: GameObject) => {
                 .reduce((best, current) => (current.distanceToTarget < best.distanceToTarget ? current : best), tests[0]);
 
             if (bestMove && !bestMove.result) {
-                c.location = bestMove.location; // Move character to best position
+                // if not at location already
+                //console.log('bestmove.location: ', bestMove.location);
+                const distanceToTarget: number = getDistance(c.location, c.targetLocation);
+                if (distanceToTarget > 1) {
+                    c.location = bestMove.location; // Move character to best position
+                } else { console.log('c at location'); };
             }
         };
 
         // ACTION === ATTACK
-        if (c.action === 'action' && c.actionTarget !== '') {
-
+        //console.log('c.action: ', c.action, ' c.actionTarget: ', c.actionTarget);
+        if (c.action === 'attack' && c.actionTarget !== '') {
+            //console.log('attack action ');
             // get location of target
-            //const locationOfTarget = ''
+            const targetCharacter: Character | undefined = gameObject.characters.find((tC: Character) => tC.id === c.actionTarget);
+            let locationOfTarget: Coordinates | undefined = undefined;
 
-            // if not find or close enough already, don't move
-                // else
+            if (targetCharacter) {
+                locationOfTarget = targetCharacter.location;
+            } else { console.log('target character undefined'); };
 
-            // Test all movement directions
-            const tests: MovementTestResult[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'].map((direction) => {
-                const location = makeMovement(direction, movementSpeed, c.location);
-                return {
-                    direction,
-                    location,
-                    result: testCollisions(c, gameObject, location),
-                    distanceToTarget: getDistance(c.targetLocation, location)
-                };
-            });
+            if (locationOfTarget) {
+                // Test all movement directions
+                const tests: MovementTestResult[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'].map((direction) => {
+                    const location = makeMovement(direction, movementSpeed, c.location);
+                    return {
+                        direction,
+                        location,
+                        result: testCollisions(c, gameObject, location),
+                        distanceToTarget: getDistance(locationOfTarget, location)
+                    };
+                });
 
-            // Find the best movement option
-            const bestMove = tests
-                .filter((test) => !test.result) // No collision
-                .reduce((best, current) => (current.distanceToTarget < best.distanceToTarget ? current : best), tests[0]);
+                // Find the best movement option
+                const bestMove = tests
+                    .filter((test) => !test.result) // No collision
+                    .reduce((best, current) => (current.distanceToTarget < best.distanceToTarget ? current : best), tests[0]);
 
-            if (bestMove && !bestMove.result) {
-                c.location = bestMove.location; // Move character to best position
-            }
+                if (bestMove && !bestMove.result && targetCharacter) {
+                    // if not at location already
+                    const distanceToTarget: number = getDistance(c.location, targetCharacter.location);
+                    if (targetCharacter && distanceToTarget > c.stats.size + targetCharacter?.stats.size + meleeDistance) {
+                        //console.log('distance: ', c.stats.size + targetCharacter?.stats.size + 0.5);
+                        c.location = bestMove.location; // Move character to best position
+                    } else { console.log('attacker at location: d: '); };
+                }
+            } else { console.log('target location undefined'); };
         };
     });
 

@@ -28,11 +28,11 @@
         const rect = canvas.getBoundingClientRect();
         const clickX = event.clientX - rect.left;
         const clickY = event.clientY - rect.top;
-        console.log('x and y ', clickX, clickY);
-        console.log('console listens');
-        console.log('dropB: ', dropButtons);
-        console.log('equipB: ', equipButtons);
-        console.log('unEb: ', unequipButtons);
+        //console.log('x and y ', clickX, clickY);
+        //console.log('console listens');
+        //console.log('dropB: ', dropButtons);
+        //console.log('equipB: ', equipButtons);
+        //console.log('unEb: ', unequipButtons);
 
         // Check if click is inside the "More Details" button
         if (
@@ -68,7 +68,7 @@
             setPause((prevPause) => {
                 const newPauseState = !prevPause;
                 pauseRef.current = newPauseState; // Ensure pauseRef is updated
-                console.log('Paused:', newPauseState);
+                //console.log('Paused:', newPauseState);
                 setMessage(newPauseState ? 'PAUSED' : 'not in pause');
                 return newPauseState;
             });
@@ -93,7 +93,7 @@
                         // Clear the slot
                         character.weapons[slot as keyof typeof character.weapons] = "" as any;
                     } else {
-                        console.log('Unequipping Armour:', character.armours[slot as keyof typeof character.armours]);
+                        //console.log('Unequipping Armour:', character.armours[slot as keyof typeof character.armours]);
 
                         const unequippedArmour = character.armours[slot as keyof typeof character.armours];
                         if (unequippedArmour) {

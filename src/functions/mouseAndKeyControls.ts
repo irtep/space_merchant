@@ -49,8 +49,8 @@ export const handleMouseDown = (
     //gameObject.mouseNowY = mouseY;
     const clickedLocation: Coordinates = { x: mouseX, y: mouseY };
     let hitToCharacter: boolean = false;
-    console.log('clicked: ', mouseX, mouseY);
-    console.log('go: ', gameObject);
+    //console.log('clicked: ', mouseX, mouseY);
+    //console.log('go: ', gameObject);
 
     // check if any of characters where clicked or if anyone is selected already
     gameObject.characters.forEach((c: Character, i: number) => {
@@ -88,8 +88,11 @@ export const handleMouseDown = (
             if (gameObject.clickedCharacterIndex === indexOfSelected) {
                 // switch to next action
                 if (gameObject.characters[gameObject.clickedCharacterIndex].action === 'wait') {
+                    // reset movement target. x: 0 and y: 0 is "don't move"
+                    gameObject.characters[gameObject.clickedCharacterIndex].targetLocation = { x: 0, y: 0 };
                     gameObject.characters[gameObject.clickedCharacterIndex].action = 'move';
                 } else if (gameObject.characters[gameObject.clickedCharacterIndex].action === 'move') {
+                    gameObject.characters[gameObject.clickedCharacterIndex].actionTarget = '';
                     gameObject.characters[gameObject.clickedCharacterIndex].action = 'attack';
                 } else if (gameObject.characters[gameObject.clickedCharacterIndex].action === 'attack') {
                     gameObject.characters[gameObject.clickedCharacterIndex].action = 'wait';
