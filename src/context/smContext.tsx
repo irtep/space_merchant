@@ -29,7 +29,8 @@ export const SMProvider: FC<Props> = ({ children }): ReactElement => {
         mouseNowX: 0,
         mouseNowY: 0,
         gameMap: jyvaskylaTown,
-        clickedCharacterIndex: 0
+        clickedCharacterIndex: 0,
+        updateCounter: 0
     });
     const [charIsSelected, setCharIsSelected] = useState<boolean>(false);
     const [indexOfSelected, setIndexOfSelected] = useState<number>(0);

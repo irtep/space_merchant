@@ -65,7 +65,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                 pauseRef,
                 setMessage/*,
                 setGameObject*/
-                );
+            );
         };
         window.addEventListener('keydown', keyDownHandler);
         canvas.addEventListener('mousedown', mouseDownHandler);
@@ -84,14 +84,31 @@ const PlayScreen: React.FC = (): React.ReactElement => {
 
         const update = (): void => {
             //console.log('update');
-            //liveGameObject.updateCounter++;
+            liveGameObject.updateCounter++;
 
             // update movements
             liveGameObject = updateTeamMovements(liveGameObject);
 
             // shoot
 
-            // close combat
+            // close combat in every 100th update
+            if (liveGameObject.updateCounter % 100 === 0) {
+                console.log('combat round');
+            }
+
+            // every tenth update removes some hits
+            /*
+            if (liveGameObject.hits.length > 0 &&
+                liveGameObject.updateCounter % 10 === 0
+            ) {
+                liveGameObject.hits.shift();
+            }
+            */
+
+            // reset updateCounter at 2000
+            if (liveGameObject.updateCounter > 2000) {
+                liveGameObject.updateCounter = 0;
+            }
 
             draw(canvas, liveGameObject); // map
             drawConsole(canvas2, liveGameObject); // console at right side
@@ -123,13 +140,13 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         };
     }, []);
 
-    useEffect( () => {
+    useEffect(() => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (!canvas) return;
         draw(canvas, liveGameObject);
     }, [gameObject]);
 
-    useEffect( () => {
+    useEffect(() => {
         setGameObject(liveGameObject);
     }, [dialogOpen]);
 
@@ -168,7 +185,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
                     />
 
                     <InventoryDialog
-                       // liveGameObject={liveGameObject}
+                    // liveGameObject={liveGameObject}
                     />
                 </Box>
 

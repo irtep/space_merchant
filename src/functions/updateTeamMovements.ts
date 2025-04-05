@@ -118,7 +118,9 @@ export const updateTeamMovements = (gameObject: GameObject) => {
                 const distanceToTarget: number = getDistance(c.location, c.targetLocation);
                 if (distanceToTarget > 1) {
                     c.location = bestMove.location; // Move character to best position
-                } else { console.log('c at location'); };
+                } else { 
+                    //console.log('c at location'); 
+                };
             }
         };
 
@@ -157,9 +159,13 @@ export const updateTeamMovements = (gameObject: GameObject) => {
                     if (targetCharacter && distanceToTarget > c.stats.size + targetCharacter?.stats.size + meleeDistance) {
                         //console.log('distance: ', c.stats.size + targetCharacter?.stats.size + 0.5);
                         c.location = bestMove.location; // Move character to best position
-                    } else { console.log('attacker at location: d: '); };
+                    } else { 
+                        //console.log('attacker at location: d: '); 
+                    };
                 }
-            } else { console.log('target location undefined'); };
+            } else { 
+                //console.log('target location undefined'); 
+            };
         };
     });
 

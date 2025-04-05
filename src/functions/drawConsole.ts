@@ -1,10 +1,13 @@
     import { Armour, Character, GameObject, Item, Loot, Weapon } from "../interfaces/sharedInterfaces";
     import { isCircleColliding } from "./collisions";
 
+
+    // id's in buttons are maybe wrong... try to log those
+
     const buttonWidth: number = 120;
-    const buttonHeight: number = 30;
+    const buttonHeight: number = 30; // more details and pause
     const smallButtonWidth: number = 80;
-    const smallButtonHeight: number = 14;
+    const smallButtonHeight: number = 13; // 14
     const fontSize: number = 14;
     let detailsButtonX: number = 0;
     let detailsButtonY: number = 0;
@@ -28,11 +31,11 @@
         const rect = canvas.getBoundingClientRect();
         const clickX = event.clientX - rect.left;
         const clickY = event.clientY - rect.top;
-        //console.log('x and y ', clickX, clickY);
+        console.log('x and y ', clickX, clickY);
         //console.log('console listens');
-        //console.log('dropB: ', dropButtons);
-        //console.log('equipB: ', equipButtons);
-        //console.log('unEb: ', unequipButtons);
+        console.log('dropB: ', dropButtons);
+        console.log('equipB: ', equipButtons);
+        console.log('unEb: ', unequipButtons);
 
         // Check if click is inside the "More Details" button
         if (

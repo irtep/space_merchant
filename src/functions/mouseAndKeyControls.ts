@@ -113,7 +113,10 @@ export const handleMouseDown = (
             if (indexOfSelected !== undefined) {
                 gameObject.characters.forEach((c: Character) => {
                     if (c.selected && gameObject.clickedCharacterIndex) {
-                        c.actionTarget = gameObject.characters[gameObject.clickedCharacterIndex].id;
+                        // if selected action is attack
+                        if (c.action == 'attack') {
+                            c.actionTarget = gameObject.characters[gameObject.clickedCharacterIndex].id;
+                        }
                     }
                 });
             }

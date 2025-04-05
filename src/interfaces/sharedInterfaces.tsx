@@ -169,12 +169,19 @@ export interface GameMap {
     loots: Loot[];
 };
 
+export interface Hit {
+    coordinates: Coordinates;
+    size: number;
+};
+
 export interface GameObject {
     characters: Character[];
     mouseNowX: number;
     mouseNowY: number;
     gameMap: GameMap;
     clickedCharacterIndex: number;
+    updateCounter: number;
+    hits: Hit[];
 };
 
 export interface Circle {
