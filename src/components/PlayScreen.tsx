@@ -9,6 +9,7 @@ import { npcs } from '../data/npcs';
 import { updateTeamMovements } from '../functions/updateTeamMovements';
 import { drawConsole, handleMouseDownToConsole } from '../functions/drawConsole';
 import InventoryDialog from './InventoryDialog';
+import { giveIdsToItem } from '../functions/setups';
 //import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
@@ -79,7 +80,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         draw(canvas, liveGameObject);
 
         /* 
-        *       update function
+        *       update functions
         */
 
         const update = (): void => {
@@ -114,6 +115,11 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             drawConsole(canvas2, liveGameObject); // console at right side
             //console.log('lgo: ', liveGameObject);
         };
+
+        /**
+         * Setups
+        */
+        liveGameObject = giveIdsToItem(liveGameObject);
 
         const loop = (): void => {
             //console.log('loop');

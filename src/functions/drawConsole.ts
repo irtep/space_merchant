@@ -229,9 +229,6 @@
         dropButtons.length = 0;
         equipButtons.length = 0;
         pickUpButtons.length = 0;
-        //let itemId: number = 0;
-
-        // give all items unique id
 
         gameObject.characters.forEach((c: Character, i: number) => {
             if (i === gameObject.clickedCharacterIndex) {
