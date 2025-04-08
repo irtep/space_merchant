@@ -3,6 +3,8 @@
 
 
     // id's in buttons are maybe wrong... try to log those
+    // maybe so, that always when this is loaded, all items get a unique id
+    // and that is used, instead of the index number
 
     const buttonWidth: number = 120;
     const buttonHeight: number = 30; // more details and pause
@@ -113,6 +115,7 @@
 
         equipButtons.forEach(({ x, y, itemIndex }) => {
             if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
+                console.log('clicked equip with index: ', itemIndex);
                 const character = gameObject.characters[gameObject.clickedCharacterIndex];
                 if (character) {
                     // Find the actual item in inventory
@@ -157,6 +160,7 @@
         // Check for "Drop" button clicks
         dropButtons.forEach(({ x, y, itemIndex }) => {
             if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
+                console.log('clicked drop of index: ', itemIndex);
                 const character = gameObject.characters[gameObject.clickedCharacterIndex];
                 if (character) {
                     // Ensure valid index
@@ -225,6 +229,9 @@
         dropButtons.length = 0;
         equipButtons.length = 0;
         pickUpButtons.length = 0;
+        //let itemId: number = 0;
+
+        // give all items unique id
 
         gameObject.characters.forEach((c: Character, i: number) => {
             if (i === gameObject.clickedCharacterIndex) {
