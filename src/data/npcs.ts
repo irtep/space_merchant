@@ -7,7 +7,7 @@ export const defaultCharacter: Character = {
     name: '',
     race: '',
     profession: '',
-    team: '',
+    team: 'npcteam',
     stats: {
         strength: 10,
         dexterity: 8,
@@ -76,6 +76,7 @@ export const npcs: Character[] = [
         armours: {
             head:
             {
+                id: 0,
                 name: 'a steel helmet',
                 shortName: 'helmet',
                 desc: `A shiny steel helmet with nose protector.`,
@@ -99,6 +100,7 @@ export const npcs: Character[] = [
             neck: '',
             upperBody:
             {
+                id: 0,
                 name: 'a steel breastplate',
                 shortName: 'breastplate',
                 desc: `A good looking shiny steel breastplate, that grants fine protections.`,
@@ -126,6 +128,7 @@ export const npcs: Character[] = [
         weapons: {
             leftHand:
             {
+                id: 0,
                 name: 'a wooden medium shield',
                 shortName: 'shield',
                 desc: 'A solid and quite light shield, made of birch.',
@@ -145,6 +148,7 @@ export const npcs: Character[] = [
                 armourPiercing: 0
             },
             rightHand: {
+                id: 0,
                 name: 'a heavy warhammer',
                 shortName: 'warhammer',
                 desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
@@ -187,6 +191,7 @@ export const npcs: Character[] = [
         weapons: {
             leftHand: '',
             rightHand: {
+                id: 0,
                 name: 'a heavy warhammer',
                 shortName: 'warhammer',
                 desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
@@ -277,6 +282,7 @@ export const npcs: Character[] = [
             neck: '',
             upperBody:
             {
+                id: 0,
                 name: 'an iron breastplate',
                 shortName: 'breastplate',
                 desc: `A heavy, but should protect you nicely!.`,
@@ -304,6 +310,7 @@ export const npcs: Character[] = [
         weapons: {
             leftHand: '',
             rightHand: {
+                id: 0,
                 name: 'a heavy warhammer',
                 shortName: 'warhammer',
                 desc: 'A brutal iron-headed hammer, slow but devastating against armor.',

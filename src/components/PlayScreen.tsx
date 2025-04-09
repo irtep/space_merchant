@@ -10,6 +10,7 @@ import { updateTeamMovements } from '../functions/updateTeamMovements';
 import { drawConsole, handleMouseDownToConsole } from '../functions/drawConsole';
 import InventoryDialog from './InventoryDialog';
 import { giveIdsToItem } from '../functions/setups';
+import { combatRound } from '../functions/combatRound';
 //import PlayerControlPanel from './PlayerControlPanel';
 
 const PlayScreen: React.FC = (): React.ReactElement => {
@@ -95,6 +96,7 @@ const PlayScreen: React.FC = (): React.ReactElement => {
             // close combat in every 100th update
             if (liveGameObject.updateCounter % 100 === 0) {
                 console.log('combat round');
+                liveGameObject = combatRound(liveGameObject);
             }
 
             // every tenth update removes some hits
@@ -119,7 +121,9 @@ const PlayScreen: React.FC = (): React.ReactElement => {
         /**
          * Setups
         */
+        
         liveGameObject = giveIdsToItem(liveGameObject);
+        console.log(`giving id's to items: `, liveGameObject);
 
         const loop = (): void => {
             //console.log('loop');
