@@ -2,6 +2,7 @@ import { Weapon } from "../interfaces/sharedInterfaces";
 
 export const weapons: Weapon[] = [
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'an iron dagger',
         shortName: 'dagger',
         desc: 'A basic iron dagger. Fast to use, easy to hide. However short ranged.',
@@ -21,6 +22,7 @@ export const weapons: Weapon[] = [
         armourPiercing: 0
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a rusted shortsword',
         shortName: 'shortsword',
         desc: 'A time-worn iron shortsword. Slightly better reach than a dagger, but less effective against armor.',
@@ -40,6 +42,7 @@ export const weapons: Weapon[] = [
         armourPiercing: 0
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a crude iron axe',
         shortName: 'axe',
         desc: 'A rough iron axe with a wooden handle. Powerful but slower than a sword.',
@@ -59,6 +62,7 @@ export const weapons: Weapon[] = [
         armourPiercing: 2
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a heavy warhammer',
         shortName: 'warhammer',
         desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
@@ -78,6 +82,7 @@ export const weapons: Weapon[] = [
         armourPiercing: 5
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a simple hunting bow',
         shortName: 'bow',
         desc: 'A lightweight bow, effective at a distance but requires skill to use.',
@@ -97,6 +102,7 @@ export const weapons: Weapon[] = [
         armourPiercing: 1
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a chipped spear',
         shortName: 'spear',
         desc: 'A long wooden spear with a dull iron tip. Versatile, allowing for thrusts or throws.',
@@ -116,6 +122,7 @@ export const weapons: Weapon[] = [
         armourPiercing: 1
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a battered wooden club',
         shortName: 'club',
         desc: 'A simple, heavy wooden club. Crude but effective in a pinch.',
@@ -135,6 +142,7 @@ export const weapons: Weapon[] = [
         armourPiercing: 0
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a jagged iron longsword',
         shortName: 'longsword',
         desc: 'A well-crafted but slightly worn longsword. Balanced and deadly in the right hands.',
@@ -154,6 +162,7 @@ export const weapons: Weapon[] = [
         armourPiercing: 2
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a wooden medium shield',
         shortName: 'shield',
         desc: 'A solid and quite light shield, made of birch.',

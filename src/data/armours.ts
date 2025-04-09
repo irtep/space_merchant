@@ -2,6 +2,7 @@ import { Armour } from "../interfaces/sharedInterfaces";
 
 export const armours: Armour[] = [
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a steel helmet',
         shortName: 'helmet',
         desc: `A shiny steel helmet with nose protector.`,
@@ -23,6 +24,7 @@ export const armours: Armour[] = [
         effects: ['head protected']
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'a steel breastplate',
         shortName: 'breastplate',
         desc: `A good looking shiny steel breastplate, that grants fine protections.`,
@@ -44,6 +46,7 @@ export const armours: Armour[] = [
         effects: []
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'an iron breastplate',
         shortName: 'breastplate',
         desc: `A heavy, but should protect you nicely!.`,

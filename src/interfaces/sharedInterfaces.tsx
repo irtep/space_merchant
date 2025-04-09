@@ -33,7 +33,7 @@ export interface Coordinates {
 };
 
 export interface Item {
-    id?: number;
+    id: number;
     name: string;
     shortName: string;
     type: 'item' | 'money' | 'ammunition';
@@ -49,7 +49,7 @@ export interface StatMod {
 };
 
 export interface Armour {
-    id?: number;
+    id: number;
     name: string;
     shortName: string;
     desc: string;
@@ -72,7 +72,7 @@ export interface DamageTypes {
 };
 
 export interface Weapon {
-    id?: number;
+    id: number;
     name: string;
     shortName: string;
     desc: string;

@@ -16,8 +16,8 @@
     let pauseButtonX: number = 0;
     let pauseButtonY: number = 0;
     const unequipButtons: { x: number; y: number; slot: string; type: "weapon" | "armour" }[] = [];
-    const dropButtons: { x: number; y: number; itemIndex: number }[] = [];
-    const equipButtons: { x: number; y: number; itemIndex: number }[] = [];
+    const dropButtons: { x: number; y: number; itemId: number }[] = [];
+    const equipButtons: { x: number; y: number; itemId: number }[] = [];
     const pickUpButtons: { x: number; y: number; lootIndex: number }[] = [];
 
     export const handleMouseDownToConsole = (
@@ -113,14 +113,15 @@
             }
         });
 
-        equipButtons.forEach(({ x, y, itemIndex }) => {
+        equipButtons.forEach(({ x, y, itemId }) => {
             if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
-                console.log('clicked equip with index: ', itemIndex);
+                console.log('clicked equip with index (new): ', itemId);
                 const character = gameObject.characters[gameObject.clickedCharacterIndex];
                 if (character) {
                     // Find the actual item in inventory
-                    const itemToEquip = character.inventory[itemIndex];
-
+                    //const itemToEquip = character.inventory[itemId];
+                    const itemToEquip = character.inventory.find( i => i.id === itemId);
+                    console.log('item to equip: ', itemToEquip);
                     if (itemToEquip) {
                         let equipped = false; // Track if we successfully equipped
 
@@ -158,15 +159,16 @@
         });
 
         // Check for "Drop" button clicks
-        dropButtons.forEach(({ x, y, itemIndex }) => {
+        dropButtons.forEach(({ x, y, itemId }) => {
             if (clickX >= x && clickX <= x + smallButtonWidth && clickY >= y && clickY <= y + smallButtonHeight) {
-                console.log('clicked drop of index: ', itemIndex);
+                console.log('clicked drop of index: ', itemId);
                 const character = gameObject.characters[gameObject.clickedCharacterIndex];
                 if (character) {
                     // Ensure valid index
-                    if (itemIndex >= 0 && itemIndex < character.inventory.length) {
-                        const itemToDrop = character.inventory[itemIndex];
-
+                    if (itemId >= 0/* && itemId < character.inventory.length*/) {
+                        //const itemToDrop = character.inventory[itemId];
+                        const itemToDrop = character.inventory.find( i => i.id === itemId);
+                        console.log('dropping, item, itemId ', itemToDrop, itemId);
                         if (itemToDrop) {
                             // Drop only that item
                             gameObject.gameMap.loots.push({
@@ -229,9 +231,6 @@
         dropButtons.length = 0;
         equipButtons.length = 0;
         pickUpButtons.length = 0;
-        //let itemId: number = 0;
-
-        // give all items unique id
 
         gameObject.characters.forEach((c: Character, i: number) => {
             if (i === gameObject.clickedCharacterIndex) {
@@ -297,7 +296,7 @@
                     }
                 });
                 
-                Object.entries(inventoryGrouped).forEach(([name, { item, count }], index) => {
+                Object.entries(inventoryGrouped).forEach(([name, { item, count }], _index) => {
                     lines++;
                     ctx.fillText(`${name} x${count}`, marginLeft, marginTop + lines * fontSize);
                 
@@ -307,7 +306,7 @@
                     ctx.fillStyle = "black";
                     ctx.fillText("Drop", marginLeft + 210, marginTop + lines * fontSize);
                 
-                    dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemIndex: index });
+                    dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemId: item.id });
                 
                     // Equip button (if applicable)
                     if (item.type === "armour" || item.type === "weapon") {
@@ -315,36 +314,9 @@
                         ctx.fillRect(marginLeft + 290, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
                         ctx.fillStyle = "white";
                         ctx.fillText("Equip", marginLeft + 300, marginTop + lines * fontSize);
-                        equipButtons.push({ x: marginLeft + 290, y: marginTop + lines * fontSize - 10, itemIndex: index });
+                        equipButtons.push({ x: marginLeft + 290, y: marginTop + lines * fontSize - 10, itemId: item.id });
                     }
                 });
-                
-/*
-                c.inventory.forEach((item: Armour | Weapon | Item, index: number) => {
-                    lines++;
-                    ctx.fillText(`${item.name}`, marginLeft, marginTop + lines * fontSize);
-
-                    // Draw Drop button
-                    ctx.fillStyle = "yellow";
-                    ctx.fillRect(marginLeft + 200, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
-                    ctx.fillStyle = "black";
-                    ctx.fillText("Drop", marginLeft + 210, marginTop + lines * fontSize);
-
-                    // Draw Equip button
-                    if (item.type === 'armour' || item.type === 'weapon') {
-                        ctx.fillStyle = "green";
-                        ctx.fillRect(marginLeft + 290, marginTop + lines * fontSize - 10, smallButtonWidth, smallButtonHeight);
-                        ctx.fillStyle = "white";
-                        ctx.fillText("Equip", marginLeft + 300, marginTop + lines * fontSize);
-                        // store equip button positions
-                        equipButtons.push({ x: marginLeft + 290, y: marginTop + lines * fontSize - 10, itemIndex: index });
-                    }
-
-                    // Store drop button positions
-                    dropButtons.push({ x: marginLeft + 200, y: marginTop + lines * fontSize - 10, itemIndex: index });
-                    
-                });
-*/
 
                 // ground
                 lines++;
