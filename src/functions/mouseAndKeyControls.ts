@@ -116,6 +116,9 @@ export const handleMouseDown = (
                         // if selected action is attack
                         if (c.action == 'attack') {
                             c.actionTarget = gameObject.characters[gameObject.clickedCharacterIndex].id;
+                            // add target and his team of the target to your enemies list:
+                            c.enemies.push(gameObject.characters[gameObject.clickedCharacterIndex].id);
+                            c.enemies.push(gameObject.characters[gameObject.clickedCharacterIndex].team);
                         }
                     }
                 });
