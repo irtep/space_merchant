@@ -2,6 +2,7 @@ import { Item } from "../interfaces/sharedInterfaces";
 
 export const items: Item[] = [
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'gold coin',
         shortName: 'gold coin',
         type: 'money',
@@ -11,6 +12,7 @@ export const items: Item[] = [
         rarity: 'common'
     },
     {
+        id: 0, // can default all to 0. real id will get generated
         name: 'arrow',
         shortName: 'arrow',
         type: 'ammunition',
