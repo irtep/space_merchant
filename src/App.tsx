@@ -1,5 +1,5 @@
 import Menu from './components/Menu.tsx';
-import PlayScreen from './components/PlayScreen.tsx';
+import PlayScreenV2 from './components/PlayScreenV2.tsx';
 import { useSMContext } from './context/smContext.tsx';
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
         }
         {
           (view === 'play') 
-          ? <PlayScreen/>
+          ? <PlayScreenV2/>
           : <></>
         }
         {
