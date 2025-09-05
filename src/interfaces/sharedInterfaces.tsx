@@ -32,6 +32,14 @@ export interface Coordinates {
     z?: number;
 };
 
+export interface ItemLocation {
+    onGround: boolean;
+    onHoldOfCharacter: boolean;
+    location?: Coordinates;
+    charactersId?: string;
+    tradeable: boolean;
+}
+
 export interface Item {
     id: number;
     name: string;
@@ -41,6 +49,7 @@ export interface Item {
     value: number;
     weight: number;
     rarity: string;
+    location?: ItemLocation;
 };
 
 export interface StatMod {
@@ -60,6 +69,7 @@ export interface Armour {
     stats: StatMod[];
     rarity: string;
     effects: string[];
+    location?: ItemLocation;
 };
 
 export interface DamageTypes {
@@ -90,6 +100,7 @@ export interface Weapon {
     coolDownCounter: number;
     rarity: string;
     armourPiercing: number;
+    location?: ItemLocation;
 };
 
 export interface Armours {
