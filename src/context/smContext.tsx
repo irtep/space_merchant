@@ -4,8 +4,8 @@ import { GameObject } from '../interfaces/sharedInterfaces';
 import { jyvaskylaTown } from '../data/maps';
 
 interface SMContextType {
-    view: 'menu' | 'play' | 'after';
-    setView: React.Dispatch<React.SetStateAction<'menu' | 'play' | 'after'>>;
+    view: 'menu' | 'play' | 'after' | 'play1' | 'play2' | 'play3';
+    setView: React.Dispatch<React.SetStateAction<'menu' | 'play' | 'after' | 'play1' | 'play2' | 'play3'>>;
     gameObject: GameObject;
     setGameObject: React.Dispatch<React.SetStateAction<GameObject>>;
     charIsSelected: boolean;
@@ -23,14 +23,15 @@ interface Props {
 };
 
 export const SMProvider: FC<Props> = ({ children }): ReactElement => {
-    const [view, setView] = useState<'menu' | 'play' | 'after'>('menu');
+    const [view, setView] = useState<'menu' | 'play' | 'after' | 'play1' | 'play2' | 'play3'>('menu');
     const [gameObject, setGameObject] = useState<GameObject>({
         characters: [],
         mouseNowX: 0,
         mouseNowY: 0,
         gameMap: jyvaskylaTown,
         clickedCharacterIndex: 0,
-        updateCounter: 0
+        updateCounter: 0,
+        hits: []
     });
     const [charIsSelected, setCharIsSelected] = useState<boolean>(false);
     const [indexOfSelected, setIndexOfSelected] = useState<number>(0);

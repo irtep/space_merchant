@@ -118,10 +118,11 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
     };
 
     // Function to merge skills and abilities (avoids duplicates)
+    /*
     const mergeArrays = <T,>(raceArray: T[] = [], professionArray: T[] = []): T[] => {
         return Array.from(new Set([...raceArray, ...professionArray])); // Ensures no duplicates
     };
-
+    */
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInitialCharacter({
             ...initialCharacter, // Spread current character properties
@@ -305,20 +306,50 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
 
                         {/* Start Button */}
                         {initialCharacter.name && initialCharacter.race && initialCharacter.profession ? (
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => {
-                                    console.log('clicked to preBattle');
-                                    setGameObject({
-                                        ...gameObject,
-                                        characters: [initialCharacter]
-                                    });
-                                    setView('play');
-                                }}
-                            >
-                                Start the Adventure
-                            </Button>
+                            <>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => {
+                                        console.log('clicked to preBattle');
+                                        setGameObject({
+                                            ...gameObject,
+                                            characters: [initialCharacter]
+                                        });
+                                        setView('play1');
+                                    }}
+                                >
+                                    Start the Adventure
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => {
+                                        console.log('clicked to preBattle');
+                                        setGameObject({
+                                            ...gameObject,
+                                            characters: [initialCharacter]
+                                        });
+                                        setView('play2');
+                                    }}
+                                >
+                                    Start the Adventure
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => {
+                                        console.log('clicked to preBattle');
+                                        setGameObject({
+                                            ...gameObject,
+                                            characters: [initialCharacter]
+                                        });
+                                        setView('play3');
+                                    }}
+                                >
+                                    Start the Adventure
+                                </Button>
+                            </>
                         ) : (
                             <Typography variant="body1" color="textSecondary">
                                 Create your character to play.
