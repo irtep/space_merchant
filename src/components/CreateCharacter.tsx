@@ -28,7 +28,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
             coldResistance: 0,
             psionicResistance: 0
         },
-        location: { x: 50, y: 50 },
+        location: { x: 2, y: 2 },
         world: 'Earth',
         zone: 'Sector 1',
         hitPoints: 100,
@@ -62,6 +62,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         selected: false,
         abilities: [],
         skills: [],
+        path: []
     });
     const {
         gameObject, setGameObject,

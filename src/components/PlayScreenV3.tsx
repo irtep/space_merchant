@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Grid, AStarFinder } from "pathfinding";
 import { Box, Container } from "@mui/material";
-
+import { useSMContext } from "../context/smContext";
+import { GameObject } from "../interfaces/sharedInterfaces";
+import { Character } from "../interfaces/sharedInterfaces";
+/*
 interface Character {
     id: number;
     x: number;
@@ -12,7 +15,7 @@ interface Character {
     //path: [number, number][];
     path: number[][];
 }
-
+*/
 interface Projectile {
     x: number;
     y: number;
@@ -24,8 +27,8 @@ interface Projectile {
 }
 
 const CELL_SIZE = 20;
-const GRID_WIDTH = 50;
-const GRID_HEIGHT = 20;
+const GRID_WIDTH = 60;
+const GRID_HEIGHT = 40;
 
 const BUILDINGS = [
     { x: 5, y: 5, w: 4, h: 4 },
@@ -36,12 +39,22 @@ const BUILDINGS = [
 const DEBUG_MODE = true;
 
 const PlayScreenV3: React.FC = () => {
+    const {
+        gameObject,
+        setGameObject,
+        //      dialogOpen,
+        //      setDialogOpen
+        //indexOfSelected,
+        //setIndexOfSelected
+    } = useSMContext();
+    /*
     const [characters, setCharacters] = useState<Character[]>([
         { id: 1, x: 2, y: 2, destX: 2, destY: 2, color: "red", path: [] },
         { id: 2, x: 10, y: 2, destX: 10, destY: 2, color: "blue", path: [] },
         { id: 3, x: 2, y: 10, destX: 2, destY: 10, color: "green", path: [] },
     ]);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+    */
+    const [selectedId, setSelectedId] = useState<string | null>(null);
     const [opponent, setOpponent] = useState<{ x: number; y: number }>({ x: 20, y: 15 });
     const [projectiles, setProjectiles] = useState<Projectile[]>([]);
     const [projectileType, setProjectileType] = useState<'laser' | 'energy' | 'bullet'>('energy');
@@ -49,8 +62,10 @@ const PlayScreenV3: React.FC = () => {
     const pauseRef: React.RefObject<boolean> = useRef<boolean>(paused); // UseRef to store latest pause state
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const buildGrid = (excludeId?: number) => {
+    const buildGrid = (excludeId?: string) => {
         const grid = new Grid(GRID_WIDTH, GRID_HEIGHT);
+
+        /*
         BUILDINGS.forEach(b => {
             for (let i = 0; i < b.w; i++) {
                 for (let j = 0; j < b.h; j++) {
@@ -58,19 +73,36 @@ const PlayScreenV3: React.FC = () => {
                 }
             }
         });
-        // mark other characters as obstacles
-        characters.forEach(c => {
+        */
+        gameObject.gameMap.rectObstacles.forEach(b => {
+            for (let i = 0; i < b.w; i++) {
+                for (let j = 0; j < b.h; j++) {
+                    grid.setWalkableAt(b.x + i, b.y + j, false);
+                }
+            }
+        });
+
+        /*
+         // mark other characters as obstacles
+         characters.forEach(c => {
+             if (c.id !== excludeId) {
+                 const cx = Math.round(c.x);
+                 const cy = Math.round(c.y);
+                 grid.setWalkableAt(cx, cy, false);
+             }
+         });
+         // mark opponent as obstacle
+         const ox = Math.round(opponent.x);
+         const oy = Math.round(opponent.y);
+         grid.setWalkableAt(ox, oy, false);
+         */
+        gameObject.characters.forEach(c => {
             if (c.id !== excludeId) {
-                const cx = Math.round(c.x);
-                const cy = Math.round(c.y);
+                const cx = Math.round(c.location.x);
+                const cy = Math.round(c.location.y);
                 grid.setWalkableAt(cx, cy, false);
             }
         });
-        // mark opponent as obstacle
-        const ox = Math.round(opponent.x);
-        const oy = Math.round(opponent.y);
-        grid.setWalkableAt(ox, oy, false);
-
         return grid;
     };
 
@@ -80,9 +112,12 @@ const PlayScreenV3: React.FC = () => {
         const clickY = Math.floor((e.clientY - rect.top) / CELL_SIZE);
 
         // check if clicked inside any character
+        /*
         const clickedChar = characters.find(c => {
-            const cx = c.x * CELL_SIZE + CELL_SIZE / 2;
-            const cy = c.y * CELL_SIZE + CELL_SIZE / 2;
+        */
+        const clickedChar = gameObject.characters.find(c => {
+            const cx = c.location.x * CELL_SIZE + CELL_SIZE / 2;
+            const cy = c.location.y * CELL_SIZE + CELL_SIZE / 2;
             const dist = Math.hypot(
                 e.clientX - rect.left - cx,
                 e.clientY - rect.top - cy
@@ -105,6 +140,23 @@ const PlayScreenV3: React.FC = () => {
             dontCrossCorners: true, // optional: prevents cutting through corners of buildings
         });
 
+        setGameObject(gob => ({
+            ...gob,
+            characters: gob.characters.map((c: Character) => {
+                if (c.id === selectedId) {
+                    const path = finder.findPath(
+                        Math.round(c.location.x),
+                        Math.round(c.location.y),
+                        clickX,
+                        clickY,
+                        grid.clone()
+                    );
+                    return { ...c, targetLocation: { x: clickX, y: clickY }, path };
+                }
+                return c;
+            }),
+        }));
+        /*
         setCharacters(chars =>
             chars.map(c => {
                 if (c.id === selectedId) {
@@ -120,16 +172,17 @@ const PlayScreenV3: React.FC = () => {
                 return c;
             })
         );
+        */
     };
 
 
     const shoot = () => {
         if (!selectedId) return;
-        const shooter = characters.find(c => c.id === selectedId);
+        const shooter = gameObject.characters.find(c => c.id === selectedId);
         if (!shooter) return;
 
-        const startX = shooter.x * CELL_SIZE + CELL_SIZE / 2;
-        const startY = shooter.y * CELL_SIZE + CELL_SIZE / 2;
+        const startX = shooter.location.x * CELL_SIZE + CELL_SIZE / 2;
+        const startY = shooter.location.y * CELL_SIZE + CELL_SIZE / 2;
         const targetX = opponent.x * CELL_SIZE + CELL_SIZE / 2;
         const targetY = opponent.y * CELL_SIZE + CELL_SIZE / 2;
 
@@ -143,7 +196,7 @@ const PlayScreenV3: React.FC = () => {
             const cx = startX + (dx * i) / (dist / 5);
             const cy = startY + (dy * i) / (dist / 5);
 
-            for (const b of BUILDINGS) {
+            for (const b of gameObject.gameMap.rectObstacles/*BUILDINGS*/) {
                 if (
                     cx >= b.x * CELL_SIZE &&
                     cx <= (b.x + b.w) * CELL_SIZE &&
@@ -156,10 +209,10 @@ const PlayScreenV3: React.FC = () => {
                 }
             }
 
-            for (const c of characters) {
+            for (const c of gameObject.characters) {
                 if (c.id === selectedId) continue; // don't block self
-                const ccx = c.x * CELL_SIZE + CELL_SIZE / 2;
-                const ccy = c.y * CELL_SIZE + CELL_SIZE / 2;
+                const ccx = c.location.x * CELL_SIZE + CELL_SIZE / 2;
+                const ccy = c.location.y * CELL_SIZE + CELL_SIZE / 2;
                 if (Math.hypot(cx - ccx, cy - ccy) < CELL_SIZE / 2) {
                     blocked = true;
                     if (DEBUG_MODE) console.log("Shot blocked by teammate", c.id);
@@ -189,37 +242,48 @@ const PlayScreenV3: React.FC = () => {
 
         const step = () => {
             if (!pauseRef.current) {
-                setCharacters(chars =>
-                    chars.map(c => {
-                        if (c.path.length > 0) {
+                // Update characters
+                setGameObject(prev => ({
+                    ...prev,
+                    characters: prev.characters.map(c => {
+                        if (c.path && c.path.length > 0) {
                             const [nextX, nextY] = c.path[0];
                             const targetX = nextX * CELL_SIZE + CELL_SIZE / 2;
                             const targetY = nextY * CELL_SIZE + CELL_SIZE / 2;
 
-                            const currentX = c.x * CELL_SIZE + CELL_SIZE / 2;
-                            const currentY = c.y * CELL_SIZE + CELL_SIZE / 2;
+                            const currentX = c.location.x * CELL_SIZE + CELL_SIZE / 2;
+                            const currentY = c.location.y * CELL_SIZE + CELL_SIZE / 2;
 
                             const dx = targetX - currentX;
                             const dy = targetY - currentY;
                             const dist = Math.sqrt(dx * dx + dy * dy);
-                            const speed = 2;
+                            const speed = 0.3; // your requested walking speed
 
                             if (dist < speed) {
-                                return { ...c, x: nextX, y: nextY, path: c.path.slice(1) };
+                                // Snap to grid cell and consume first step
+                                return {
+                                    ...c,
+                                    location: { x: nextX, y: nextY },
+                                    path: c.path.slice(1),
+                                };
                             } else {
+                                // Move smoothly toward target
                                 const moveX = currentX + (dx / dist) * speed;
                                 const moveY = currentY + (dy / dist) * speed;
                                 return {
                                     ...c,
-                                    x: moveX / CELL_SIZE - 0.5,
-                                    y: moveY / CELL_SIZE - 0.5,
+                                    location: {
+                                        x: moveX / CELL_SIZE - 0.5,
+                                        y: moveY / CELL_SIZE - 0.5,
+                                    },
                                 };
                             }
                         }
                         return c;
-                    })
-                );
+                    }),
+                }));
 
+                // Update projectiles (if you still keep them separate)
                 setProjectiles(prev =>
                     prev
                         .map(p => {
@@ -230,6 +294,7 @@ const PlayScreenV3: React.FC = () => {
 
                             const newTrail = [...p.trail, { x: nx, y: ny, alpha: 1 }].slice(-15);
 
+                            // Opponent still as-is for now
                             const ox = opponent.x * CELL_SIZE + CELL_SIZE / 2;
                             const oy = opponent.y * CELL_SIZE + CELL_SIZE / 2;
                             if (Math.hypot(nx - ox, ny - oy) < CELL_SIZE / 2) {
@@ -238,7 +303,12 @@ const PlayScreenV3: React.FC = () => {
                             }
 
                             for (const b of BUILDINGS) {
-                                if (nx >= b.x * CELL_SIZE && nx <= (b.x + b.w) * CELL_SIZE && ny >= b.y * CELL_SIZE && ny <= (b.y + b.h) * CELL_SIZE) {
+                                if (
+                                    nx >= b.x * CELL_SIZE &&
+                                    nx <= (b.x + b.w) * CELL_SIZE &&
+                                    ny >= b.y * CELL_SIZE &&
+                                    ny <= (b.y + b.h) * CELL_SIZE
+                                ) {
                                     if (DEBUG_MODE) console.log("Projectile collided with building");
                                     return { ...p, active: false };
                                 }
@@ -248,13 +318,17 @@ const PlayScreenV3: React.FC = () => {
                         })
                         .filter(p => p.active)
                 );
-            } else { console.log('pause'); }
+            } else {
+                console.log("pause");
+            }
+
             animationFrame = requestAnimationFrame(step);
         };
 
         animationFrame = requestAnimationFrame(step);
         return () => cancelAnimationFrame(animationFrame);
     }, [opponent]);
+
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -300,15 +374,19 @@ const PlayScreenV3: React.FC = () => {
 
         // buildings
         ctx.fillStyle = "gray";
-        BUILDINGS.forEach(b => {
+
+        gameObject.gameMap.rectObstacles.forEach(b => {
+        //BUILDINGS.forEach(b => {
+            console.log('building: ', b.x * CELL_SIZE, b.y * CELL_SIZE, b.w * CELL_SIZE, b.h * CELL_SIZE);
             ctx.fillRect(b.x * CELL_SIZE, b.y * CELL_SIZE, b.w * CELL_SIZE, b.h * CELL_SIZE);
         });
 
         // characters
-        characters.forEach(c => {
+        gameObject.characters.forEach(c => {
             ctx.beginPath();
-            ctx.arc(c.x * CELL_SIZE + CELL_SIZE / 2, c.y * CELL_SIZE + CELL_SIZE / 2, CELL_SIZE / 2 - 2, 0, Math.PI * 2);
-            ctx.fillStyle = c.color;
+            console.log('character: ', c.location.x * CELL_SIZE + CELL_SIZE / 2, c.location.y * CELL_SIZE + CELL_SIZE / 2, CELL_SIZE / 2 - 2, 0, Math.PI * 2);
+            ctx.arc(c.location.x * CELL_SIZE + CELL_SIZE / 2, c.location.y * CELL_SIZE + CELL_SIZE / 2, CELL_SIZE / 2 - 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'green';
             ctx.fill();
             if (c.id === selectedId) {
                 ctx.lineWidth = 3;
@@ -355,11 +433,15 @@ const PlayScreenV3: React.FC = () => {
                     break;
             }
         });
-    }, [characters, selectedId, opponent, projectiles]);
+    }, [gameObject, selectedId, opponent, projectiles]);
 
     useEffect(() => {
         pauseRef.current = paused;
     }, [paused]);
+
+    useEffect( () => {
+        console.log('game Ob', gameObject);
+    }, []);
 
     return (
         <Container maxWidth="lg">
@@ -407,7 +489,7 @@ const PlayScreenV3: React.FC = () => {
                     >
                         <h2 className="text-lg font-semibold">Controls</h2>
 
-                        {characters.map(c => (
+                        {gameObject.characters.map(c => (
                             <button
                                 key={c.id}
                                 onClick={() => setSelectedId(c.id)}

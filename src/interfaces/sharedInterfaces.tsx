@@ -150,6 +150,7 @@ export interface Character {
     desc?: string;
     abilities: Ability[];
     skills: Skill[];
+    path: number[][];
 };
 
 export interface Loot {

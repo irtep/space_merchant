@@ -24,8 +24,8 @@ interface Projectile {
 }
 
 const CELL_SIZE = 20;
-const GRID_WIDTH = 50;
-const GRID_HEIGHT = 20;
+const GRID_WIDTH = 60;
+const GRID_HEIGHT = 40;
 
 const BUILDINGS = [
     { x: 5, y: 5, w: 4, h: 4 },
@@ -45,6 +45,8 @@ const PlayScreenV2: React.FC = () => {
     const [opponent, setOpponent] = useState<{ x: number; y: number }>({ x: 20, y: 15 });
     const [projectiles, setProjectiles] = useState<Projectile[]>([]);
     const [projectileType, setProjectileType] = useState<'laser' | 'energy' | 'bullet'>('energy');
+    const [paused, setPaused] = useState(false);
+    const pauseRef: React.RefObject<boolean> = useRef<boolean>(paused); // UseRef to store latest pause state
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const buildGrid = (excludeId?: number) => {
@@ -186,72 +188,84 @@ const PlayScreenV2: React.FC = () => {
         let animationFrame: number;
 
         const step = () => {
-            setCharacters(chars =>
-                chars.map(c => {
-                    if (c.path.length > 0) {
-                        const [nextX, nextY] = c.path[0];
-                        const targetX = nextX * CELL_SIZE + CELL_SIZE / 2;
-                        const targetY = nextY * CELL_SIZE + CELL_SIZE / 2;
+            if (!pauseRef.current) {
+                setCharacters(chars =>
+                    chars.map(c => {
+                        if (c.path.length > 0) {
+                            const [nextX, nextY] = c.path[0];
+                            const targetX = nextX * CELL_SIZE + CELL_SIZE / 2;
+                            const targetY = nextY * CELL_SIZE + CELL_SIZE / 2;
 
-                        const currentX = c.x * CELL_SIZE + CELL_SIZE / 2;
-                        const currentY = c.y * CELL_SIZE + CELL_SIZE / 2;
+                            const currentX = c.x * CELL_SIZE + CELL_SIZE / 2;
+                            const currentY = c.y * CELL_SIZE + CELL_SIZE / 2;
 
-                        const dx = targetX - currentX;
-                        const dy = targetY - currentY;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        const speed = 2;
+                            const dx = targetX - currentX;
+                            const dy = targetY - currentY;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            const speed = 2;
 
-                        if (dist < speed) {
-                            return { ...c, x: nextX, y: nextY, path: c.path.slice(1) };
-                        } else {
-                            const moveX = currentX + (dx / dist) * speed;
-                            const moveY = currentY + (dy / dist) * speed;
-                            return {
-                                ...c,
-                                x: moveX / CELL_SIZE - 0.5,
-                                y: moveY / CELL_SIZE - 0.5,
-                            };
-                        }
-                    }
-                    return c;
-                })
-            );
-
-            setProjectiles(prev =>
-                prev
-                    .map(p => {
-                        if (!p.active) return p;
-                        const speed = 5;
-                        const nx = p.x + p.dx * speed;
-                        const ny = p.y + p.dy * speed;
-
-                        const newTrail = [...p.trail, { x: nx, y: ny, alpha: 1 }].slice(-15);
-
-                        const ox = opponent.x * CELL_SIZE + CELL_SIZE / 2;
-                        const oy = opponent.y * CELL_SIZE + CELL_SIZE / 2;
-                        if (Math.hypot(nx - ox, ny - oy) < CELL_SIZE / 2) {
-                            if (DEBUG_MODE) console.log("Projectile hit opponent!");
-                            return { ...p, active: false };
-                        }
-
-                        for (const b of BUILDINGS) {
-                            if (nx >= b.x * CELL_SIZE && nx <= (b.x + b.w) * CELL_SIZE && ny >= b.y * CELL_SIZE && ny <= (b.y + b.h) * CELL_SIZE) {
-                                if (DEBUG_MODE) console.log("Projectile collided with building");
-                                return { ...p, active: false };
+                            if (dist < speed) {
+                                return { ...c, x: nextX, y: nextY, path: c.path.slice(1) };
+                            } else {
+                                const moveX = currentX + (dx / dist) * speed;
+                                const moveY = currentY + (dy / dist) * speed;
+                                return {
+                                    ...c,
+                                    x: moveX / CELL_SIZE - 0.5,
+                                    y: moveY / CELL_SIZE - 0.5,
+                                };
                             }
                         }
-
-                        return { ...p, x: nx, y: ny, trail: newTrail };
+                        return c;
                     })
-                    .filter(p => p.active)
-            );
+                );
 
+                setProjectiles(prev =>
+                    prev
+                        .map(p => {
+                            if (!p.active) return p;
+                            const speed = 5;
+                            const nx = p.x + p.dx * speed;
+                            const ny = p.y + p.dy * speed;
+
+                            const newTrail = [...p.trail, { x: nx, y: ny, alpha: 1 }].slice(-15);
+
+                            const ox = opponent.x * CELL_SIZE + CELL_SIZE / 2;
+                            const oy = opponent.y * CELL_SIZE + CELL_SIZE / 2;
+                            if (Math.hypot(nx - ox, ny - oy) < CELL_SIZE / 2) {
+                                if (DEBUG_MODE) console.log("Projectile hit opponent!");
+                                return { ...p, active: false };
+                            }
+
+                            for (const b of BUILDINGS) {
+                                if (nx >= b.x * CELL_SIZE && nx <= (b.x + b.w) * CELL_SIZE && ny >= b.y * CELL_SIZE && ny <= (b.y + b.h) * CELL_SIZE) {
+                                    if (DEBUG_MODE) console.log("Projectile collided with building");
+                                    return { ...p, active: false };
+                                }
+                            }
+
+                            return { ...p, x: nx, y: ny, trail: newTrail };
+                        })
+                        .filter(p => p.active)
+                );
+            } else { console.log('pause'); }
             animationFrame = requestAnimationFrame(step);
         };
 
         animationFrame = requestAnimationFrame(step);
         return () => cancelAnimationFrame(animationFrame);
     }, [opponent]);
+
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.code === "Space") {
+                setPaused(p => !p);
+            }
+        };
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, []);
+
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -343,6 +357,10 @@ const PlayScreenV2: React.FC = () => {
         });
     }, [characters, selectedId, opponent, projectiles]);
 
+    useEffect(() => {
+        pauseRef.current = paused;
+    }, [paused]);
+
     return (
         <Container maxWidth="lg">
             <Box sx={{
@@ -414,6 +432,12 @@ const PlayScreenV2: React.FC = () => {
                                 Shoot Opponent
                             </button>
                         )}
+                        <button
+                            onClick={() => setPaused(p => !p)}
+                            className="p-2 mt-4 bg-blue-300 rounded border"
+                        >
+                            {paused ? "Resume" : "Pause"}
+                        </button>
                         {DEBUG_MODE && (
                             <div className="mt-4 p-2 text-sm bg-gray-100 border">
                                 <p>✅ Debug mode ON</p>
