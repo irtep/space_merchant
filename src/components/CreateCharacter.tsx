@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { races } from '../data/races.ts';
 import { Ability, Character, Profession, Race, Skill, Stats } from '../interfaces/sharedInterfaces.tsx';
 import { professions } from '../data/professions.ts';
+import { npcs } from '../data/npcs.ts';
 
 const CreateCharacter: React.FC = (): React.ReactElement => {
     const [initialCharacter, setInitialCharacter] = useState<Character>({
@@ -343,7 +344,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                                         console.log('clicked to preBattle');
                                         setGameObject({
                                             ...gameObject,
-                                            characters: [initialCharacter]
+                                            characters: [initialCharacter, ...npcs]
                                         });
                                         setView('play3');
                                     }}

@@ -57,6 +57,7 @@ export const defaultCharacter: Character = {
     selected: false,
     abilities: [],
     skills: [],
+    path: []
 };
 
 const clonedDefaultChar: Character = JSON.parse(JSON.stringify(defaultCharacter));
@@ -232,7 +233,8 @@ export const npcs: Character[] = [
                 desc: 'General skill for close combat.'
             }
         ],
-        abilities: []
+        abilities: [],
+        path: []
     },
     {
         ...clonedDefaultChar,
@@ -354,6 +356,7 @@ export const npcs: Character[] = [
                 desc: 'General skill for close combat.'
             }
         ],
-        abilities: []
+        abilities: [],
+        path: []
     },
 ];

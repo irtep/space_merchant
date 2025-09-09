@@ -4,11 +4,11 @@ import { weapons } from "./weapons";
 
 export const jyvaskylaTown: GameMap = {
     rectObstacles: [
-        { x: 22, y: 15, w: 21, h: 24, color: 'black', door: { x: 30, y: 15 }, name: 'The Sturdy Oak Tavern' },
-        { x: 7, y: 30, w: 19, h: 23, color: 'black', door: { x: 14, y: 30 }, name: 'Blacksmith’s Forge' },
-        { x: 50, y: 80, w: 26, h: 30, color: 'black', door: { x: 65, y: 8 }, name: 'The Great Hall of Jyvaskyla' },
-        { x: 3, y: 50, w: 30, h: 15, color: 'black', door: { x: 4, y: 50 }, name: 'Harbor Warehouse' },
-        { x: 38, y: 48, w: 22, h: 18, color: 'black', door: { x: 45, y: 48 }, name: 'Market Hall' }
+        { x: 22, y: 15, w: 2, h: 2, color: 'black', door: { x: 30, y: 15 }, name: 'The Sturdy Oak Tavern' },
+        { x: 7, y: 30, w: 1, h: 2, color: 'black', door: { x: 14, y: 30 }, name: 'Blacksmith’s Forge' },
+        { x: 17, y: 16, w: 2, h: 3, color: 'black', door: { x: 65, y: 8 }, name: 'The Great Hall of Jyvaskyla' },
+        { x: 3, y: 16, w: 3, h: 1, color: 'black', door: { x: 4, y: 50 }, name: 'Harbor Warehouse' },
+        { x: 20, y: 11, w: 2, h: 1, color: 'black', door: { x: 45, y: 48 }, name: 'Market Hall' }
     ],
     circleObstacles: [
         { x: 600, y: 360, size: 90, color: 'black', name: 'Stone Watchtower' }
