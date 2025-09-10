@@ -292,9 +292,12 @@ const PlayScreenV3: React.FC = () => {
                             <div>
                                 <h4>Equipment:</h4>
                                 {Object.entries(hoverChar.equipment).map(([slot, itemId]) => {
-                                    const item = itemId ? getItem(itemId, gameObject.gameMap.loots) : null;
+                                    const item = itemId ? getItem(itemId, itemStore) : null;
                                     return (
-                                        <div key={slot}>
+                                        <div
+                                            key={slot}
+                                            style={{ borderStyle: "solid" }}
+                                        >
                                             {slot}: {item ? item.name : "empty"}
                                             {hoverChar.team === gameObject.characters[0].team && item && (
                                                 <button onClick={() => handleUnequip(slot as keyof Character['equipment'])} style={{ marginLeft: 5 }}>Unequip</button>
@@ -309,7 +312,10 @@ const PlayScreenV3: React.FC = () => {
                                     const item = getItem(invItem.itemId, itemStore);
                                     if (!item) return null;
                                     return (
-                                        <div key={`invOfPl-${invItem.itemId}-${index}`}>
+                                        <div
+                                            key={`invOfPl-${invItem.itemId}-${index}`}
+                                            style={{ borderStyle: "solid" }}
+                                        >
                                             {item.name}
                                             {hoverChar.team === gameObject.characters[0].team && (
                                                 <div style={{ display: 'inline-block', marginLeft: 5 }}>
