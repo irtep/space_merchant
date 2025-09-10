@@ -1,3 +1,107 @@
+// ====== Base Items ======
+export interface ItemBase {
+    id: string;
+    name: string;
+    shortName: string;
+    desc: string;
+    type: "weapon" | "armour" | "item" | "money" | "ammunition";
+    value: number;
+    weight: number;
+    rarity: string;
+    stackable: boolean; // always present now
+}
+
+export interface Weapon extends ItemBase {
+    type: "weapon";
+    handlingSkill: string;
+    range: number;
+    rangedWeapon: boolean;
+    slotsNeeded: number;
+    stats: StatMod[];
+    combatSpeed: number;
+    effects: string[];
+    damage: DamageTypes;
+    coolDownCounter: number;
+    armourPiercing: number;
+    ammunition?: string; // ID of ammo type
+}
+
+export interface Armour extends ItemBase {
+    type: "armour";
+    slot: "head" | "neck" | "upperBody" | "legs" | "hands" | "feet";
+    stats: StatMod[];
+    effects: string[];
+}
+
+export interface Item extends ItemBase {
+    type: "item" | "money" | "ammunition";
+}
+
+
+// ====== Shared Item Store ======
+export type AnyItem = Weapon | Armour | Item;
+
+export interface ItemStore {
+    [id: string]: AnyItem;
+}
+
+export interface Character {
+    id: string;
+    title: string;
+    name: string;
+    race: string;
+    profession: string;
+    team: string;
+    stats: Stats;
+    location: Coordinates;
+    world: string;
+    zone: string;
+
+    hitPoints: number;
+    maxHitPoints: number;
+    magicPoints: number;
+    endurancePoints: number;
+
+    // Equipped items store IDs, not full objects
+    equipment: {
+        head?: string;
+        neck?: string;
+        upperBody?: string;
+        legs?: string;
+        hands?: string;
+        feet?: string;
+        leftHand?: string;
+        rightHand?: string;
+    };
+
+    // Inventory is just a list of item IDs
+    inventory: InventoryEntry[];
+
+    // Character meta
+    npc: boolean;
+    aggressive: boolean;
+    status: string[];
+    active: boolean;
+    enemies: string[];
+    friends: string[];
+    canTalk: boolean;
+    action: string;
+    actionTarget: string;
+    targetLocation: Coordinates;
+    isPlayer: boolean;
+    selected: boolean;
+    desc?: string;
+    abilities: Ability[];
+    skills: Skill[];
+    path: number[][];
+}
+
+// Inventory entries always store quantity
+export interface InventoryEntry {
+    itemId: string;   // reference to ItemStore
+    quantity: number; // >= 1
+}
+
 export interface Ability {
     name: string;
     desc: string;
@@ -40,36 +144,9 @@ export interface ItemLocation {
     tradeable: boolean;
 }
 
-export interface Item {
-    id: number;
-    name: string;
-    shortName: string;
-    type: 'item' | 'money' | 'ammunition';
-    desc: string;
-    value: number;
-    weight: number;
-    rarity: string;
-    location?: ItemLocation;
-};
-
 export interface StatMod {
     stat: string;
     value: number;
-};
-
-export interface Armour {
-    id: number;
-    name: string;
-    shortName: string;
-    desc: string;
-    type: 'armour';
-    slot: string;
-    value: number;
-    weight: number;
-    stats: StatMod[];
-    rarity: string;
-    effects: string[];
-    location?: ItemLocation;
 };
 
 export interface DamageTypes {
@@ -79,84 +156,6 @@ export interface DamageTypes {
     poison?: number;
     cold?: number;
     psionic?: number;
-};
-
-export interface Weapon {
-    id: number;
-    name: string;
-    shortName: string;
-    desc: string;
-    type: 'weapon';
-    handlingSkill: string;
-    range: number;
-    rangedWeapon: boolean;
-    slotsNeeded: number;
-    value: number;
-    weight: number;
-    stats: StatMod[];
-    combatSpeed: number;
-    effects: string[];
-    damage: DamageTypes;
-    coolDownCounter: number;
-    rarity: string;
-    armourPiercing: number;
-    location?: ItemLocation;
-};
-
-export interface Armours {
-    head: Armour | '';
-    neck: Armour | '';
-    upperBody: Armour | '';
-    legs: Armour | '';
-    hands: Armour | '';
-    feet: Armour | '';
-}
-
-export interface Weapons {
-    leftHand: Weapon | '';
-    rightHand: Weapon | '';
-};
-
-export interface Character {
-    id: string;
-    title: string;
-    name: string;
-    race: string;
-    profession: string;
-    team: string;
-    stats: Stats;
-    location: Coordinates;
-    world: string;
-    zone: string;
-    hitPoints: number;
-    maxHitPoints: number;
-    magicPoints: number;
-    endurancePoints: number;
-    armours: Armours;
-    weapons: Weapons;
-    npc: boolean;
-    aggressive: boolean;
-    status: string[];
-    active: boolean;
-    enemies: string[];
-    friends: string[];
-    canTalk: boolean;
-    action: string;
-    actionTarget: string;
-    targetLocation: Coordinates;
-    inventory: (Weapon | Armour | Item)[];
-    isPlayer: boolean;
-    selected: boolean;
-    desc?: string;
-    abilities: Ability[];
-    skills: Skill[];
-    path: number[][];
-};
-
-export interface Loot {
-    x: number;
-    y: number;
-    what: Weapon | Armour | Item
 };
 
 export interface RectObstacle {
@@ -181,7 +180,7 @@ export interface CircleObstacle {
 export interface GameMap {
     rectObstacles: RectObstacle[];
     circleObstacles: CircleObstacle[];
-    loots: Loot[];
+    loots: any;
 };
 
 export interface Hit {
@@ -231,72 +230,3 @@ export interface Profession {
 export interface Background {
     name: string;
 };
-
-/*
-export class Character {
-    title: string;
-    name: string;
-    race: string;
-    profession: string;
-    ship: string;
-    stats: Stats;
-    location: Coordinates;
-    world: string;
-    zone: string;
-    hitPoints: number;
-    maxHitPoints: number;
-    magicPoints: number;
-    endurancePoints: number;
-    armours: Armours;
-    weapons: Weapons;
-    npc: boolean;
-    aggressive: boolean;
-    status: string[];
-    active: boolean;
-    enemies: string[];
-    friends: string[];
-    canTalk: boolean;
-    action: string;
-    actionTarget: string;
-    inventory: Weapons[] | Armours[] | Item[];
-
-    constructor(data: Omit<Character, 'attack' | 'move' | 'defend' | 'useItem'>) {
-        this.title = data.title;
-        this.name = data.name;
-        this.race = data.race;
-        this.profession = data.profession;
-        this.ship = data.ship;
-        this.stats = data.stats;
-        this.location = data.location;
-        this.world = data.world;
-        this.zone = data.zone;
-        this.hitPoints = data.hitPoints;
-        this.maxHitPoints = data.maxHitPoints;
-        this.magicPoints = data.magicPoints;
-        this.endurancePoints = data.endurancePoints;
-        this.armours = data.armours;
-        this.weapons = data.weapons;
-        this.npc = data.npc;
-        this.aggressive = data.npc;
-        this.status =  data.status;
-        this.active = data.active;
-        this.enemies = data.enemies;
-        this.friends = data.friends;
-        this.canTalk = data.canTalk;
-        this.action = data.action;
-        this.actionTarget = data.actionTarget;
-        this.inventory = data.inventory;
-    }
-
-    attack(target: Character) {
-        const damage = this.stats.strength * 2; // Example formula
-        target.hitPoints -= damage;
-        console.log(`${this.name} attacks ${target.name} for ${damage} damage!`);
-    }
-
-    move(newLocation: Coordinates) {
-        this.location = newLocation;
-        console.log(`${this.name} moves to (${newLocation.x}, ${newLocation.y})`);
-    }
-};
-*/

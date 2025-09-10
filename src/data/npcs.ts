@@ -30,18 +30,7 @@ export const defaultCharacter: Character = {
     maxHitPoints: 100,
     magicPoints: 50,
     endurancePoints: 50,
-    armours: {
-        head: '',
-        neck: '',
-        upperBody: '',
-        hands: '',
-        legs: '',
-        feet: ''
-    },
-    weapons: {
-        leftHand: '',
-        rightHand: ''
-    },
+    equipment: {},
     npc: false,
     aggressive: false,
     status: [],
@@ -74,101 +63,15 @@ export const npcs: Character[] = [
         stats: {
             ...clonedDefaultChar.stats
         },
-        armours: {
-            head:
-            {
-                id: 0,
-                name: 'a steel helmet',
-                shortName: 'helmet',
-                desc: `A shiny steel helmet with nose protector.`,
-                type: 'armour',
-                slot: 'head',
-                value: 30,
-                weight: 1,
-                stats: [
-                    {
-                        stat: 'toughness',
-                        value: 1
-                    },
-                    {
-                        stat: 'physical resistance',
-                        value: 1
-                    }
-                ],
-                rarity: 'uncommon',
-                effects: ['head protected']
-            },
-            neck: '',
-            upperBody:
-            {
-                id: 0,
-                name: 'a steel breastplate',
-                shortName: 'breastplate',
-                desc: `A good looking shiny steel breastplate, that grants fine protections.`,
-                type: 'armour',
-                slot: 'upperBody',
-                value: 50,
-                weight: 10,
-                stats: [
-                    {
-                        stat: 'toughness',
-                        value: 5
-                    },
-                    {
-                        stat: 'physical resistance',
-                        value: 5
-                    }
-                ],
-                rarity: 'uncommon',
-                effects: []
-            },
-            hands: '',
-            legs: '',
-            feet: '',
+        equipment: {
+            head: 'steel-helmet0'
         },
-        weapons: {
-            leftHand:
-            {
-                id: 0,
-                name: 'a wooden medium shield',
-                shortName: 'shield',
-                desc: 'A solid and quite light shield, made of birch.',
-                type: 'weapon',
-                handlingSkill: 'shields',
-                range: 5,
-                rangedWeapon: false,
-                slotsNeeded: 1,
-                value: 3,
-                weight: 2.2,
-                stats: [],
-                combatSpeed: 2,
-                effects: ['shield', 'defensive'],
-                damage: { physical: 1 },
-                coolDownCounter: 0,
-                rarity: 'common',
-                armourPiercing: 0
-            },
-            rightHand: {
-                id: 0,
-                name: 'a heavy warhammer',
-                shortName: 'warhammer',
-                desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
-                type: 'weapon',
-                handlingSkill: 'bludgeons',
-                range: 12,
-                rangedWeapon: false,
-                slotsNeeded: 1,
-                value: 8,
-                weight: 3.5,
-                stats: [],
-                combatSpeed: 5,
-                effects: ['armor breaker'],
-                damage: { physical: 25 },
-                coolDownCounter: 0,
-                rarity: 'uncommon',
-                armourPiercing: 5
-            }
-        },
+        inventory: [
+            {itemId: "pistol-01", quantity: 1},
+            {itemId: "steel-breastplate0", quantity: 1},
+            {itemId: "hama0", quantity: 1},
+            {itemId: "ammo-9mm", quantity: 20}
+        ],
         desc: `Badass looking armoured dwarf warrior.`
     },
     {
@@ -181,37 +84,7 @@ export const npcs: Character[] = [
         stats: {
             ...clonedDefaultChar.stats
         },
-        armours: {
-            head: '',
-            neck: '',
-            upperBody: '',
-            hands: '',
-            legs: '',
-            feet: ''
-        },
-        weapons: {
-            leftHand: '',
-            rightHand: {
-                id: 0,
-                name: 'a heavy warhammer',
-                shortName: 'warhammer',
-                desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
-                type: 'weapon',
-                handlingSkill: 'bludgeons',
-                range: 12,
-                rangedWeapon: false,
-                slotsNeeded: 1,
-                value: 8,
-                weight: 3.5,
-                stats: [],
-                combatSpeed: 5,
-                effects: ['armor breaker'],
-                damage: { physical: 25 },
-                coolDownCounter: 0,
-                rarity: 'uncommon',
-                armourPiercing: 5
-            }
-        },
+        equipment: {},
         location: { x: 350, y: 450 },
         skills: [
             {
@@ -279,59 +152,7 @@ export const npcs: Character[] = [
             coldResistance: 0,
             psionicResistance: 0
         },
-        armours: {
-            head: '',
-            neck: '',
-            upperBody:
-            {
-                id: 0,
-                name: 'an iron breastplate',
-                shortName: 'breastplate',
-                desc: `A heavy, but should protect you nicely!.`,
-                type: 'armour',
-                slot: 'upperBody',
-                value: 10,
-                weight: 20,
-                stats: [
-                    {
-                        stat: 'toughness',
-                        value: 1
-                    },
-                    {
-                        stat: 'physical resistance',
-                        value: 2
-                    }
-                ],
-                rarity: 'common',
-                effects: []
-            },
-            hands: '',
-            legs: '',
-            feet: ''
-        },
-        weapons: {
-            leftHand: '',
-            rightHand: {
-                id: 0,
-                name: 'a heavy warhammer',
-                shortName: 'warhammer',
-                desc: 'A brutal iron-headed hammer, slow but devastating against armor.',
-                type: 'weapon',
-                handlingSkill: 'bludgeons',
-                range: 12,
-                rangedWeapon: false,
-                slotsNeeded: 1,
-                value: 8,
-                weight: 3.5,
-                stats: [],
-                combatSpeed: 5,
-                effects: ['armor breaker'],
-                damage: { physical: 25 },
-                coolDownCounter: 0,
-                rarity: 'uncommon',
-                armourPiercing: 5
-            }
-        },
+        equipment: {},
         race: 'ogre',
         profession: 'mercenary',
         team: 'big guns',
@@ -359,4 +180,51 @@ export const npcs: Character[] = [
         abilities: [],
         path: []
     },
+    {
+        id: "char-01",
+        title: "Captain",
+        name: "Hristo",
+        race: "Human",
+        profession: "Soldier",
+        team: "Alpha",
+        stats: {
+            strength: 10,
+            dexterity: 8,
+            toughness: 12,
+            perception: 5,
+            learning: 0,
+            size: mediumBase,
+            magic: 5,
+            physicalResistance: 0,
+            magicResistance: 0,
+            fireResistance: 0,
+            poisonResistance: 0,
+            coldResistance: 0,
+            psionicResistance: 0
+        },
+        location: { x: 0, y: 0 },
+        world: "Earth",
+        zone: "City",
+        hitPoints: 100,
+        maxHitPoints: 100,
+        magicPoints: 20,
+        endurancePoints: 50,
+        equipment: {},
+        inventory: [{itemId: "pistol-01", quantity: 1}],
+        npc: false,
+        aggressive: false,
+        status: [],
+        active: true,
+        enemies: [],
+        friends: [],
+        canTalk: true,
+        action: "",
+        actionTarget: "",
+        targetLocation: { x: 0, y: 0 },
+        isPlayer: true,
+        selected: true,
+        abilities: [],
+        skills: [],
+        path: [],
+    }
 ];

@@ -36,18 +36,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         maxHitPoints: 100,
         magicPoints: 50,
         endurancePoints: 50,
-        armours: {
-            head: '',
-            neck: '',
-            upperBody: '',
-            hands: '',
-            legs: '',
-            feet: ''
-        },
-        weapons: {
-            leftHand: '',
-            rightHand: ''
-        },
+        equipment: {},
         npc: false,
         aggressive: false,
         status: [],

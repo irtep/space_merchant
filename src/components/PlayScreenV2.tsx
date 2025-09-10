@@ -1,17 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Grid, AStarFinder } from "pathfinding";
 import { Box, Container } from "@mui/material";
-
-interface Character {
-    id: number;
-    x: number;
-    y: number;
-    destX: number;
-    destY: number;
-    color: string;
-    //path: [number, number][];
-    path: number[][];
-}
+import { useSMContext } from "../context/smContext";
+import { Character } from "../interfaces/sharedInterfaces";
+import { placeCharactersRandomly } from "../functions/playScreenV3/pSv3functions";
+import { drawGame } from "../functions/playScreenV3/drawGame";
 
 interface Projectile {
     x: number;
@@ -21,57 +14,61 @@ interface Projectile {
     active: boolean;
     trail: { x: number; y: number; alpha: number }[];
     type: "laser" | "energy" | "bullet";
+    targetId?: string;
 }
 
 const CELL_SIZE = 20;
 const GRID_WIDTH = 60;
 const GRID_HEIGHT = 40;
 
-const BUILDINGS = [
-    { x: 5, y: 5, w: 4, h: 4 },
-    { x: 15, y: 10, w: 5, h: 3 },
-    { x: 22, y: 4, w: 3, h: 6 },
-];
-
-const DEBUG_MODE = true;
+const DEBUG_MODE: boolean = true;
 
 const PlayScreenV2: React.FC = () => {
-    const [characters, setCharacters] = useState<Character[]>([
-        { id: 1, x: 2, y: 2, destX: 2, destY: 2, color: "red", path: [] },
-        { id: 2, x: 10, y: 2, destX: 10, destY: 2, color: "blue", path: [] },
-        { id: 3, x: 2, y: 10, destX: 2, destY: 10, color: "green", path: [] },
-    ]);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
-    const [opponent, setOpponent] = useState<{ x: number; y: number }>({ x: 20, y: 15 });
+    const {
+        gameObject,
+        setGameObject,
+    } = useSMContext();
+
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [selectedAction, setSelectedAction] = useState<"move" | "ranged" | "melee" | null>(null);
     const [projectiles, setProjectiles] = useState<Projectile[]>([]);
     const [projectileType, setProjectileType] = useState<'laser' | 'energy' | 'bullet'>('energy');
     const [paused, setPaused] = useState(false);
+    const [hoverPos, setHoverPos] = useState<{ x: number, y: number } | null>(null);
     const pauseRef: React.RefObject<boolean> = useRef<boolean>(paused); // UseRef to store latest pause state
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const charactersRef = useRef<Character[]>(gameObject.characters);
 
-    const buildGrid = (excludeId?: number) => {
+    const buildGrid = (excludeId?: string) => {
         const grid = new Grid(GRID_WIDTH, GRID_HEIGHT);
-        BUILDINGS.forEach(b => {
+
+        gameObject.gameMap.rectObstacles.forEach(b => {
             for (let i = 0; i < b.w; i++) {
                 for (let j = 0; j < b.h; j++) {
                     grid.setWalkableAt(b.x + i, b.y + j, false);
                 }
             }
         });
-        // mark other characters as obstacles
-        characters.forEach(c => {
+
+        gameObject.characters.forEach(c => {
             if (c.id !== excludeId) {
-                const cx = Math.round(c.x);
-                const cy = Math.round(c.y);
+                const cx = Math.round(c.location.x);
+                const cy = Math.round(c.location.y);
                 grid.setWalkableAt(cx, cy, false);
             }
         });
-        // mark opponent as obstacle
-        const ox = Math.round(opponent.x);
-        const oy = Math.round(opponent.y);
-        grid.setWalkableAt(ox, oy, false);
-
         return grid;
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / CELL_SIZE);
+        const y = Math.floor((e.clientY - rect.top) / CELL_SIZE);
+        setHoverPos({ x, y });
+    };
+
+    const handleMouseLeave = () => {
+        setHoverPos(null); // reset when leaving canvas
     };
 
     const handleClick = (e: React.MouseEvent) => {
@@ -79,96 +76,80 @@ const PlayScreenV2: React.FC = () => {
         const clickX = Math.floor((e.clientX - rect.left) / CELL_SIZE);
         const clickY = Math.floor((e.clientY - rect.top) / CELL_SIZE);
 
-        // check if clicked inside any character
-        const clickedChar = characters.find(c => {
-            const cx = c.x * CELL_SIZE + CELL_SIZE / 2;
-            const cy = c.y * CELL_SIZE + CELL_SIZE / 2;
-            const dist = Math.hypot(
-                e.clientX - rect.left - cx,
-                e.clientY - rect.top - cy
+        // If we are waiting for a target (ranged or melee)
+        if (selectedAction === "ranged" || selectedAction === "melee") {
+            const targetChar = gameObject.characters.find(c =>
+                Math.round(c.location.x) === clickX &&
+                Math.round(c.location.y) === clickY
             );
-            return dist < CELL_SIZE / 2; // inside circle
-        });
 
-        if (clickedChar) {
-            // select character instead of moving
-            setSelectedId(clickedChar.id);
+            if (targetChar) {
+                if (selectedAction === "ranged" && selectedId !== null) {
+                    console.log("Ranged attack on", targetChar.id);
+                    shootAtCharacter(selectedId, targetChar);  // ✅ actually shoot
+                    setSelectedAction(null);
+                    return;
+                } else {
+                    console.log("Melee attack on", targetChar.id);
+                    // TODO: your melee damage logic here
+                }
+            }
+
+            setSelectedAction(null); // reset after action
             return;
         }
 
-        // otherwise try to move selected character
-        if (!selectedId) return;
+        // If we are moving
+        if (selectedAction === "move" && selectedId) {
+            const grid = buildGrid(selectedId);
+            const finder = new AStarFinder({ allowDiagonal: true, dontCrossCorners: true });
 
-        const grid = buildGrid(selectedId);
-        const finder = new AStarFinder({
-            allowDiagonal: true,
-            dontCrossCorners: true, // optional: prevents cutting through corners of buildings
+            setGameObject(gob => ({
+                ...gob,
+                characters: gob.characters.map((c: Character) => {
+                    if (c.id === selectedId) {
+                        const path = finder.findPath(
+                            Math.round(c.location.x),
+                            Math.round(c.location.y),
+                            clickX,
+                            clickY,
+                            grid.clone()
+                        );
+                        return { ...c, targetLocation: { x: clickX, y: clickY }, path };
+                    }
+                    return c;
+                }),
+            }));
+
+            setSelectedAction(null); // reset
+            return;
+        }
+
+        // Otherwise: maybe just select a character
+        const clickedChar = gameObject.characters.find(c => {
+            const cx = c.location.x * CELL_SIZE + CELL_SIZE / 2;
+            const cy = c.location.y * CELL_SIZE + CELL_SIZE / 2;
+            const dist = Math.hypot(e.clientX - rect.left - cx, e.clientY - rect.top - cy);
+            return dist < CELL_SIZE / 2;
         });
 
-        setCharacters(chars =>
-            chars.map(c => {
-                if (c.id === selectedId) {
-                    const path = finder.findPath(
-                        Math.round(c.x),
-                        Math.round(c.y),
-                        clickX,
-                        clickY,
-                        grid.clone()
-                    );
-                    return { ...c, destX: clickX, destY: clickY, path };
-                }
-                return c;
-            })
-        );
+        if (clickedChar && clickedChar.team === "player") {
+            setSelectedId(clickedChar.id);
+        }
     };
 
-
-    const shoot = () => {
-        if (!selectedId) return;
-        const shooter = characters.find(c => c.id === selectedId);
+    const shootAtCharacter = (shooterId: string, target: Character) => {
+        const shooter = gameObject.characters.find(c => c.id === shooterId);
         if (!shooter) return;
 
-        const startX = shooter.x * CELL_SIZE + CELL_SIZE / 2;
-        const startY = shooter.y * CELL_SIZE + CELL_SIZE / 2;
-        const targetX = opponent.x * CELL_SIZE + CELL_SIZE / 2;
-        const targetY = opponent.y * CELL_SIZE + CELL_SIZE / 2;
+        const startX = shooter.location.x * CELL_SIZE + CELL_SIZE / 2;
+        const startY = shooter.location.y * CELL_SIZE + CELL_SIZE / 2;
+        const targetX = target.location.x * CELL_SIZE + CELL_SIZE / 2;
+        const targetY = target.location.y * CELL_SIZE + CELL_SIZE / 2;
 
         const dx = targetX - startX;
         const dy = targetY - startY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-
-        let blocked = false;
-
-        for (let i = 1; i <= dist / 5; i++) {
-            const cx = startX + (dx * i) / (dist / 5);
-            const cy = startY + (dy * i) / (dist / 5);
-
-            for (const b of BUILDINGS) {
-                if (
-                    cx >= b.x * CELL_SIZE &&
-                    cx <= (b.x + b.w) * CELL_SIZE &&
-                    cy >= b.y * CELL_SIZE &&
-                    cy <= (b.y + b.h) * CELL_SIZE
-                ) {
-                    blocked = true;
-                    if (DEBUG_MODE) console.log("Shot blocked by building at", cx, cy);
-                    break;
-                }
-            }
-
-            for (const c of characters) {
-                if (c.id === selectedId) continue; // don't block self
-                const ccx = c.x * CELL_SIZE + CELL_SIZE / 2;
-                const ccy = c.y * CELL_SIZE + CELL_SIZE / 2;
-                if (Math.hypot(cx - ccx, cy - ccy) < CELL_SIZE / 2) {
-                    blocked = true;
-                    if (DEBUG_MODE) console.log("Shot blocked by teammate", c.id);
-                    break;
-                }
-            }
-        }
-
-        if (blocked && !DEBUG_MODE) return;
 
         setProjectiles(prev => [
             ...prev,
@@ -180,6 +161,7 @@ const PlayScreenV2: React.FC = () => {
                 active: true,
                 trail: [],
                 type: projectileType,
+                targetId: target.id
             },
         ]);
     };
@@ -189,37 +171,48 @@ const PlayScreenV2: React.FC = () => {
 
         const step = () => {
             if (!pauseRef.current) {
-                setCharacters(chars =>
-                    chars.map(c => {
-                        if (c.path.length > 0) {
+                // Update characters
+                setGameObject(prev => ({
+                    ...prev,
+                    characters: prev.characters.map(c => {
+                        if (c.path && c.path.length > 0) {
                             const [nextX, nextY] = c.path[0];
                             const targetX = nextX * CELL_SIZE + CELL_SIZE / 2;
                             const targetY = nextY * CELL_SIZE + CELL_SIZE / 2;
 
-                            const currentX = c.x * CELL_SIZE + CELL_SIZE / 2;
-                            const currentY = c.y * CELL_SIZE + CELL_SIZE / 2;
+                            const currentX = c.location.x * CELL_SIZE + CELL_SIZE / 2;
+                            const currentY = c.location.y * CELL_SIZE + CELL_SIZE / 2;
 
                             const dx = targetX - currentX;
                             const dy = targetY - currentY;
                             const dist = Math.sqrt(dx * dx + dy * dy);
-                            const speed = 2;
+                            const speed = 0.3; // your requested walking speed
 
                             if (dist < speed) {
-                                return { ...c, x: nextX, y: nextY, path: c.path.slice(1) };
+                                // Snap to grid cell and consume first step
+                                return {
+                                    ...c,
+                                    location: { x: nextX, y: nextY },
+                                    path: c.path.slice(1),
+                                };
                             } else {
+                                // Move smoothly toward target
                                 const moveX = currentX + (dx / dist) * speed;
                                 const moveY = currentY + (dy / dist) * speed;
                                 return {
                                     ...c,
-                                    x: moveX / CELL_SIZE - 0.5,
-                                    y: moveY / CELL_SIZE - 0.5,
+                                    location: {
+                                        x: moveX / CELL_SIZE - 0.5,
+                                        y: moveY / CELL_SIZE - 0.5,
+                                    },
                                 };
                             }
                         }
                         return c;
-                    })
-                );
+                    }),
+                }));
 
+                // Update projectiles
                 setProjectiles(prev =>
                     prev
                         .map(p => {
@@ -227,19 +220,42 @@ const PlayScreenV2: React.FC = () => {
                             const speed = 5;
                             const nx = p.x + p.dx * speed;
                             const ny = p.y + p.dy * speed;
+                            const characters = charactersRef.current;
 
                             const newTrail = [...p.trail, { x: nx, y: ny, alpha: 1 }].slice(-15);
 
-                            const ox = opponent.x * CELL_SIZE + CELL_SIZE / 2;
-                            const oy = opponent.y * CELL_SIZE + CELL_SIZE / 2;
-                            if (Math.hypot(nx - ox, ny - oy) < CELL_SIZE / 2) {
-                                if (DEBUG_MODE) console.log("Projectile hit opponent!");
-                                return { ...p, active: false };
+                            // ✅ If projectile had a specific target
+                            if (p.targetId) {
+                                const target = characters.find(c => c.id === p.targetId);
+
+                                if (target) {
+                                    const tx = target.location.x * CELL_SIZE + CELL_SIZE / 2;
+                                    const ty = target.location.y * CELL_SIZE + CELL_SIZE / 2;
+                                    if (Math.hypot(nx - tx, ny - ty) < CELL_SIZE / 2) {
+                                        if (DEBUG_MODE) console.log(`Projectile reached target ${target.id}!`);
+                                        return { ...p, active: false };
+                                    }
+                                }
                             }
 
-                            for (const b of BUILDINGS) {
-                                if (nx >= b.x * CELL_SIZE && nx <= (b.x + b.w) * CELL_SIZE && ny >= b.y * CELL_SIZE && ny <= (b.y + b.h) * CELL_SIZE) {
-                                    if (DEBUG_MODE) console.log("Projectile collided with building");
+                            // ✅ Or: check generic collision with *any* enemy
+                            for (const enemy of characters.filter(c => c.team !== gameObject.characters[0].team)) {
+                                const ex = enemy.location.x * CELL_SIZE + CELL_SIZE / 2;
+                                const ey = enemy.location.y * CELL_SIZE + CELL_SIZE / 2;
+                                if (Math.hypot(nx - ex, ny - ey) < CELL_SIZE / 2) {
+                                    if (DEBUG_MODE) console.log(`Projectile hit ${enemy.id}!`);
+                                    return { ...p, active: false };
+                                }
+                            }
+
+                            // Check collision with obstacles
+                            for (const b of gameObject.gameMap.rectObstacles) {
+                                if (
+                                    nx >= b.x * CELL_SIZE &&
+                                    nx <= (b.x + b.w) * CELL_SIZE &&
+                                    ny >= b.y * CELL_SIZE &&
+                                    ny <= (b.y + b.h) * CELL_SIZE
+                                ) {
                                     return { ...p, active: false };
                                 }
                             }
@@ -248,13 +264,18 @@ const PlayScreenV2: React.FC = () => {
                         })
                         .filter(p => p.active)
                 );
-            } else { console.log('pause'); }
+
+            } else {
+                console.log("pause");
+            }
+
             animationFrame = requestAnimationFrame(step);
         };
 
         animationFrame = requestAnimationFrame(step);
         return () => cancelAnimationFrame(animationFrame);
-    }, [opponent]);
+    }, []);
+
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -266,6 +287,17 @@ const PlayScreenV2: React.FC = () => {
         return () => window.removeEventListener("keydown", handleKey);
     }, []);
 
+    useEffect(() => {
+        setGameObject(gob => ({
+            ...gob,
+            characters: placeCharactersRandomly(
+                gob.characters,
+                gob.gameMap.rectObstacles,
+                GRID_WIDTH,
+                GRID_HEIGHT
+            ),
+        }));
+    }, []);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -273,93 +305,21 @@ const PlayScreenV2: React.FC = () => {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGame(ctx, canvas, gameObject, selectedId, projectiles, hoverPos, selectedAction);
+    }, [gameObject, selectedId, projectiles, hoverPos, selectedAction]);
 
-        ctx.strokeStyle = "#ccc";
-
-        // border lines
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(GRID_WIDTH * CELL_SIZE, 0);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(0, GRID_HEIGHT * CELL_SIZE);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(0, GRID_HEIGHT * CELL_SIZE);
-        ctx.lineTo(GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(GRID_WIDTH * CELL_SIZE, 0);
-        ctx.lineTo(GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE);
-        ctx.stroke();
-
-        // buildings
-        ctx.fillStyle = "gray";
-        BUILDINGS.forEach(b => {
-            ctx.fillRect(b.x * CELL_SIZE, b.y * CELL_SIZE, b.w * CELL_SIZE, b.h * CELL_SIZE);
-        });
-
-        // characters
-        characters.forEach(c => {
-            ctx.beginPath();
-            ctx.arc(c.x * CELL_SIZE + CELL_SIZE / 2, c.y * CELL_SIZE + CELL_SIZE / 2, CELL_SIZE / 2 - 2, 0, Math.PI * 2);
-            ctx.fillStyle = c.color;
-            ctx.fill();
-            if (c.id === selectedId) {
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = "yellow";
-                ctx.stroke();
-            }
-        });
-
-        // "opponent"
-        ctx.beginPath();
-        ctx.arc(opponent.x * CELL_SIZE + CELL_SIZE / 2, opponent.y * CELL_SIZE + CELL_SIZE / 2, CELL_SIZE / 2 - 2, 0, Math.PI * 2);
-        ctx.fillStyle = "black";
-        ctx.fill();
-
-        // projectiles
-        projectiles.forEach(p => {
-            switch (p.type) {
-                case "laser":
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    const endX = p.x + p.dx * 10;
-                    const endY = p.y + p.dy * 10;
-                    ctx.lineTo(endX, endY);
-                    ctx.strokeStyle = "cyan";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    break;
-                case "energy":
-                    for (let i = 0; i < p.trail.length; i++) {
-                        const t = p.trail[i];
-                        ctx.beginPath();
-                        ctx.arc(t.x, t.y, 3, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(255,165,0,${(i + 1) / p.trail.length})`;
-                        ctx.fill();
-                    }
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
-                    ctx.fillStyle = "orange";
-                    ctx.fill();
-                    break;
-                case "bullet":
-                    ctx.fillStyle = "black";
-                    ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
-                    break;
-            }
-        });
-    }, [characters, selectedId, opponent, projectiles]);
 
     useEffect(() => {
         pauseRef.current = paused;
     }, [paused]);
+
+    useEffect(() => {
+        charactersRef.current = gameObject.characters;
+    }, [gameObject.characters]);
+
+    useEffect(() => {
+        console.log('game Ob', gameObject);
+    }, []);
 
     return (
         <Container maxWidth="lg">
@@ -384,7 +344,14 @@ const PlayScreenV2: React.FC = () => {
 
                     {/* Left Column: Canvas (80%) */}
                     <div className="w-3/5 flex justify-center items-center bg-green-50">
-                        <canvas ref={canvasRef} width={GRID_WIDTH * CELL_SIZE} height={GRID_HEIGHT * CELL_SIZE} onClick={handleClick} className="border border-gray-400" />
+                        <canvas
+                            ref={canvasRef}
+                            width={GRID_WIDTH * CELL_SIZE}
+                            height={GRID_HEIGHT * CELL_SIZE}
+                            onClick={handleClick}
+                            className="border border-gray-400"
+                            onMouseMove={handleMouseMove}
+                            onMouseLeave={handleMouseLeave} />
                     </div>
 
                 </Box>
@@ -407,17 +374,32 @@ const PlayScreenV2: React.FC = () => {
                     >
                         <h2 className="text-lg font-semibold">Controls</h2>
 
-                        {characters.map(c => (
-                            <button
-                                key={c.id}
-                                onClick={() => setSelectedId(c.id)}
-                                style={{
-                                    background: `${selectedId === c.id ? "yellow" : "white"}`
-                                }}
-                            >
-                                Select Character {c.id}
-                            </button>
-                        ))}
+                        {gameObject.characters
+                            .filter(c => c.team === gameObject.characters[0].team)
+                            .map(c => (
+                                <button
+                                    key={`selChar-${c.id}`}
+                                    onClick={() => setSelectedId(c.id)}
+                                    style={{
+                                        background: selectedId === c.id ? "yellow" : "white",
+                                    }}
+                                >
+                                    Select Character {c.id}
+                                </button>
+                            ))}
+                        {selectedId && (
+                            <div className="mt-4 flex flex-col gap-2">
+                                <button onClick={() => setSelectedAction("move")} className="p-2 bg-blue-200 rounded">
+                                    Move
+                                </button>
+                                <button onClick={() => setSelectedAction("ranged")} className="p-2 bg-red-200 rounded">
+                                    Ranged Attack
+                                </button>
+                                <button onClick={() => setSelectedAction("melee")} className="p-2 bg-green-200 rounded">
+                                    Close Combat
+                                </button>
+                            </div>
+                        )}
 
                         <div className="mt-2">
                             <label>Projectile Type: </label>
@@ -427,11 +409,7 @@ const PlayScreenV2: React.FC = () => {
                                 <option value="bullet">Bullet</option>
                             </select>
                         </div>
-                        {selectedId && (
-                            <button onClick={shoot} className="p-2 mt-4 bg-red-300 rounded border">
-                                Shoot Opponent
-                            </button>
-                        )}
+
                         <button
                             onClick={() => setPaused(p => !p)}
                             className="p-2 mt-4 bg-blue-300 rounded border"

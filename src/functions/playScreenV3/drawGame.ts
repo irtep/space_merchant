@@ -69,6 +69,9 @@ export function drawGame(
       ctx.strokeStyle = "yellow";
       ctx.stroke();
     }
+    ctx.font = '14px Arial';
+    ctx.fillStyle = 'cyan';
+    ctx.fillText(c.name, c.location.x * CELL_SIZE + CELL_SIZE / 2, c.location.y * CELL_SIZE + CELL_SIZE / 2);
   });
 
   // projectiles
