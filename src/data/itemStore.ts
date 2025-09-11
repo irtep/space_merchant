@@ -39,7 +39,7 @@ export const itemStore: Record<string, AnyItem> = {
     slotsNeeded: 1,
     stats: [],
     combatSpeed: 3,
-    effects: [],
+    effects: ["ranged"],
     damage: { physical: 15 },
     coolDownCounter: 0,
     armourPiercing: 1,

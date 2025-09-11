@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Grid, AStarFinder } from "pathfinding";
 import { Box, Container } from "@mui/material";
 import { useSMContext } from "../context/smContext";
-import { Character, } from "../interfaces/sharedInterfaces";
+import { AnyItem, Character, Weapon, } from "../interfaces/sharedInterfaces";
 import { placeCharactersRandomly } from "../functions/playScreenV3/pSv3functions";
 import { drawGame } from "../functions/playScreenV3/drawGame";
 import { getItem, equipItem, unequipItem } from "../functions/playScreenV3/equipmentHandling";
@@ -42,11 +42,26 @@ const PlayScreenV3: React.FC = () => {
     const hoverChar = hoverCharId
         ? gameObject.characters.find(c => c.id === hoverCharId) || null
         : null;
-    const groundLoots = hoverPos
+    const groundLoots = hoverChar
         ? gameObject.gameMap.loots.filter(
-            loot => loot.location.x === hoverPos.x && loot.location.y === hoverPos.y
+            loot =>
+                Math.round(loot.location.x) === Math.round(hoverChar.location.x) &&
+                Math.round(loot.location.y) === Math.round(hoverChar.location.y)
         )
         : [];
+    const selectedChar = gameObject.characters.find(c => c.id === selectedId);
+    const isWeapon = (item: AnyItem | undefined): item is Weapon =>
+        !!item && item.type === "weapon";
+
+    const rightHandId = selectedChar?.equipment.rightHand;
+    const leftHandId = selectedChar?.equipment.leftHand;
+
+    const equippedWeapon =
+        (rightHandId && rightHandId !== "" ? getItem(rightHandId, itemStore) : undefined) ||
+        (leftHandId && leftHandId !== "" ? getItem(leftHandId, itemStore) : undefined);
+
+    const hasRanged = isWeapon(equippedWeapon) && equippedWeapon.effects.includes("ranged");
+
 
 
     /** BUILD PATHFINDING GRID */
@@ -158,7 +173,7 @@ const PlayScreenV3: React.FC = () => {
     const handleDrop = (itemId: string) => {
         setGameObject(prev => {
             const updatedChars = prev.characters.map(c => {
-                if (c.id !== selectedId) return c;
+                if (c.id !== hoverCharId) return c;
                 const newInv = c.inventory.map(i =>
                     i.itemId === itemId ? { ...i, quantity: i.quantity - 1 } : i
                 ).filter(i => i.quantity > 0);
@@ -166,7 +181,8 @@ const PlayScreenV3: React.FC = () => {
                 return { ...c, inventory: newInv };
             });
 
-            const char = prev.characters.find(c => c.id === selectedId)!;
+            const char = prev.characters.find(c => c.id === hoverCharId)!;
+            console.log('char: ', char);
             const newLoot = {
                 id: crypto.randomUUID(),
                 itemId,
@@ -482,10 +498,17 @@ const PlayScreenV3: React.FC = () => {
                     {selectedId && (
                         <div style={{ marginTop: 10 }}>
                             <button onClick={() => setSelectedAction("move")}>Move</button>
-                            <button onClick={() => setSelectedAction("ranged")}>Ranged Attack</button>
+
+                            {hasRanged && (
+                                <button onClick={() => setSelectedAction("ranged")}>
+                                    Ranged Attack
+                                </button>
+                            )}
+
                             <button onClick={() => setSelectedAction("melee")}>Close Combat</button>
                         </div>
                     )}
+
 
                     <div style={{ marginTop: 10 }}>
                         <label>Projectile Type: </label>

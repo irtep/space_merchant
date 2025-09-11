@@ -54,6 +54,16 @@ export function drawGame(
     ctx.fillRect(b.x * CELL_SIZE, b.y * CELL_SIZE, b.w * CELL_SIZE, b.h * CELL_SIZE);
   });
 
+  // loots
+  gameObject.gameMap.loots.forEach((loot: Loot) => {
+    const item = getItem(loot.itemId, itemStore);
+    if (!item) return;
+    ctx.fillStyle = "gold";
+    ctx.fillRect(loot.location.x * CELL_SIZE, loot.location.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    ctx.fillStyle = "black";
+    ctx.fillText('some items', loot.location.x * CELL_SIZE + CELL_SIZE / 2, loot.location.y * CELL_SIZE + CELL_SIZE / 2);
+  });
+
   // characters
   gameObject.characters.forEach((c: Character) => {
     ctx.beginPath();
@@ -74,13 +84,6 @@ export function drawGame(
     ctx.font = '14px Arial';
     ctx.fillStyle = 'cyan';
     ctx.fillText(c.name, c.location.x * CELL_SIZE + CELL_SIZE / 2, c.location.y * CELL_SIZE + CELL_SIZE / 2);
-  });
-
-  gameObject.gameMap.loots.forEach( (loot: Loot) => {
-    const item = getItem(loot.itemId, itemStore);
-    if (!item) return;
-    ctx.fillStyle = "gold"; // or icon per item
-    ctx.fillRect(loot.location.x * CELL_SIZE, loot.location.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
   });
 
   // projectiles
