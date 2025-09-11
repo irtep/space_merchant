@@ -30,7 +30,7 @@ const PlayScreenV3: React.FC = () => {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedAction, setSelectedAction] = useState<"move" | "ranged" | "melee" | null>(null);
     const [hoverPos, setHoverPos] = useState<{ x: number, y: number } | null>(null);
-    const [hoverChar, setHoverChar] = useState<Character | null>(null);
+    const [hoverCharId, setHoverCharId] = useState<string | null>(null);
     const [projectiles, setProjectiles] = useState<Projectile[]>([]);
     const [projectileType, setProjectileType] = useState<'laser' | 'energy' | 'bullet'>('energy');
     const [paused, setPaused] = useState(false);
@@ -38,6 +38,16 @@ const PlayScreenV3: React.FC = () => {
     const pauseRef = useRef(paused);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const charactersRef = useRef<Character[]>(gameObject.characters);
+    // derived character
+    const hoverChar = hoverCharId
+        ? gameObject.characters.find(c => c.id === hoverCharId) || null
+        : null;
+    const groundLoots = hoverPos
+        ? gameObject.gameMap.loots.filter(
+            loot => loot.location.x === hoverPos.x && loot.location.y === hoverPos.y
+        )
+        : [];
+
 
     /** BUILD PATHFINDING GRID */
     const buildGrid = (excludeId?: string) => {
@@ -76,17 +86,14 @@ const PlayScreenV3: React.FC = () => {
 
         // Only update hoverChar if we actually hover a character
         if (hovered) {
-            setHoverChar(hovered);
+            setHoverCharId(hovered.id);
         }
         // else keep last hovered character
     };
 
     const handleMouseLeave = () => {
         setHoverPos(null);
-        // do NOT clear hoverChar, so the last hovered stays visible
-        // setHoverChar(null); <- remove this
     };
-
 
     /** CHARACTER CLICK & ACTIONS */
     const handleClick = (e: React.MouseEvent) => {
@@ -146,6 +153,72 @@ const PlayScreenV3: React.FC = () => {
             c.team === gameObject.characters[0].team
         );
         if (clickedChar) setSelectedId(clickedChar.id);
+    };
+
+    const handleDrop = (itemId: string) => {
+        setGameObject(prev => {
+            const updatedChars = prev.characters.map(c => {
+                if (c.id !== selectedId) return c;
+                const newInv = c.inventory.map(i =>
+                    i.itemId === itemId ? { ...i, quantity: i.quantity - 1 } : i
+                ).filter(i => i.quantity > 0);
+
+                return { ...c, inventory: newInv };
+            });
+
+            const char = prev.characters.find(c => c.id === selectedId)!;
+            const newLoot = {
+                id: crypto.randomUUID(),
+                itemId,
+                quantity: 1,
+                location: { ...char.location }
+            };
+
+            return {
+                ...prev,
+                characters: updatedChars,
+                gameMap: {
+                    ...prev.gameMap,
+                    loots: [...prev.gameMap.loots, newLoot]
+                }
+            };
+        });
+    };
+
+    const handlePickUp = (lootId: string) => {
+        setGameObject(prev => {
+            const loot = prev.gameMap.loots.find(l => l.id === lootId);
+            if (!loot) return prev;
+
+            const updatedChars = prev.characters.map(c => {
+                if (c.id !== selectedId) return c;
+                const existing = c.inventory.find(i => i.itemId === loot.itemId);
+                if (existing) {
+                    return {
+                        ...c,
+                        inventory: c.inventory.map(i =>
+                            i.itemId === loot.itemId
+                                ? { ...i, quantity: i.quantity + loot.quantity }
+                                : i
+                        )
+                    };
+                } else {
+                    return {
+                        ...c,
+                        inventory: [...c.inventory, { itemId: loot.itemId, quantity: loot.quantity }]
+                    };
+                }
+            });
+
+            return {
+                ...prev,
+                characters: updatedChars,
+                gameMap: {
+                    ...prev.gameMap,
+                    loots: prev.gameMap.loots.filter(l => l.id !== lootId)
+                }
+            };
+        });
     };
 
     /** PROJECTILE FIRING */
@@ -300,7 +373,12 @@ const PlayScreenV3: React.FC = () => {
                                         >
                                             {slot}: {item ? item.name : "empty"}
                                             {hoverChar.team === gameObject.characters[0].team && item && (
-                                                <button onClick={() => handleUnequip(slot as keyof Character['equipment'])} style={{ marginLeft: 5 }}>Unequip</button>
+                                                <button
+                                                    onClick={() => handleUnequip(slot as keyof Character["equipment"])}
+                                                    style={{ marginLeft: 5 }}
+                                                >
+                                                    Unequip
+                                                </button>
                                             )}
                                         </div>
                                     );
@@ -311,22 +389,67 @@ const PlayScreenV3: React.FC = () => {
                                 {hoverChar.inventory.map((invItem, index) => {
                                     const item = getItem(invItem.itemId, itemStore);
                                     if (!item) return null;
+
+                                    // check if target slot already has something
+                                    const rightHandFree = !hoverChar.equipment.rightHand;
+                                    const leftHandFree = !hoverChar.equipment.leftHand;
+                                    const armourSlotFree = item.type === "armour"
+                                        ? !hoverChar.equipment[item.slot as keyof Character["equipment"]]
+                                        : false;
+
                                     return (
                                         <div
                                             key={`invOfPl-${invItem.itemId}-${index}`}
                                             style={{ borderStyle: "solid" }}
                                         >
-                                            {item.name}
+                                            {item.name} x{invItem.quantity}
                                             {hoverChar.team === gameObject.characters[0].team && (
-                                                <div style={{ display: 'inline-block', marginLeft: 5 }}>
-                                                    {item.type === "weapon" && <button onClick={() => handleEquip(invItem.itemId, "rightHand")}>Equip Right</button>}
-                                                    {item.type === "weapon" && <button onClick={() => handleEquip(invItem.itemId, "leftHand")}>Equip Left</button>}
+                                                <div style={{ display: "inline-block", marginLeft: 5 }}>
+                                                    {item.type === "weapon" && (
+                                                        <>
+                                                            {rightHandFree && (
+                                                                <button onClick={() => handleEquip(invItem.itemId, "rightHand")}>
+                                                                    Equip Right
+                                                                </button>
+                                                            )}
+                                                            {leftHandFree && (
+                                                                <button onClick={() => handleEquip(invItem.itemId, "leftHand")}>
+                                                                    Equip Left
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    )}
+
+                                                    {item.type === "armour" && armourSlotFree && (
+                                                        <button
+                                                            onClick={() =>
+                                                                handleEquip(invItem.itemId, item.slot as keyof Character["equipment"])
+                                                            }
+                                                        >
+                                                            Equip {item.slot}
+                                                        </button>
+                                                    )}
+                                                    <button onClick={() => handleDrop(invItem.itemId)}>Drop</button>
                                                 </div>
                                             )}
                                         </div>
                                     );
                                 })}
                             </div>
+                            {groundLoots.length > 0 && (
+                                <div>
+                                    <h4>On Ground:</h4>
+                                    {groundLoots.map(loot => {
+                                        const item = getItem(loot.itemId, itemStore);
+                                        return (
+                                            <div key={loot.id} style={{ borderStyle: "dashed" }}>
+                                                {item?.name} x{loot.quantity}
+                                                <button onClick={() => handlePickUp(loot.id)}>Pick Up</button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </>
                     ) : (
                         <p style={{ minHeight: '200px' }}>Hover over a character to see info</p>

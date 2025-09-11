@@ -177,10 +177,17 @@ export interface CircleObstacle {
     name: string;
 };
 
+export interface Loot {
+  id: string;            // unique instance ID (e.g. uuid)
+  itemId: string;        // references itemStore
+  quantity: number;
+  location: { x: number; y: number };
+}
+
 export interface GameMap {
     rectObstacles: RectObstacle[];
     circleObstacles: CircleObstacle[];
-    loots: any;
+    loots: Loot[];
 };
 
 export interface Hit {

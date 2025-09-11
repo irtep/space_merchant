@@ -17,22 +17,36 @@ export const getEquippedWeapon = (
     return item && item.type === "weapon" ? (item as Weapon) : null;
 };
 
-// Equip item (keep stack in inventory, just mark equipped)
+// Equip item (takes 1 from inventory, places into equipment slot)
 export const equipItem = (
     character: Character,
     itemId: string,
     slot: keyof Character["equipment"]
 ): Character => {
-    const entry = character.inventory.find(e => e.itemId === itemId && e.quantity > 0);
-    if (!entry) return character; // item not in inventory
+    const entryIndex = character.inventory.findIndex(e => e.itemId === itemId && e.quantity > 0);
+    if (entryIndex === -1) return character; // item not in inventory
+
+    const newInventory = [...character.inventory];
+
+    // decrease quantity
+    if (newInventory[entryIndex].quantity > 1) {
+        newInventory[entryIndex] = {
+            ...newInventory[entryIndex],
+            quantity: newInventory[entryIndex].quantity - 1,
+        };
+    } else {
+        // remove entry entirely if quantity becomes 0
+        newInventory.splice(entryIndex, 1);
+    }
 
     return {
         ...character,
         equipment: { ...character.equipment, [slot]: itemId },
+        inventory: newInventory,
     };
 };
 
-// Unequip item (doesn't touch quantity, just clears slot)
+// Unequip item (adds 1 back to inventory, clears equipment slot)
 export const unequipItem = (
     character: Character,
     slot: keyof Character["equipment"]
@@ -40,8 +54,25 @@ export const unequipItem = (
     const itemId = character.equipment[slot];
     if (!itemId) return character;
 
+    // see if item already exists in inventory
+    const entryIndex = character.inventory.findIndex(e => e.itemId === itemId);
+    const newInventory = [...character.inventory];
+
+    if (entryIndex !== -1) {
+        // increase quantity
+        newInventory[entryIndex] = {
+            ...newInventory[entryIndex],
+            quantity: newInventory[entryIndex].quantity + 1,
+        };
+    } else {
+        // add new entry
+        newInventory.push({ itemId, quantity: 1 });
+    }
+
     return {
         ...character,
         equipment: { ...character.equipment, [slot]: undefined },
+        inventory: newInventory,
     };
 };
+

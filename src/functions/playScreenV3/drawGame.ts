@@ -1,4 +1,6 @@
-import { Character } from "../../interfaces/sharedInterfaces";
+import { itemStore } from "../../data/itemStore";
+import { Character, Loot } from "../../interfaces/sharedInterfaces";
+import { getItem } from "./equipmentHandling";
 
 interface Projectile {
   x: number;
@@ -72,6 +74,13 @@ export function drawGame(
     ctx.font = '14px Arial';
     ctx.fillStyle = 'cyan';
     ctx.fillText(c.name, c.location.x * CELL_SIZE + CELL_SIZE / 2, c.location.y * CELL_SIZE + CELL_SIZE / 2);
+  });
+
+  gameObject.gameMap.loots.forEach( (loot: Loot) => {
+    const item = getItem(loot.itemId, itemStore);
+    if (!item) return;
+    ctx.fillStyle = "gold"; // or icon per item
+    ctx.fillRect(loot.location.x * CELL_SIZE, loot.location.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
   });
 
   // projectiles
