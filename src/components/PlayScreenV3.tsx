@@ -379,6 +379,11 @@ const PlayScreenV3: React.FC = () => {
                         <>
                             <h3>{hoverChar.name}</h3>
                             <div>
+                                {`${hoverChar.profession} ${hoverChar.race}`} <br/>
+                                {`hit points: ${hoverChar.hitPoints}/${hoverChar.maxHitPoints}`} <br/>
+                                {`endurance points: ${hoverChar.endurancePoints}/${hoverChar.maxEndurancePoints}`} <br/>
+                            </div>
+                            <div>
                                 <h4>Equipment:</h4>
                                 {Object.entries(hoverChar.equipment).map(([slot, itemId]) => {
                                     const item = itemId ? getItem(itemId, itemStore) : null;

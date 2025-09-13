@@ -60,7 +60,9 @@ export interface Character {
     hitPoints: number;
     maxHitPoints: number;
     magicPoints: number;
+    maxMagicPoints: number;
     endurancePoints: number;
+    maxEndurancePoints: number;
 
     // Equipped items store IDs, not full objects
     equipment: {
