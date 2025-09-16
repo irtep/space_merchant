@@ -262,55 +262,114 @@ const PlayScreenV3: React.FC = () => {
 
         const step = () => {
             if (!pauseRef.current) {
-                // Update characters
-                setGameObject(prev => ({
-                    ...prev,
-                    characters: prev.characters.map(c => {
-                        if (c.path && c.path.length > 0) {
-                            const [nextX, nextY] = c.path[0];
-                            const targetX = nextX * CELL_SIZE + CELL_SIZE / 2;
-                            const targetY = nextY * CELL_SIZE + CELL_SIZE / 2;
-                            const currentX = c.location.x * CELL_SIZE + CELL_SIZE / 2;
-                            const currentY = c.location.y * CELL_SIZE + CELL_SIZE / 2;
+                setGameObject(prev => {
+                    let next = {
+                        ...prev,
+                        // bump update counter
+                        updateCounter: prev.updateCounter + 1,
+                    };
 
-                            const dx = targetX - currentX;
-                            const dy = targetY - currentY;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-                            const speed = 0.3;
+                    // === Update characters movement ===
+                    next = {
+                        ...next,
+                        characters: next.characters.map(c => {
+                            if (c.path && c.path.length > 0) {
+                                const [nextX, nextY] = c.path[0];
+                                const targetX = nextX * CELL_SIZE + CELL_SIZE / 2;
+                                const targetY = nextY * CELL_SIZE + CELL_SIZE / 2;
+                                const currentX = c.location.x * CELL_SIZE + CELL_SIZE / 2;
+                                const currentY = c.location.y * CELL_SIZE + CELL_SIZE / 2;
 
-                            if (dist < speed) {
-                                return { ...c, location: { x: nextX, y: nextY }, path: c.path.slice(1) };
-                            } else {
-                                return { ...c, location: { x: (currentX + (dx / dist) * speed) / CELL_SIZE - 0.5, y: (currentY + (dy / dist) * speed) / CELL_SIZE - 0.5 } };
+                                const dx = targetX - currentX;
+                                const dy = targetY - currentY;
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                const speed = 0.3;
+
+                                if (dist < speed) {
+                                    return {
+                                        ...c,
+                                        location: { x: nextX, y: nextY },
+                                        path: c.path.slice(1),
+                                    };
+                                } else {
+                                    return {
+                                        ...c,
+                                        location: {
+                                            x: (currentX + (dx / dist) * speed) / CELL_SIZE - 0.5,
+                                            y: (currentY + (dy / dist) * speed) / CELL_SIZE - 0.5,
+                                        },
+                                    };
+                                }
                             }
-                        }
-                        return c;
-                    }),
-                }));
+                            return c;
+                        }),
+                    };
 
-                // Update projectiles
-                setProjectiles(prev => prev.map(p => {
-                    if (!p.active) return p;
-                    const speed = 5;
-                    const nx = p.x + p.dx * speed;
-                    const ny = p.y + p.dy * speed;
-                    const newTrail = [...p.trail, { x: nx, y: ny, alpha: 1 }].slice(-15);
+                    // === Rhythm-based updates ===
+                    if (next.updateCounter % 100 === 0) {
+                        console.log("combat round");
+                        
+                        // close combat round
 
-                    // Check target collision
-                    if (p.targetId) {
-                        const target = charactersRef.current.find(c => c.id === p.targetId);
-                        if (target && Math.hypot(nx - (target.location.x * CELL_SIZE + CELL_SIZE / 2), ny - (target.location.y * CELL_SIZE + CELL_SIZE / 2)) < CELL_SIZE / 2) {
-                            return { ...p, active: false };
-                        }
+                        // cool down remove from guns and maybe close combats
+
+                        // shoot
+                        
+                        // example: call your combat resolution function
+                        //next = combatRound(next);
                     }
-                    return { ...p, x: nx, y: ny, trail: newTrail };
-                }).filter(p => p.active));
+
+                    if (next.hits.length > 0 && next.updateCounter % 10 === 0) {
+                        // remove old hits gradually
+                        next = {
+                            ...next,
+                            hits: next.hits.slice(1),
+                        };
+                    }
+
+                    if (next.updateCounter > 2000) {
+                        next.updateCounter = 0;
+                    }
+
+                    return next;
+                });
+
+                // === Projectiles ===
+                setProjectiles(prev =>
+                    prev
+                        .map(p => {
+                            if (!p.active) return p;
+                            const speed = 7;
+                            const nx = p.x + p.dx * speed;
+                            const ny = p.y + p.dy * speed;
+                            const newTrail = [...p.trail, { x: nx, y: ny, alpha: 1 }].slice(-15);
+
+                            if (p.targetId) {
+                                const target = charactersRef.current.find(c => c.id === p.targetId);
+                                if (
+                                    target &&
+                                    Math.hypot(
+                                        nx - (target.location.x * CELL_SIZE + CELL_SIZE / 2),
+                                        ny - (target.location.y * CELL_SIZE + CELL_SIZE / 2)
+                                    ) < CELL_SIZE / 2
+                                ) {
+                                    return { ...p, active: false };
+                                }
+                            }
+
+                            return { ...p, x: nx, y: ny, trail: newTrail };
+                        })
+                        .filter(p => p.active)
+                );
             }
+
             animationFrame = requestAnimationFrame(step);
         };
+
         animationFrame = requestAnimationFrame(step);
         return () => cancelAnimationFrame(animationFrame);
     }, []);
+
 
     /** KEYBOARD PAUSE */
     useEffect(() => {
@@ -379,9 +438,9 @@ const PlayScreenV3: React.FC = () => {
                         <>
                             <h3>{hoverChar.name}</h3>
                             <div>
-                                {`${hoverChar.profession} ${hoverChar.race}`} <br/>
-                                {`hit points: ${hoverChar.hitPoints}/${hoverChar.maxHitPoints}`} <br/>
-                                {`endurance points: ${hoverChar.endurancePoints}/${hoverChar.maxEndurancePoints}`} <br/>
+                                {`${hoverChar.profession} ${hoverChar.race}`} <br />
+                                {`hit points: ${hoverChar.hitPoints}/${hoverChar.maxHitPoints}`} <br />
+                                {`endurance points: ${hoverChar.endurancePoints}/${hoverChar.maxEndurancePoints}`} <br />
                             </div>
                             <div>
                                 <h4>Equipment:</h4>
