@@ -22,7 +22,6 @@ interface Projectile {
 const CELL_SIZE = 20;
 const GRID_WIDTH = 60;
 const GRID_HEIGHT = 40;
-const DEBUG_MODE: boolean = true;
 
 const PlayScreenV3: React.FC = () => {
     const { gameObject, setGameObject } = useSMContext();
@@ -61,8 +60,6 @@ const PlayScreenV3: React.FC = () => {
         (leftHandId && leftHandId !== "" ? getItem(leftHandId, itemStore) : undefined);
 
     const hasRanged = isWeapon(equippedWeapon) && equippedWeapon.effects.includes("ranged");
-
-
 
     /** BUILD PATHFINDING GRID */
     const buildGrid = (excludeId?: string) => {
@@ -573,7 +570,6 @@ const PlayScreenV3: React.FC = () => {
                         </div>
                     )}
 
-
                     <div style={{ marginTop: 10 }}>
                         <label>Projectile Type: </label>
                         <select value={projectileType} onChange={e => setProjectileType(e.target.value as any)}>
@@ -587,7 +583,6 @@ const PlayScreenV3: React.FC = () => {
                         {paused ? "Resume" : "Pause"}
                     </button>
 
-                    {DEBUG_MODE && <div style={{ marginTop: 10 }}>Debug mode ON</div>}
                 </Box>
             </Box>
         </Container>
