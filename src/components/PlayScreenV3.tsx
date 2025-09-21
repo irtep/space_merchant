@@ -16,9 +16,9 @@ interface Projectile {
     dx: number;
     dy: number;
     active: boolean;
-    trail: { x: number; y: number; alpha: number }[];
-    type: "laser" | "energy" | "bullet";
-    targetId?: string;
+    trail: { x: number; y: number }[];
+    type: string; // e.g. "bullet", "laser"
+    targetId: string;
 }
 
 const CELL_SIZE = 20;
@@ -311,7 +311,7 @@ const PlayScreenV3: React.FC = () => {
     };
 
     /** PROJECTILE FIRING */
-    const shootAtCharacter = (shooterId: string, target: Character) => {
+    const shootAtCharacter = (shooterId: string, target: Character, projectileType = "bullet") => {
         const shooter = gameObject.characters.find(c => c.id === shooterId);
         if (!shooter) return;
 
@@ -319,15 +319,26 @@ const PlayScreenV3: React.FC = () => {
         const startY = shooter.location.y * CELL_SIZE + CELL_SIZE / 2;
         const targetX = target.location.x * CELL_SIZE + CELL_SIZE / 2;
         const targetY = target.location.y * CELL_SIZE + CELL_SIZE / 2;
+
         const dx = targetX - startX;
         const dy = targetY - startY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         setProjectiles(prev => [
             ...prev,
-            { x: startX, y: startY, dx: dx / dist, dy: dy / dist, active: true, trail: [], type: projectileType, targetId: target.id },
+            {
+                x: startX,
+                y: startY,
+                dx: dx / dist, // normalized step
+                dy: dy / dist,
+                active: true,
+                trail: [],
+                type: projectileType,
+                targetId: target.id,
+            } as Projectile,
         ]);
     };
+
 
     /** GAME LOOP */
     useEffect(() => {
