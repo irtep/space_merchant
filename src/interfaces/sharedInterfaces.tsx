@@ -89,7 +89,7 @@ export interface Character {
     canTalk: boolean;
     action: string;
     actionTarget: string;
-    targetLocation: Coordinates;
+    targetLocation?: Coordinates;
     isPlayer: boolean;
     selected: boolean;
     desc?: string;

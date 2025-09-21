@@ -2,11 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { Grid, AStarFinder } from "pathfinding";
 import { Box, Container } from "@mui/material";
 import { useSMContext } from "../context/smContext";
-import { AnyItem, Character, Weapon, } from "../interfaces/sharedInterfaces";
+import { AnyItem, Character, GameObject, Weapon, } from "../interfaces/sharedInterfaces";
 import { placeCharactersRandomly } from "../functions/playScreenV3/pSv3functions";
 import { drawGame } from "../functions/playScreenV3/drawGame";
 import { getItem, equipItem, unequipItem } from "../functions/playScreenV3/equipmentHandling";
 import { itemStore } from "../data/itemStore";
+import { findPathToAdjacent, meleeAttack } from "../functions/playScreenV3/closeCombat";
+import { getObstacles, hasLineOfSight } from "../functions/playScreenV3/rangedAttack";
 
 interface Projectile {
     x: number;
@@ -113,27 +115,6 @@ const PlayScreenV3: React.FC = () => {
         const clickX = Math.floor((e.clientX - rect.left) / CELL_SIZE);
         const clickY = Math.floor((e.clientY - rect.top) / CELL_SIZE);
 
-        // Targeting for ranged/melee
-        if ((selectedAction === "ranged" || selectedAction === "melee") && selectedId) {
-            const targetChar = gameObject.characters.find(c =>
-                Math.round(c.location.x) === clickX &&
-                Math.round(c.location.y) === clickY
-            );
-
-            if (targetChar) {
-                if (selectedAction === "ranged") {
-                    shootAtCharacter(selectedId, targetChar);
-                } else {
-                    console.log("Melee attack", targetChar.id);
-                    // TODO: melee logic
-                }
-                setSelectedAction(null);
-                return;
-            }
-            setSelectedAction(null);
-            return;
-        }
-
         // Movement
         if (selectedAction === "move" && selectedId) {
             const grid = buildGrid(selectedId);
@@ -157,6 +138,101 @@ const PlayScreenV3: React.FC = () => {
             }));
             setSelectedAction(null);
             return;
+        }
+
+        // Ranged
+        if (selectedAction === "ranged" && selectedId) {
+            const attacker = gameObject.characters.find(c => c.id === selectedId);
+            const target = gameObject.characters.find(
+                c => Math.round(c.location.x) === clickX && Math.round(c.location.y) === clickY
+            );
+
+            if (!attacker || !target) return;
+
+            const obstacles = getObstacles(gameObject); // ← implement like your pathfinder obstacles
+            if (hasLineOfSight(
+                { x: Math.round(attacker.location.x), y: Math.round(attacker.location.y) },
+                { x: Math.round(target.location.x), y: Math.round(target.location.y) },
+                obstacles
+            )) {
+                // 👊 immediate ranged attack
+                shootAtCharacter(selectedId, target);
+            } else {
+                // 🚶 move until LoS
+                const grid = buildGrid(selectedId);
+                const finder = new AStarFinder({ allowDiagonal: true, dontCrossCorners: true });
+                const path = finder.findPath(
+                    Math.round(attacker.location.x),
+                    Math.round(attacker.location.y),
+                    clickX,
+                    clickY,
+                    grid.clone()
+                );
+
+                setGameObject(gob => ({
+                    ...gob,
+                    characters: gob.characters.map(c =>
+                        c.id === selectedId
+                            ? {
+                                ...c,
+                                path,
+                                targetLocation: { x: clickX, y: clickY },
+                                action: "moveAndShoot",
+                                actionTarget: target.id,
+                            }
+                            : c
+                    ),
+                }));
+            }
+
+            setSelectedAction(null);
+            return;
+        }
+
+        // close combat
+        if (selectedAction === "melee" && selectedId) {
+            const target = gameObject.characters.find(
+                c => Math.round(c.location.x) === clickX &&
+                    Math.round(c.location.y) === clickY
+            );
+
+            if (target && target.team !== selectedChar?.team && selectedChar) {
+                const obstacles = [
+                    ...gameObject.gameMap.rectObstacles.flatMap(r =>
+                        Array.from({ length: r.w }, (_, dx) =>
+                            Array.from({ length: r.h }, (_, dy) =>
+                                ({ x: r.x + dx, y: r.y + dy })
+                            )
+                        ).flat()
+                    ),
+                    ...gameObject.characters
+                        .filter(c => c.id !== selectedChar.id && c.id !== target.id)
+                        .map(c => ({ x: Math.round(c.location.x), y: Math.round(c.location.y) })),
+                ];
+
+                const path = findPathToAdjacent(
+                    { x: Math.round(selectedChar.location.x), y: Math.round(selectedChar.location.y) },
+                    { x: Math.round(target.location.x), y: Math.round(target.location.y) },
+                    obstacles,
+                    GRID_WIDTH,
+                    GRID_HEIGHT
+                );
+
+                setGameObject((gob: GameObject) => ({
+                    ...gob,
+                    characters: gob.characters.map((c: Character) => {
+                        if (c.id === selectedChar.id) {
+                            return {
+                                ...c,
+                                path,
+                                targetLocation: { x: target.location.x, y: target.location.y }
+                                //      pendingAttack: { type: "melee", targetId: target.id } // 👈 new field
+                            };
+                        }
+                        return c;
+                    })
+                }));
+            }
         }
 
         // Selection
@@ -305,13 +381,13 @@ const PlayScreenV3: React.FC = () => {
                     // === Rhythm-based updates ===
                     if (next.updateCounter % 100 === 0) {
                         console.log("combat round");
-                        
+
                         // close combat round
 
                         // cool down remove from guns and maybe close combats
 
                         // shoot
-                        
+
                         // example: call your combat resolution function
                         //next = combatRound(next);
                     }
@@ -590,3 +666,5 @@ const PlayScreenV3: React.FC = () => {
 };
 
 export default PlayScreenV3;
+
+
