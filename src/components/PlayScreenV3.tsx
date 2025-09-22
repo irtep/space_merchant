@@ -16,10 +16,11 @@ interface Projectile {
     dx: number;
     dy: number;
     active: boolean;
-    trail: { x: number; y: number }[];
-    type: string; // e.g. "bullet", "laser"
+    trail: { x: number; y: number; alpha: number }[];
+    type: "laser" | "energy" | "bullet";
     targetId: string;
 }
+
 
 const CELL_SIZE = 20;
 const GRID_WIDTH = 60;
@@ -149,14 +150,14 @@ const PlayScreenV3: React.FC = () => {
 
             if (!attacker || !target) return;
 
-            const obstacles = getObstacles(gameObject); // ← implement like your pathfinder obstacles
+            const obstacles = getObstacles(gameObject, [attacker.id, target.id]);
             if (hasLineOfSight(
                 { x: Math.round(attacker.location.x), y: Math.round(attacker.location.y) },
                 { x: Math.round(target.location.x), y: Math.round(target.location.y) },
                 obstacles
             )) {
                 // 👊 immediate ranged attack
-                shootAtCharacter(selectedId, target);
+                shootAtCharacter(selectedId, target, projectileType);
             } else {
                 // 🚶 move until LoS
                 const grid = buildGrid(selectedId);
@@ -311,7 +312,7 @@ const PlayScreenV3: React.FC = () => {
     };
 
     /** PROJECTILE FIRING */
-    const shootAtCharacter = (shooterId: string, target: Character, projectileType = "bullet") => {
+    const shootAtCharacter = (shooterId: string, target: Character, projectileType: string) => {
         const shooter = gameObject.characters.find(c => c.id === shooterId);
         if (!shooter) return;
 
@@ -391,7 +392,7 @@ const PlayScreenV3: React.FC = () => {
 
                     // === Rhythm-based updates ===
                     if (next.updateCounter % 100 === 0) {
-                        console.log("combat round");
+                        //console.log("combat round");
 
                         // close combat round
 
@@ -401,6 +402,7 @@ const PlayScreenV3: React.FC = () => {
 
                         // example: call your combat resolution function
                         //next = combatRound(next);
+                        //console.log('go: ', gameObject);
                     }
 
                     if (next.hits.length > 0 && next.updateCounter % 10 === 0) {
@@ -423,11 +425,18 @@ const PlayScreenV3: React.FC = () => {
                     prev
                         .map(p => {
                             if (!p.active) return p;
+
                             const speed = 7;
                             const nx = p.x + p.dx * speed;
                             const ny = p.y + p.dy * speed;
-                            const newTrail = [...p.trail, { x: nx, y: ny, alpha: 1 }].slice(-15);
 
+                            // Fade old trail points
+                            const fadedTrail = p.trail.map(tp => ({ ...tp, alpha: tp.alpha * 0.9 }));
+
+                            // Add new point with full opacity
+                            const newTrail = [...fadedTrail, { x: nx, y: ny, alpha: 1 }].slice(-15);
+
+                            // Check hit
                             if (p.targetId) {
                                 const target = charactersRef.current.find(c => c.id === p.targetId);
                                 if (
@@ -437,6 +446,8 @@ const PlayScreenV3: React.FC = () => {
                                         ny - (target.location.y * CELL_SIZE + CELL_SIZE / 2)
                                     ) < CELL_SIZE / 2
                                 ) {
+                                    // 💥 target hit
+                                    console.log('arget hit');
                                     return { ...p, active: false };
                                 }
                             }
@@ -445,6 +456,7 @@ const PlayScreenV3: React.FC = () => {
                         })
                         .filter(p => p.active)
                 );
+
             }
 
             animationFrame = requestAnimationFrame(step);

@@ -87,6 +87,24 @@ export function drawGame(
   });
 
   // projectiles
+  // === Projectiles ===
+  projectiles.forEach(p => {
+    // Draw trail
+    p.trail.forEach(tp => {
+      ctx.globalAlpha = tp.alpha;
+      ctx.fillStyle = p.type === "laser" ? "red"
+        : p.type === "energy" ? "cyan"
+          : "yellow";
+
+      ctx.beginPath();
+      ctx.arc(tp.x, tp.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.globalAlpha = 1; // reset
+  });
+
+  /*
   projectiles.forEach(p => {
     switch (p.type) {
       case "laser":
@@ -116,7 +134,7 @@ export function drawGame(
         break;
     }
   });
-
+*/
   // hover previews
   if (hoverPos && selectedAction) {
     const cx = hoverPos.x * CELL_SIZE + CELL_SIZE / 2;

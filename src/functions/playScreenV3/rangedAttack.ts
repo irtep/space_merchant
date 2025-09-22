@@ -4,30 +4,34 @@
 import { GameObject } from "../../interfaces/sharedInterfaces";
 
 /** Collect obstacles as array of coordinates (for LoS checks) */
-export const getObstacles = (gameObject: GameObject, excludeId?: string): { x: number; y: number }[] => {
-    const obstacles: { x: number; y: number }[] = [];
+export const getObstacles = (
+  gameObject: GameObject,
+  excludeIds: string[] = []
+): { x: number; y: number }[] => {
+  const obstacles: { x: number; y: number }[] = [];
 
-    // Rectangular obstacles from map
-    gameObject.gameMap.rectObstacles.forEach(b => {
-        for (let i = 0; i < b.w; i++) {
-            for (let j = 0; j < b.h; j++) {
-                obstacles.push({ x: b.x + i, y: b.y + j });
-            }
-        }
-    });
+  // Rectangular obstacles from map
+  gameObject.gameMap.rectObstacles.forEach(b => {
+    for (let i = 0; i < b.w; i++) {
+      for (let j = 0; j < b.h; j++) {
+        obstacles.push({ x: b.x + i, y: b.y + j });
+      }
+    }
+  });
 
-    // Characters as obstacles (except the excluded one, e.g. the attacker)
-    gameObject.characters.forEach(c => {
-        if (c.id !== excludeId) {
-            obstacles.push({
-                x: Math.round(c.location.x),
-                y: Math.round(c.location.y)
-            });
-        }
-    });
+  // Characters as obstacles (except the excluded ones, e.g. attacker + target)
+  gameObject.characters.forEach(c => {
+    if (!excludeIds.includes(c.id)) {
+      obstacles.push({
+        x: Math.round(c.location.x),
+        y: Math.round(c.location.y),
+      });
+    }
+  });
 
-    return obstacles;
+  return obstacles;
 };
+
 
 export function hasLineOfSight(
   start: { x: number; y: number },
@@ -46,7 +50,10 @@ export function hasLineOfSight(
   let err = dx - dy;
 
   while (true) {
-    if (obstacleSet.has(`${x0},${y0}`)) return false; // 👈 blocked
+    if (obstacleSet.has(`${x0},${y0}`)) {
+      console.log('los blocked');
+      return false;
+    } // 👈 blocked
     if (x0 === x1 && y0 === y1) break;
     const e2 = 2 * err;
     if (e2 > -dy) { err -= dy; x0 += sx; }
