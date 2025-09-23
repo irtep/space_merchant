@@ -120,7 +120,7 @@ const PlayScreenV3: React.FC = () => {
         if (selectedAction === "move" && selectedId) {
             const grid = buildGrid(selectedId);
             const finder = new AStarFinder({ allowDiagonal: true, dontCrossCorners: true });
-
+            console.log('finder: ', finder);
             setGameObject(gob => ({
                 ...gob,
                 characters: gob.characters.map(c => {
@@ -132,7 +132,7 @@ const PlayScreenV3: React.FC = () => {
                             clickY,
                             grid.clone()
                         );
-                        return { ...c, targetLocation: { x: clickX, y: clickY }, path };
+                        return { ...c, targetLocation: { x: clickX, y: clickY }, path, action: 'move' };
                     }
                     return c;
                 }),
@@ -143,51 +143,99 @@ const PlayScreenV3: React.FC = () => {
 
         // Ranged
         if (selectedAction === "ranged" && selectedId) {
-            const attacker = gameObject.characters.find(c => c.id === selectedId);
+            //const attacker = gameObject.characters.find(c => c.id === selectedId);
             const target = gameObject.characters.find(
                 c => Math.round(c.location.x) === clickX && Math.round(c.location.y) === clickY
             );
+            if (target && target.team !== selectedChar?.team && selectedChar) {
+                const obstacles = [
+                    ...gameObject.gameMap.rectObstacles.flatMap(r =>
+                        Array.from({ length: r.w }, (_, dx) =>
+                            Array.from({ length: r.h }, (_, dy) =>
+                                ({ x: r.x + dx, y: r.y + dy })
+                            )
+                        ).flat()
+                    ),
+                    ...gameObject.characters
+                        .filter(c => c.id !== selectedChar.id && c.id !== target.id)
+                        .map(c => ({ x: Math.round(c.location.x), y: Math.round(c.location.y) })),
+                ];
 
-            if (!attacker || !target) return;
-
-            const obstacles = getObstacles(gameObject, [attacker.id, target.id]);
-            if (hasLineOfSight(
-                { x: Math.round(attacker.location.x), y: Math.round(attacker.location.y) },
-                { x: Math.round(target.location.x), y: Math.round(target.location.y) },
-                obstacles
-            )) {
-                // 👊 immediate ranged attack
-                shootAtCharacter(selectedId, target, projectileType);
-            } else {
-                // 🚶 move until LoS
-                const grid = buildGrid(selectedId);
-                const finder = new AStarFinder({ allowDiagonal: true, dontCrossCorners: true });
-                const path = finder.findPath(
-                    Math.round(attacker.location.x),
-                    Math.round(attacker.location.y),
-                    clickX,
-                    clickY,
-                    grid.clone()
+                const path = findPathToAdjacent(
+                    { x: Math.round(selectedChar.location.x), y: Math.round(selectedChar.location.y) },
+                    { x: Math.round(target.location.x), y: Math.round(target.location.y) },
+                    obstacles,
+                    GRID_WIDTH,
+                    GRID_HEIGHT
                 );
 
-                setGameObject(gob => ({
+                setGameObject((gob: GameObject) => ({
                     ...gob,
-                    characters: gob.characters.map(c =>
-                        c.id === selectedId
-                            ? {
+                    characters: gob.characters.map((c: Character) => {
+                        if (c.id === selectedChar.id) {
+                            return {
                                 ...c,
+                                action: 'ranged',
                                 path,
-                                targetLocation: { x: clickX, y: clickY },
-                                action: "moveAndShoot",
-                                actionTarget: target.id,
-                            }
-                            : c
-                    ),
+                                actionTarget: target,
+                                targetLocation: { x: target.location.x, y: target.location.y }
+                            };
+                        }
+                        return c;
+                    })
                 }));
-            }
 
-            setSelectedAction(null);
-            return;
+                /*
+                const obstacles = getObstacles(gameObject, [attacker.id, target.id]);
+                if (hasLineOfSight(
+                    { x: Math.round(attacker.location.x), y: Math.round(attacker.location.y) },
+                    { x: Math.round(target.location.x), y: Math.round(target.location.y) },
+                    obstacles
+                )) {
+                    // 👊 immediate ranged attack
+                    shootAtCharacter(selectedId, target, projectileType);
+                } else {
+                    console.log('trying to move');
+                    // 🚶 move until LoS
+                    const grid = buildGrid(selectedId);
+                    const finder = new AStarFinder({ allowDiagonal: true, dontCrossCorners: true });
+                    const path = finder.findPath(
+                        Math.round(attacker.location.x),
+                        Math.round(attacker.location.y),
+                        clickX,
+                        clickY,
+                        grid.clone()
+                    );
+                    setGameObject((gob: GameObject) => ({
+                        ...gob,
+                        characters: gob.characters.map((c: Character) => {
+                            if (c.id === selectedId) {
+                                return {
+                                    ...c,
+                                    path,
+                                    targetLocation: { x: target.location.x, y: target.location.y }
+                                };
+                            }
+                            return c;
+                        })
+                    }));
+                    /*
+                    setGameObject(gob => ({
+                        ...gob,
+                        characters: gob.characters.map(c =>
+                            c.id === selectedId
+                                ? {
+                                    ...c,
+                                    path,
+                                    targetLocation: { x: clickX, y: clickY },
+                                    action: "moveAndShoot",
+                                    actionTarget: target.id,
+                                }
+                                : c
+                        ),
+                    }));
+                    */
+            }
         }
 
         // close combat
@@ -225,9 +273,9 @@ const PlayScreenV3: React.FC = () => {
                         if (c.id === selectedChar.id) {
                             return {
                                 ...c,
+                                actionTarget: target,
                                 path,
                                 targetLocation: { x: target.location.x, y: target.location.y }
-                                //      pendingAttack: { type: "melee", targetId: target.id } // 👈 new field
                             };
                         }
                         return c;
@@ -392,18 +440,58 @@ const PlayScreenV3: React.FC = () => {
 
                     // === Rhythm-based updates ===
                     if (next.updateCounter % 100 === 0) {
-                        //console.log("combat round");
+                        const projectilesToSpawn: { shooterId: string; target: Character }[] = [];
 
-                        // close combat round
+                        next = {
+                            ...next,
+                            characters: next.characters.map(c => {
+                                if (c.action === "ranged" && c.actionTarget?.id) {
+                                    const target = next.characters.find(t => t.id === c.actionTarget.id);
+                                    if (target) {
+                                        const obstacles = getObstacles(next, [c.id, c.actionTarget.id]);
+                                        const hasLoS = hasLineOfSight(
+                                            { x: Math.round(c.location.x), y: Math.round(c.location.y) },
+                                            { x: Math.round(target.location.x), y: Math.round(target.location.y) },
+                                            obstacles
+                                        );
 
-                        // cool down remove from guns and maybe close combats
+                                        if (hasLoS) {
+                                            console.log(`${c.name} shoots at ${target.name}`);
+                                            c = { ...c, path: [] };
 
-                        // shoot
+                                            // queue projectile instead of calling immediately
+                                            projectilesToSpawn.push({ shooterId: c.id, target });
+                                        }
+                                    }
+                                }
+                                return c;
+                            }),
+                        };
 
-                        // example: call your combat resolution function
-                        //next = combatRound(next);
-                        //console.log('go: ', gameObject);
+                        // after updating game state, spawn projectiles in a separate state update
+                        if (projectilesToSpawn.length > 0) {
+                            setTimeout(() => {
+                                projectilesToSpawn.forEach(({ shooterId, target }) =>
+                                    shootAtCharacter(shooterId, target, "laser")
+                                );
+                            }, 0);
+                        }
                     }
+
+                    /*
+                                                    // === MELEE ===
+                                                    if (c.action === "melee" && c.actionTarget.id) {
+                                                        const target = next.characters.find(t => t.id === c.actionTarget.id);
+                                                        if (target) {
+                                                            const dx = Math.abs(Math.round(c.location.x) - Math.round(target.location.x));
+                                                            const dy = Math.abs(Math.round(c.location.y) - Math.round(target.location.y));
+                                                            if (dx <= 1 && dy <= 1) {
+                                                                console.log("close combat", c.name, "vs", target.name);
+                                                                // (later: resolve damage here)
+                                                            }
+                                                        }
+                                                    }
+                    */
 
                     if (next.hits.length > 0 && next.updateCounter % 10 === 0) {
                         // remove old hits gradually
@@ -681,7 +769,9 @@ const PlayScreenV3: React.FC = () => {
                     <button onClick={() => setPaused(p => !p)} style={{ marginTop: 10 }}>
                         {paused ? "Resume" : "Pause"}
                     </button>
-
+                    <button onClick={() => console.log('game object ', gameObject)} style={{ marginTop: 10 }}>
+                        game object
+                    </button>
                 </Box>
             </Box>
         </Container>
