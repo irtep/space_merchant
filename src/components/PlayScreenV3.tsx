@@ -360,10 +360,11 @@ const PlayScreenV3: React.FC = () => {
     };
 
     /** PROJECTILE FIRING */
-    const shootAtCharacter = (shooterId: string, target: Character, projectileType: string) => {
-        const shooter = gameObject.characters.find(c => c.id === shooterId);
+    const shootAtCharacter = (shooter: Character, target: Character, projectileType: string) => {
+        //const shooter = gameObject.characters.find(c => c.id === shooterId);
         if (!shooter) return;
-
+        console.log('shooter: ', shooter);
+        //console.log('target: ', target);
         const startX = shooter.location.x * CELL_SIZE + CELL_SIZE / 2;
         const startY = shooter.location.y * CELL_SIZE + CELL_SIZE / 2;
         const targetX = target.location.x * CELL_SIZE + CELL_SIZE / 2;
@@ -372,7 +373,7 @@ const PlayScreenV3: React.FC = () => {
         const dx = targetX - startX;
         const dy = targetY - startY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-
+        console.log('shoot at. start: ', startX, startY, ' target: ', targetX, targetY);
         setProjectiles(prev => [
             ...prev,
             {
@@ -440,7 +441,7 @@ const PlayScreenV3: React.FC = () => {
 
                     // === Rhythm-based updates ===
                     if (next.updateCounter % 100 === 0) {
-                        const projectilesToSpawn: { shooterId: string; target: Character }[] = [];
+                        const projectilesToSpawn: { shooter: Character; target: Character }[] = [];
 
                         next = {
                             ...next,
@@ -460,7 +461,7 @@ const PlayScreenV3: React.FC = () => {
                                             c = { ...c, path: [] };
 
                                             // queue projectile instead of calling immediately
-                                            projectilesToSpawn.push({ shooterId: c.id, target });
+                                            projectilesToSpawn.push({ shooter: c, target });
                                         }
                                     }
                                 }
@@ -469,11 +470,12 @@ const PlayScreenV3: React.FC = () => {
                         };
 
                         // after updating game state, spawn projectiles in a separate state update
+                        console.log('projectiles to spawn ', projectilesToSpawn);
                         if (projectilesToSpawn.length > 0) {
                             setTimeout(() => {
-                                projectilesToSpawn.forEach(({ shooterId, target }) =>
-                                    shootAtCharacter(shooterId, target, "laser")
-                                );
+                                projectilesToSpawn.forEach(({ shooter, target }) => {
+                                    shootAtCharacter(shooter, target, "laser")
+                                });
                             }, 0);
                         }
                     }
