@@ -143,7 +143,6 @@ const PlayScreenV3: React.FC = () => {
 
         // Ranged
         if (selectedAction === "ranged" && selectedId) {
-            //const attacker = gameObject.characters.find(c => c.id === selectedId);
             const target = gameObject.characters.find(
                 c => Math.round(c.location.x) === clickX && Math.round(c.location.y) === clickY
             );
@@ -177,6 +176,7 @@ const PlayScreenV3: React.FC = () => {
                                 ...c,
                                 action: 'ranged',
                                 path,
+                                enemies: [...c.enemies, target.team],
                                 actionTarget: target,
                                 targetLocation: { x: target.location.x, y: target.location.y }
                             };
@@ -184,57 +184,6 @@ const PlayScreenV3: React.FC = () => {
                         return c;
                     })
                 }));
-
-                /*
-                const obstacles = getObstacles(gameObject, [attacker.id, target.id]);
-                if (hasLineOfSight(
-                    { x: Math.round(attacker.location.x), y: Math.round(attacker.location.y) },
-                    { x: Math.round(target.location.x), y: Math.round(target.location.y) },
-                    obstacles
-                )) {
-                    // 👊 immediate ranged attack
-                    shootAtCharacter(selectedId, target, projectileType);
-                } else {
-                    console.log('trying to move');
-                    // 🚶 move until LoS
-                    const grid = buildGrid(selectedId);
-                    const finder = new AStarFinder({ allowDiagonal: true, dontCrossCorners: true });
-                    const path = finder.findPath(
-                        Math.round(attacker.location.x),
-                        Math.round(attacker.location.y),
-                        clickX,
-                        clickY,
-                        grid.clone()
-                    );
-                    setGameObject((gob: GameObject) => ({
-                        ...gob,
-                        characters: gob.characters.map((c: Character) => {
-                            if (c.id === selectedId) {
-                                return {
-                                    ...c,
-                                    path,
-                                    targetLocation: { x: target.location.x, y: target.location.y }
-                                };
-                            }
-                            return c;
-                        })
-                    }));
-                    /*
-                    setGameObject(gob => ({
-                        ...gob,
-                        characters: gob.characters.map(c =>
-                            c.id === selectedId
-                                ? {
-                                    ...c,
-                                    path,
-                                    targetLocation: { x: clickX, y: clickY },
-                                    action: "moveAndShoot",
-                                    actionTarget: target.id,
-                                }
-                                : c
-                        ),
-                    }));
-                    */
             }
         }
 
@@ -274,6 +223,7 @@ const PlayScreenV3: React.FC = () => {
                             return {
                                 ...c,
                                 actionTarget: target,
+                                enemies: [...c.enemies, target.team],
                                 path,
                                 targetLocation: { x: target.location.x, y: target.location.y }
                             };
@@ -373,7 +323,7 @@ const PlayScreenV3: React.FC = () => {
         const dx = targetX - startX;
         const dy = targetY - startY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        console.log('shoot at. start: ', startX, startY, ' target: ', targetX, targetY);
+        //console.log('shoot at. start: ', startX, startY, ' target: ', targetX, targetY);
         setProjectiles(prev => [
             ...prev,
             {
@@ -388,7 +338,6 @@ const PlayScreenV3: React.FC = () => {
             } as Projectile,
         ]);
     };
-
 
     /** GAME LOOP */
     useEffect(() => {
@@ -455,12 +404,26 @@ const PlayScreenV3: React.FC = () => {
                                             { x: Math.round(target.location.x), y: Math.round(target.location.y) },
                                             obstacles
                                         );
-
                                         if (hasLoS) {
                                             console.log(`${c.name} shoots at ${target.name}`);
+
+                                            // deduct damage immediately
+                                            next = {
+                                                ...next,
+                                                characters: next.characters.map(cc => {
+                                                    console.log('cc.id', cc.id, ' target.id: ', target.id);
+                                                    if (cc.id === target.id) {
+                                                        return {...cc, hitPoints: cc.hitPoints - 1}
+                                                    } else {
+                                                        return cc;
+                                                    }
+                                                }),
+                                            };
+
+                                            // clear shooter’s path
                                             c = { ...c, path: [] };
 
-                                            // queue projectile instead of calling immediately
+                                            // still queue projectile (for visuals)
                                             projectilesToSpawn.push({ shooter: c, target });
                                         }
                                     }
@@ -470,7 +433,8 @@ const PlayScreenV3: React.FC = () => {
                         };
 
                         // after updating game state, spawn projectiles in a separate state update
-                        console.log('projectiles to spawn ', projectilesToSpawn);
+                        //console.log('projectiles to spawn ', projectilesToSpawn);
+                        /*
                         if (projectilesToSpawn.length > 0) {
                             setTimeout(() => {
                                 projectilesToSpawn.forEach(({ shooter, target }) => {
@@ -478,6 +442,13 @@ const PlayScreenV3: React.FC = () => {
                                 });
                             }, 0);
                         }
+                            */
+                        if (projectilesToSpawn.length > 0) {
+                            projectilesToSpawn.forEach(({ shooter, target }) => {
+                                shootAtCharacter(shooter, target, "laser");
+                            });
+                        }
+
                     }
 
                     /*
@@ -511,12 +482,14 @@ const PlayScreenV3: React.FC = () => {
                 });
 
                 // === Projectiles ===
-                setProjectiles(prev =>
-                    prev
+                setProjectiles(prev => {
+                    //const newDamageEvents: { targetId: string; amount: number }[] = [];
+
+                    const updated = prev
                         .map(p => {
                             if (!p.active) return p;
 
-                            const speed = 7;
+                            const speed = 27;
                             const nx = p.x + p.dx * speed;
                             const ny = p.y + p.dy * speed;
 
@@ -536,19 +509,22 @@ const PlayScreenV3: React.FC = () => {
                                         ny - (target.location.y * CELL_SIZE + CELL_SIZE / 2)
                                     ) < CELL_SIZE / 2
                                 ) {
-                                    // 💥 target hit
-                                    console.log('arget hit');
-                                    return { ...p, active: false };
+                                    // 💥 projectile hit -> record damage
+                                    console.log("Projectile hit", target.name);
+                                    //newDamageEvents.push({ targetId: target.id, amount: 1 });
+
+                                    return { ...p, active: false }; // deactivate projectile
                                 }
                             }
 
                             return { ...p, x: nx, y: ny, trail: newTrail };
                         })
-                        .filter(p => p.active)
-                );
+                        .filter(p => p.active);
+
+                    return updated;
+                });
 
             }
-
             animationFrame = requestAnimationFrame(step);
         };
 
