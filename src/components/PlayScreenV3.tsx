@@ -7,7 +7,7 @@ import { placeCharactersRandomly } from "../functions/playScreenV3/pSv3functions
 import { drawGame } from "../functions/playScreenV3/drawGame";
 import { getItem, equipItem, unequipItem } from "../functions/playScreenV3/equipmentHandling";
 import { itemStore } from "../data/itemStore";
-import { findPathToAdjacent, meleeAttack } from "../functions/playScreenV3/closeCombat";
+import { findPathToAdjacent } from "../functions/playScreenV3/closeCombat";
 import { getObstacles, hasLineOfSight } from "../functions/playScreenV3/rangedAttack";
 
 interface Projectile {
@@ -108,7 +108,7 @@ const PlayScreenV3: React.FC = () => {
         // First pass: identify all valid attacks and collect damage
         const charactersAfterAnalysis = gameState.characters.map(c => {
             if (c.action === "ranged" && c.actionTarget?.id) {
-                const target = gameState.characters.find(t => t.id === c.actionTarget.id);
+                const target = gameState.characters.find(t => t.id === c.actionTarget?.id);
                 if (target) {
                     const obstacles = getObstacles(gameState, [c.id, c.actionTarget.id]);
                     const hasLoS = hasLineOfSight(

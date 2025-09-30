@@ -47,7 +47,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         friends: [],
         canTalk: true,
         action: 'wait',
-        actionTarget: '',
+        actionTarget: null,
         targetLocation: { x: 0, y: 0 },
         inventory: [],
         isPlayer: true,
@@ -307,37 +307,9 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
                                         console.log('clicked to preBattle');
                                         setGameObject({
                                             ...gameObject,
-                                            characters: [initialCharacter]
-                                        });
-                                        setView('play1');
-                                    }}
-                                >
-                                    Start the Adventure
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => {
-                                        console.log('clicked to preBattle');
-                                        setGameObject({
-                                            ...gameObject,
-                                            characters: [initialCharacter]
-                                        });
-                                        setView('play2');
-                                    }}
-                                >
-                                    Start the Adventure
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => {
-                                        console.log('clicked to preBattle');
-                                        setGameObject({
-                                            ...gameObject,
                                             characters: [initialCharacter, ...npcs]
                                         });
-                                        setView('play3');
+                                        setView('play1');
                                     }}
                                 >
                                     Start the Adventure
