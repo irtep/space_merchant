@@ -21,7 +21,7 @@ export function drawGame(
   selectedId: string | null,
   projectiles: Projectile[],
   hoverPos: { x: number; y: number } | null,
-  selectedAction: "move" | "ranged" | "melee" | null
+  selectedAction: "move" | "ranged" | "melee" | "wait" | null
 ) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
