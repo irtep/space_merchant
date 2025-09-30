@@ -88,7 +88,7 @@ export interface Character {
     friends: string[];
     canTalk: boolean;
     action: string;
-    actionTarget: Character;
+    actionTarget: Character | null;
     targetLocation?: Coordinates;
     isPlayer: boolean;
     selected: boolean;
