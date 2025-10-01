@@ -22,6 +22,7 @@ export const itemStore: Record<string, AnyItem> = {
     weight: 0.02,
     rarity: "common",
     stackable: true,
+    damageType: 'physical'
   },
   "pistol-01": {
     id: "pistol-01",
@@ -34,13 +35,14 @@ export const itemStore: Record<string, AnyItem> = {
     rarity: "common",
     stackable: true,
     handlingSkill: "pistols",
-    range: 5,
+    range: 25,
     rangedWeapon: true,
     slotsNeeded: 1,
     stats: [],
     combatSpeed: 3,
     effects: ["ranged"],
     damage: { physical: 15 },
+    coolDown: 0,
     coolDownCounter: 0,
     armourPiercing: 1,
     ammunition: "ammo-9mm",

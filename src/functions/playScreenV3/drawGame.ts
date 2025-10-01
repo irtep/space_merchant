@@ -70,7 +70,7 @@ export function drawGame(
     ctx.arc(
       c.location.x * CELL_SIZE + CELL_SIZE / 2,
       c.location.y * CELL_SIZE + CELL_SIZE / 2,
-      CELL_SIZE / 2 - 2,
+      CELL_SIZE / 2 - 2 + c.stats.size,
       0,
       Math.PI * 2
     );
