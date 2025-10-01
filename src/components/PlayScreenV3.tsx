@@ -43,6 +43,7 @@ const PlayScreenV3: React.FC = () => {
     const pauseRef = useRef(paused);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const charactersRef = useRef<Character[]>(gameObject.characters);
+    const messageQueueRef = useRef<GameMessage[]>([]);
 
     // derived character
     const hoverChar = hoverCharId
@@ -112,16 +113,23 @@ const PlayScreenV3: React.FC = () => {
             type
         };
 
-        setGameMessages(prev => [newMessage, ...prev].slice(0, 100)); // Keep only latest 100 messages
+        // Queue the message instead of immediately updating state
+        messageQueueRef.current = [newMessage, ...messageQueueRef.current].slice(0, 100);
     };
 
     /** Process all combat actions (ranged attacks) */
     const processCombatActions = (gameState: GameObject): GameObject => {
+        console.log('combat actions called - counter:', gameState.updateCounter);
         const projectilesToSpawn: { shooter: Character; target: Character }[] = [];
-        const damageMap = new Map<string, number>(); // targetId -> damage amount
+        const damageMap = new Map<string, number>();
+        const actedThisTurn = new Set<string>();
 
         // First pass: identify all valid attacks and collect damage
         const charactersAfterAnalysis = gameState.characters.map(c => {
+            if (actedThisTurn.has(c.id)) {
+                return c;
+            }
+
             if (c.action === "ranged" && c.actionTarget?.id) {
                 const target = gameState.characters.find(t => t.id === c.actionTarget?.id);
                 if (target) {
@@ -135,14 +143,16 @@ const PlayScreenV3: React.FC = () => {
                     if (hasLoS) {
                         console.log(`${c.name} shoots at ${target.name}`);
 
-                        // Record damage for this target
+                        // Queue message instead of direct state update
+                        addGameMessage(`${c.name} shoots at ${target.name}`, 'combat');
+
+                        actedThisTurn.add(c.id);
+
                         const currentDamage = damageMap.get(target.id) || 0;
                         damageMap.set(target.id, currentDamage + 1);
 
-                        // Queue projectile for visuals
                         projectilesToSpawn.push({ shooter: c, target });
 
-                        // Clear shooter's path
                         return { ...c, path: [] };
                     }
                 }
@@ -196,7 +206,7 @@ const PlayScreenV3: React.FC = () => {
                 if (p.targetId) {
                     const target = charactersRef.current.find(c => c.id === p.targetId);
                     if (target && isProjectileHit(nx, ny, target)) {
-                        console.log("Projectile hit", target.name);
+                        //console.log("Projectile hit", target.name);
                         return { ...p, active: false };
                     }
                 }
@@ -559,6 +569,17 @@ const PlayScreenV3: React.FC = () => {
         drawGame(ctx, canvas, gameObject, selectedId, projectiles, hoverPos, selectedAction);
     }, [gameObject, selectedId, projectiles, hoverPos, selectedAction]);
 
+    // Add this useEffect to process the message queue
+    useEffect(() => {
+        if (messageQueueRef.current.length > 0) {
+            setGameMessages(prev => {
+                const newMessages = [...messageQueueRef.current];
+                messageQueueRef.current = []; // Clear the queue
+                return [...newMessages, ...prev].slice(0, 100);
+            });
+        }
+    });
+
     /** REFS */
     useEffect(() => { pauseRef.current = paused; }, [paused]);
     useEffect(() => { charactersRef.current = gameObject.characters; }, [gameObject.characters]);
@@ -798,7 +819,7 @@ const PlayScreenV3: React.FC = () => {
                         game object
                     </button>
 
-                    <GameMonitor messages={gameMessages}/>
+                    <GameMonitor messages={gameMessages} />
                 </Box>
             </Box>
         </Container >
