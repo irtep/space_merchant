@@ -9,6 +9,7 @@ export interface ItemBase {
     weight: number;
     rarity: string;
     stackable: boolean; // always present now
+    damageType?: string;
 }
 
 export interface Weapon extends ItemBase {
@@ -21,9 +22,11 @@ export interface Weapon extends ItemBase {
     combatSpeed: number;
     effects: string[];
     damage: DamageTypes;
+    coolDown?: number;
     coolDownCounter: number;
     armourPiercing: number;
     ammunition?: string; // ID of ammo type
+    damageType?: string;
 }
 
 export interface Armour extends ItemBase {
@@ -96,6 +99,7 @@ export interface Character {
     abilities: Ability[];
     skills: Skill[];
     path: number[][];
+    img? : string;
 }
 
 // Inventory entries always store quantity
@@ -116,6 +120,15 @@ export interface Skill {
     desc: string;
 };
 
+export interface Resists {
+    physical: number;
+    magic: number;
+    fire: number;
+    poison: number;
+    cold: number;
+    psionic: number;
+};
+
 export interface Stats {
     strength: number;
     dexterity: number;
@@ -124,12 +137,7 @@ export interface Stats {
     learning: number;
     size: number;
     magic: number;
-    physicalResistance: number;
-    magicResistance: number;
-    fireResistance: number;
-    poisonResistance: number;
-    coldResistance: number;
-    psionicResistance: number;
+    resists: Resists;
 };
 
 export interface Coordinates {

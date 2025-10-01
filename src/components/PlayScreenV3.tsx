@@ -9,6 +9,8 @@ import { getItem, equipItem, unequipItem } from "../functions/playScreenV3/equip
 import { itemStore } from "../data/itemStore";
 import { findPathToAdjacent } from "../functions/playScreenV3/closeCombat";
 import { getObstacles, hasLineOfSight } from "../functions/playScreenV3/rangedAttack";
+import CharacterDialog from "./CharacterDialog";
+import GameMonitor, { GameMessage } from "./GameMonitor";
 
 interface Projectile {
     x: number;
@@ -27,7 +29,7 @@ const GRID_HEIGHT = 40;
 
 const PlayScreenV3: React.FC = () => {
     const { gameObject, setGameObject } = useSMContext();
-
+    const [gameMessages, setGameMessages] = useState<GameMessage[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedAction, setSelectedAction] = useState<"move" | "ranged" | "melee" | "wait" | null>(null);
     const [hoverPos, setHoverPos] = useState<{ x: number, y: number } | null>(null);
@@ -35,6 +37,8 @@ const PlayScreenV3: React.FC = () => {
     const [projectiles, setProjectiles] = useState<Projectile[]>([]);
     const [projectileType, setProjectileType] = useState<'laser' | 'energy' | 'bullet'>('energy');
     const [paused, setPaused] = useState(false);
+    const [characterDialogOpen, setCharacterDialogOpen] = useState(false);
+    const [viewingCharacter, setViewingCharacter] = useState<Character | null>(null);
 
     const pauseRef = useRef(paused);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -98,6 +102,17 @@ const PlayScreenV3: React.FC = () => {
                 },
             };
         }
+    };
+
+    const addGameMessage = (text: string, type: 'combat' | 'system' | 'event' = 'combat') => {
+        const newMessage: GameMessage = {
+            id: crypto.randomUUID(),
+            text,
+            timestamp: Date.now(),
+            type
+        };
+
+        setGameMessages(prev => [newMessage, ...prev].slice(0, 100)); // Keep only latest 100 messages
     };
 
     /** Process all combat actions (ranged attacks) */
@@ -586,6 +601,23 @@ const PlayScreenV3: React.FC = () => {
                     {hoverChar ? (
                         <>
                             <h3>{hoverChar.name}</h3>
+                            <button
+                                onClick={() => {
+                                    setPaused(true);
+                                    setViewingCharacter(hoverChar);
+                                    setCharacterDialogOpen(true);
+                                }}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: '#2196F3',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                View
+                            </button>
                             <div>
                                 {`${hoverChar.profession} ${hoverChar.race}`} <br />
                                 {`hit points: ${hoverChar.hitPoints}/${hoverChar.maxHitPoints}`} <br />
@@ -683,6 +715,15 @@ const PlayScreenV3: React.FC = () => {
                     ) : (
                         <p style={{ minHeight: '200px' }}>Hover over a character to see info</p>
                     )}
+                    <CharacterDialog
+                        character={viewingCharacter}
+                        open={characterDialogOpen}
+                        onClose={() => {
+                            setCharacterDialogOpen(false);
+                            setViewingCharacter(null);
+                            setPaused(false);
+                        }}
+                    />
                 </Box>
 
                 {/* Center Panel: Canvas (60%) */}
@@ -756,6 +797,8 @@ const PlayScreenV3: React.FC = () => {
                     <button onClick={() => console.log('game object ', gameObject)} style={{ marginTop: 10 }}>
                         game object
                     </button>
+
+                    <GameMonitor messages={gameMessages}/>
                 </Box>
             </Box>
         </Container >

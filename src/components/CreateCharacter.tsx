@@ -2,7 +2,7 @@ import { Container, MenuItem, Select, FormControl, Button, Box, Typography, Sele
 import { useSMContext } from '../context/smContext.tsx';
 import React, { useEffect, useState } from 'react';
 import { races } from '../data/races.ts';
-import { Ability, Character, Profession, Race, Skill, Stats } from '../interfaces/sharedInterfaces.tsx';
+import { Ability, Character, Profession, Race, Skill, Stats, Resists } from '../interfaces/sharedInterfaces.tsx';
 import { professions } from '../data/professions.ts';
 import { npcs } from '../data/npcs.ts';
 
@@ -19,15 +19,17 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
             dexterity: 0,
             toughness: 0,
             perception: 0,
+            learning: 0,
             size: 0,
             magic: 0,
-            learning: 0,
-            physicalResistance: 0,
-            magicResistance: 0,
-            fireResistance: 0,
-            poisonResistance: 0,
-            coldResistance: 0,
-            psionicResistance: 0
+            resists: {
+                physical: 0,
+                magic: 0,
+                fire: 0,
+                poison: 0,
+                cold: 0,
+                psionic: 0
+            }
         },
         location: { x: 2, y: 2 },
         world: 'Earth',
@@ -61,7 +63,6 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         setView
     } = useSMContext();
 
-
     const mergeSkills = (raceSkills: Skill[] = [], professionSkills: Skill[] = []): Skill[] => {
         const skillMap = new Map<string, Skill>();
 
@@ -90,32 +91,36 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         return Array.from(abilitySet.values());
     };
 
-
     // Function to merge stats
     const mergeStats = (raceStats: Partial<Stats> = {}, professionStats: Partial<Stats> = {}): Stats => {
+        const baseResists: Resists = {
+            physical: 0,
+            magic: 0,
+            fire: 0,
+            poison: 0,
+            cold: 0,
+            psionic: 0
+        };
+
         return {
             strength: (raceStats.strength || 0) + (professionStats.strength || 0),
             dexterity: (raceStats.dexterity || 0) + (professionStats.dexterity || 0),
             toughness: (raceStats.toughness || 0) + (professionStats.toughness || 0),
             perception: (raceStats.perception || 0) + (professionStats.perception || 0),
+            learning: (raceStats.learning || 0) + (professionStats.learning || 0),
             size: (raceStats.size || 0) + (professionStats.size || 0),
             magic: (raceStats.magic || 0) + (professionStats.magic || 0),
-            learning: (raceStats.learning || 0) + (professionStats.learning || 0),
-            physicalResistance: (raceStats.physicalResistance || 0) + (professionStats.physicalResistance || 0),
-            magicResistance: (raceStats.magicResistance || 0) + (professionStats.magicResistance || 0),
-            fireResistance: (raceStats.fireResistance || 0) + (professionStats.fireResistance || 0),
-            poisonResistance: (raceStats.poisonResistance || 0) + (professionStats.poisonResistance || 0),
-            coldResistance: (raceStats.coldResistance || 0) + (professionStats.coldResistance || 0),
-            psionicResistance: (raceStats.psionicResistance || 0) + (professionStats.psionicResistance || 0),
+            resists: {
+                physical: (raceStats.resists?.physical || 0) + (professionStats.resists?.physical || 0),
+                magic: (raceStats.resists?.magic || 0) + (professionStats.resists?.magic || 0),
+                fire: (raceStats.resists?.fire || 0) + (professionStats.resists?.fire || 0),
+                poison: (raceStats.resists?.poison || 0) + (professionStats.resists?.poison || 0),
+                cold: (raceStats.resists?.cold || 0) + (professionStats.resists?.cold || 0),
+                psionic: (raceStats.resists?.psionic || 0) + (professionStats.resists?.psionic || 0),
+            }
         };
     };
 
-    // Function to merge skills and abilities (avoids duplicates)
-    /*
-    const mergeArrays = <T,>(raceArray: T[] = [], professionArray: T[] = []): T[] => {
-        return Array.from(new Set([...raceArray, ...professionArray])); // Ensures no duplicates
-    };
-    */
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInitialCharacter({
             ...initialCharacter, // Spread current character properties
@@ -173,15 +178,6 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         setInitialCharacter(updatedCharacter);
     };
 
-
-    /*
-    const handleSelectChange = (event: SelectChangeEvent<string>) => {
-        setInitialCharacter({
-            ...initialCharacter, // Keep existing properties
-            [event.target.name]: event.target.value // Update changed field
-        });
-    };
-*/
     useEffect(() => {
 
     }, []);

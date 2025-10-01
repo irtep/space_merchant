@@ -1,7 +1,6 @@
 import { Race } from "../interfaces/sharedInterfaces";
 import { largeBase, mediumBase, smallBase } from "../measures/measures";
 
-// any for now, will be Race[] later
 export const races: Race[] = [
     {
         name: 'human',
@@ -15,12 +14,14 @@ export const races: Race[] = [
             size: mediumBase,
             magic: 0,
             learning: 10,
-            physicalResistance: 0,
-            magicResistance: 0,
-            fireResistance: 0,
-            poisonResistance: 0,
-            coldResistance: 0,
-            psionicResistance: 0
+            resists: {
+                physical: 0,
+                magic: 0,
+                fire: 0,
+                poison: 0,
+                cold: 0,
+                psionic: 0
+            }
         },
         skills: [
             {
@@ -58,12 +59,14 @@ export const races: Race[] = [
             size: largeBase,
             magic: 0,
             learning: 0,
-            physicalResistance: 10,
-            magicResistance: 0,
-            fireResistance: 25,
-            poisonResistance: 100,
-            coldResistance: 25,
-            psionicResistance: 100
+            resists: {
+                physical: 10,
+                magic: 0,
+                fire: 40,
+                poison: 100,
+                cold: 40,
+                psionic: 100
+            }
         },
         skills: [
             {
@@ -113,12 +116,14 @@ export const races: Race[] = [
             size: smallBase,
             magic: 0,
             learning: 8,
-            physicalResistance: 0,
-            magicResistance: 0,
-            fireResistance: 0,
-            poisonResistance: 0,
-            coldResistance: 0,
-            psionicResistance: 70
+            resists: {
+                physical: 0,
+                magic: 0,
+                fire: 0,
+                poison: 0,
+                cold: 0,
+                psionic: 70
+            }
         },
         skills: [
             {
@@ -166,12 +171,14 @@ export const races: Race[] = [
             size: mediumBase,
             magic: 0,
             learning: 5,
-            physicalResistance: 10,
-            magicResistance: 50,
-            fireResistance: 5,
-            poisonResistance: 40,
-            coldResistance: 10,
-            psionicResistance: 10
+            resists: {
+                physical: 20,
+                magic: 70,
+                fire: 20,
+                poison: 70,
+                cold: 40,
+                psionic: 40
+            }
         },
         skills: [
             {
