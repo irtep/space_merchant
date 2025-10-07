@@ -8,7 +8,7 @@ export interface ItemBase {
     value: number;
     weight: number;
     rarity: string;
-    stackable: boolean; // always present now
+    stackable: boolean;
     damageType?: string;
 }
 
@@ -23,7 +23,7 @@ export interface Weapon extends ItemBase {
     effects: string[];
     damage: DamageTypes;
     coolDown?: number;
-    coolDownCounter: number;
+    epCost: number;
     armourPiercing: number;
     ammunition?: string; // ID of ammo type
     damageType?: string;
@@ -31,7 +31,7 @@ export interface Weapon extends ItemBase {
 
 export interface Armour extends ItemBase {
     type: "armour";
-    slot: "head" | "neck" | "upperBody" | "legs" | "hands" | "feet";
+    slot: "head" | "neck" | "torso" | "legs" | "hands" | "feet" | "torso and legs" | "arms" | "torso and arms" | "torso, arms and legs";
     stats: StatMod[];
     effects: string[];
 }
@@ -46,6 +46,15 @@ export type AnyItem = Weapon | Armour | Item;
 
 export interface ItemStore {
     [id: string]: AnyItem;
+}
+
+export interface CombatProps {
+    damage: number;
+    type: string;
+    skill: string;
+    epCost: number;
+    coolDown: number;
+    coolDownCounter: number;
 }
 
 export interface Character {
@@ -66,6 +75,9 @@ export interface Character {
     maxMagicPoints: number;
     endurancePoints: number;
     maxEndurancePoints: number;
+
+    closeCombat: CombatProps;
+    rangedCombat: CombatProps;
 
     // Equipped items store IDs, not full objects
     equipment: {
