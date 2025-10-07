@@ -1,4 +1,4 @@
-import { Character, GameObject } from "../../interfaces/sharedInterfaces";
+import { Character } from "../../interfaces/sharedInterfaces";
 
 export const isCellFree = (
   x: number,

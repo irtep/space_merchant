@@ -25,6 +25,22 @@ export const defaultCharacter: Character = {
                 psionic: 0
             }
         },
+    closeCombat: {
+        damage: 0,
+        type: 'physical',
+        skill: 'unarmed',
+        epCost: 1,
+        coolDown: 0,
+        coolDownCounter: 0
+    },
+    rangedCombat: {
+        damage: 0,
+        type: 'physical',
+        skill: 'not available',
+        epCost: 1,
+        coolDown: 0,
+        coolDownCounter: 0
+    },
     location: { x: 0, y: 0 },
     world: 'Earth',
     zone: 'Sector 1',
@@ -271,6 +287,7 @@ export const npcs: Character[] = [
         path: []
     },
     {
+        ...clonedDefaultChar,
         id: "char-01",
         title: "Captain",
         name: "Hristo",
