@@ -22,7 +22,8 @@ export const itemStore: Record<string, AnyItem> = {
     weight: 0.02,
     rarity: "common",
     stackable: true,
-    damageType: 'physical'
+    damageType: 'physical',
+    armourPiercing: 1,
   },
   "arrow": {
     id: "standardArrow",
@@ -34,7 +35,8 @@ export const itemStore: Record<string, AnyItem> = {
     weight: 0.02,
     rarity: "common",
     stackable: true,
-    damageType: 'physical'
+    damageType: 'physical',
+    armourPiercing: 1
   },
   "pistol-01": {
     id: "pistol-01",
@@ -205,6 +207,8 @@ export const itemStore: Record<string, AnyItem> = {
     rarity: "uncommon",
     stackable: true,
     effects: ["head protected"],
+    coverage: 80,
+    tougness: 10
   },
   "steel-breastplate0": {
     id: "steel-breastplate0",
@@ -222,6 +226,8 @@ export const itemStore: Record<string, AnyItem> = {
     rarity: "uncommon",
     stackable: true,
     effects: [],
+    coverage: 100,
+    tougness: 10
   },
   "iron-breastplate0": {
     id: "iron-breastplate0",
@@ -239,5 +245,7 @@ export const itemStore: Record<string, AnyItem> = {
     rarity: "common",
     stackable: true,
     effects: [],
+    coverage: 100,
+    tougness: 5
   },
 };

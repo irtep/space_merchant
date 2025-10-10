@@ -10,6 +10,7 @@ export interface ItemBase {
     rarity: string;
     stackable: boolean;
     damageType?: string;
+    armourPiercing?: number;
 }
 
 export interface Weapon extends ItemBase {
@@ -24,7 +25,6 @@ export interface Weapon extends ItemBase {
     damage: DamageTypes;
     coolDown?: number;
     epCost: number;
-    armourPiercing: number;
     ammunition?: string; // ID of ammo type
     damageType?: string;
 }
@@ -34,6 +34,8 @@ export interface Armour extends ItemBase {
     slot: "head" | "neck" | "torso" | "legs" | "hands" | "feet" | "torso and legs" | "arms" | "torso and arms" | "torso, arms and legs";
     stats: StatMod[];
     effects: string[];
+    coverage: number; // percent of coverage of that/those slots
+    tougness: number; // iron 5, steel 10
 }
 
 export interface Item extends ItemBase {
