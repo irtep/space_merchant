@@ -3,7 +3,7 @@ import { Grid, AStarFinder } from "pathfinding";
 import { Box, Container } from "@mui/material";
 import { useSMContext } from "../context/smContext";
 import { AnyItem, Character, GameObject, Weapon, } from "../interfaces/sharedInterfaces";
-import { placeCharactersRandomly } from "../functions/playScreenV3/pSv3functions";
+import { placeCharactersRandomly, getDistance } from "../functions/playScreenV3/pSv3functions";
 import { drawGame } from "../functions/playScreenV3/drawGame";
 import { getItem, equipItem, unequipItem } from "../functions/playScreenV3/equipmentHandling";
 import { itemStore } from "../data/itemStore";
@@ -132,6 +132,8 @@ const PlayScreenV3: React.FC = () => {
 
             if (c.action === "ranged" && c.actionTarget?.id) {
                 const target = gameState.characters.find(t => t.id === c.actionTarget?.id);
+                const distanceToTarget: number = getDistance(c.location, target!.location);
+                console.log('distance: ', distanceToTarget);
                 if (target) {
                     const obstacles = getObstacles(gameState, [c.id, c.actionTarget.id]);
                     const hasLoS = hasLineOfSight(

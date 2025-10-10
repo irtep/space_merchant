@@ -57,6 +57,7 @@ export interface CombatProps {
     epCost: number;
     coolDown: number;
     coolDownCounter: number;
+    range: number;
 }
 
 export interface Character {

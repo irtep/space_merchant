@@ -54,3 +54,9 @@ export const placeCharactersRandomly = (
   });
 };
 
+export function getDistance(obj1: { x: number; y: number }, obj2: { x: number; y: number }): number {
+  const dx = obj2.x - obj1.x;
+  const dy = obj2.y - obj1.y;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+

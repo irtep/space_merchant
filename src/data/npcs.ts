@@ -31,7 +31,8 @@ export const defaultCharacter: Character = {
         skill: 'unarmed',
         epCost: 1,
         coolDown: 0,
-        coolDownCounter: 0
+        coolDownCounter: 0,
+        range: 1
     },
     rangedCombat: {
         damage: 0,
@@ -39,7 +40,8 @@ export const defaultCharacter: Character = {
         skill: 'not available',
         epCost: 1,
         coolDown: 0,
-        coolDownCounter: 0
+        coolDownCounter: 0,
+        range: 1
     },
     location: { x: 0, y: 0 },
     world: 'Earth',
