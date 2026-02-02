@@ -52,6 +52,7 @@ export const findPathToAdjacent = (
 export const meleeAttack = (attacker: Character, defender: Character/*, itemStore: ItemStore*/) => {
   //const equippedId = attacker.equipment.rightHand || attacker.equipment.leftHand;
   //const weapon = equippedId ? getItem(equippedId, itemStore) : null;
+  console.log('melee attack called');
 
   const baseDamage = 5;
   const critChance = 0.1;
