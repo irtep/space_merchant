@@ -27,7 +27,7 @@ export const defaultCharacter: Character = {
         },
     closeCombat: {
         damage: 0,
-        type: 'physical',
+        type: ['physical'],
         skill: 'unarmed',
         epCost: 1,
         coolDown: 0,
@@ -36,7 +36,7 @@ export const defaultCharacter: Character = {
     },
     rangedCombat: {
         damage: 0,
-        type: 'physical',
+        type: ['physical'],
         skill: 'not available',
         epCost: 1,
         coolDown: 0,
