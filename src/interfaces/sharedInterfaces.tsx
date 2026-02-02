@@ -1,4 +1,5 @@
 // ====== Base Items ======
+
 export interface ItemBase {
     id: string;
     name: string;
@@ -9,7 +10,7 @@ export interface ItemBase {
     weight: number;
     rarity: string;
     stackable: boolean;
-    damageType?: string;
+    damageTypes?: DamageTypes[];
     armourPiercing?: number;
 }
 
@@ -22,11 +23,11 @@ export interface Weapon extends ItemBase {
     stats: StatMod[];
     combatSpeed: number;
     effects: string[];
-    damage: DamageTypes;
+    damage: number;
+    damageTypes: DamageTypes[];
     coolDown?: number;
     epCost: number;
     ammunition?: string; // ID of ammo type
-    damageType?: string;
 }
 
 export interface Armour extends ItemBase {
@@ -52,7 +53,7 @@ export interface ItemStore {
 
 export interface CombatProps {
     damage: number;
-    type: string;
+    type: DamageTypes[];
     skill: string;
     epCost: number;
     coolDown: number;
@@ -174,14 +175,13 @@ export interface StatMod {
     value: number;
 };
 
-export interface DamageTypes {
-    physical?: number;
-    magic?: number;
-    fire?: number;
-    poison?: number;
-    cold?: number;
-    psionic?: number;
-};
+export type DamageTypes =
+  | 'physical'
+  | 'magic'
+  | 'fire'
+  | 'poison'
+  | 'cold'
+  | 'psionic';
 
 export interface RectObstacle {
     x: number;

@@ -1,4 +1,4 @@
-import { AnyItem, Character, ItemStore, Weapon } from "../../interfaces/sharedInterfaces";
+import { AnyItem, Character, CombatProps, ItemStore, Weapon } from "../../interfaces/sharedInterfaces";
 import { itemStore } from "../../data/itemStore";
 
 // Get full item from store
@@ -19,20 +19,20 @@ export const getEquippedWeapon = (
 };
 
 // Default combat properties
-const DEFAULT_CLOSE_COMBAT = {
+let defaultCloseCombat: CombatProps = {
   damage: 0,
-  type: 'physical' as const,
-  skill: 'unarmed' as const,
+  type: ['physical'],
+  skill: 'unarmed',
   epCost: 1,
   coolDown: 0,
   coolDownCounter: 0,
   range: 1
 };
 
-const DEFAULT_RANGED_COMBAT = {
+let defaultRangedCombat: CombatProps = {
   damage: 0,
-  type: 'physical' as const,
-  skill: 'not available' as const,
+  type: ['physical'],
+  skill: 'not available',
   epCost: 1,
   coolDown: 0,
   coolDownCounter: 0,
@@ -105,7 +105,7 @@ export const equipItem = (
       // Update ranged combat with weapon properties (except coolDownCounter)
       updatedRangedCombat = {
         damage: weapon.damage || 0,
-        type: weapon.damageType || 'physical',
+        type: weapon.damageTypes || ['physical'],
         skill: weapon.handlingSkill || 'not available',
         epCost: weapon.epCost || 1,
         coolDown: weapon.coolDown || 0,
@@ -116,7 +116,7 @@ export const equipItem = (
       // Update close combat with weapon properties (except coolDownCounter)
       updatedCloseCombat = {
         damage: weapon.damage || 0,
-        type: weapon.damageType || 'physical',
+        type: weapon.damageTypes || ['physical'],
         skill: weapon.handlingSkill || 'unarmed',
         epCost: weapon.epCost || 1,
         coolDown: weapon.coolDown || 0,
@@ -201,13 +201,13 @@ export const unequipItem = (
     if (weapon.rangedWeapon) {
       // Reset ranged combat to defaults
       updatedRangedCombat = {
-        ...DEFAULT_RANGED_COMBAT,
+        ...defaultRangedCombat,
         coolDownCounter: character.rangedCombat.coolDownCounter // Preserve current counter
       };
     } else {
       // Reset close combat to defaults
       updatedCloseCombat = {
-        ...DEFAULT_CLOSE_COMBAT,
+        ...defaultCloseCombat,
         coolDownCounter: character.closeCombat.coolDownCounter // Preserve current counter
       };
     }
