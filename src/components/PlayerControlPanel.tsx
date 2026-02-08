@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Character, GameObject } from '../interfaces/sharedInterfaces';
 import CharacterOptions from './CharacterOptions';
 import { useSMContext } from '../context/smContext';
-import { draw } from '../functions/draw';
+//import { drawGame } from '../functions/playScreenV3/drawGame';
 
 interface PCPprops {
     pause: boolean;
@@ -57,7 +57,7 @@ const PlayerControlPanel: React.FC<PCPprops> = ({ pause, setPause, liveGameObjec
                                                     liveGameObject = oldGameObject;
                                                     setGameObject(oldGameObject);
                                                     if (!canvas) return;
-                                                    draw(canvas, liveGameObject);
+                                                    //drawGame(canvas, liveGameObject);
                                                 }}
                                                 style={{
                                                 }}

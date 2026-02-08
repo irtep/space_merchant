@@ -8,23 +8,23 @@ export const defaultCharacter: Character = {
     race: 'human',
     profession: '',
     team: 'npcteam',
-        stats: {
-            strength: 10,
-            dexterity: 8,
-            toughness: 12,
-            perception: 5,
-            size: mediumBase,
+    stats: {
+        strength: 10,
+        dexterity: 8,
+        toughness: 12,
+        perception: 5,
+        size: mediumBase,
+        magic: 0,
+        learning: 10,
+        resists: {
+            physical: 0,
             magic: 0,
-            learning: 10,
-            resists: {
-                physical: 0,
-                magic: 0,
-                fire: 0,
-                poison: 0,
-                cold: 0,
-                psionic: 0
-            }
-        },
+            fire: 0,
+            poison: 0,
+            cold: 0,
+            psionic: 0
+        }
+    },
     closeCombat: {
         damage: 0,
         type: ['physical'],
@@ -56,13 +56,9 @@ export const defaultCharacter: Character = {
     maxEndurancePoints: 50,
     equipment: {
         head: 'empty',
-        neck: 'empty',
         upperBody: 'empty',
         legs: 'empty',
-        hands: 'empty',
-        feet: 'empty',
-        leftHand: 'empty',
-        rightHand: 'empty'
+        hands: 'empty'
     },
     npc: false,
     aggressive: false,
@@ -165,13 +161,13 @@ export const npcs: Character[] = [
             head: 'steel-helmet0'
         },
         inventory: [
-            {itemId: "pistol-01", quantity: 1},
-            {itemId: "steel-breastplate0", quantity: 1},
-            {itemId: "hama0", quantity: 1},
-            {itemId: "ammo-9mm", quantity: 20},
-            {itemId: "bow0", quantity: 1},
-            {itemId: "bow1", quantity: 1},
-            {itemId: "arrow", quantity: 40}
+            { itemId: "pistol-01", quantity: 1 },
+            { itemId: "steel-breastplate0", quantity: 1 },
+            { itemId: "hama0", quantity: 1 },
+            { itemId: "ammo-9mm", quantity: 20 },
+            { itemId: "bow0", quantity: 1 },
+            { itemId: "bow1", quantity: 1 },
+            { itemId: "arrow", quantity: 40 }
         ],
         desc: `Badass looking armoured dwarf warrior.`
     },
@@ -318,7 +314,7 @@ export const npcs: Character[] = [
         maxMagicPoints: 20,
         endurancePoints: 50,
         maxEndurancePoints: 50,
-        inventory: [{itemId: "pistol-01", quantity: 1}],
+        inventory: [{ itemId: "pistol-01", quantity: 1 }],
         npc: false,
         aggressive: false,
         status: [],
@@ -334,5 +330,11 @@ export const npcs: Character[] = [
         abilities: [],
         skills: [],
         path: [],
+        equipment: {
+            head: 'steel-helmet0',
+            upperBody: 'steel-breastplate0',
+            legs: 'empty',
+            hands: 'empty'
+        },
     }
 ];
