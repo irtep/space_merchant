@@ -36,7 +36,7 @@ export interface Armour extends ItemBase {
     stats: StatMod[];
     effects: string[];
     coverage: number; // percent of coverage of that/those slots
-    tougness: number; // iron 5, steel 10
+    hardness: number; // iron 5, steel 10
 }
 
 export interface Item extends ItemBase {
@@ -59,6 +59,8 @@ export interface CombatProps {
     coolDown: number;
     coolDownCounter: number;
     range: number;
+    armourPiercing: number;
+    ammunition?: string;
 }
 
 export interface Character {
@@ -85,14 +87,14 @@ export interface Character {
 
     // Equipped items store IDs, not full objects
     equipment: {
-        head?: string;
-        neck?: string;
-        upperBody?: string;
-        legs?: string;
-        hands?: string;
-        feet?: string;
-        leftHand?: string;
-        rightHand?: string;
+        head: string;
+        neck: string;
+        upperBody: string;
+        legs: string;
+        hands: string;
+        feet: string;
+        leftHand: string;
+        rightHand: string;
     };
 
     // Inventory is just a list of item IDs

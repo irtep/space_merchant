@@ -26,7 +26,8 @@ let defaultCloseCombat: CombatProps = {
   epCost: 1,
   coolDown: 0,
   coolDownCounter: 0,
-  range: 1
+  range: 1,
+  armourPiercing: 0
 };
 
 let defaultRangedCombat: CombatProps = {
@@ -36,7 +37,8 @@ let defaultRangedCombat: CombatProps = {
   epCost: 1,
   coolDown: 0,
   coolDownCounter: 0,
-  range: 1
+  range: 1,
+  armourPiercing: 0
 };
 
 // Update equipItem function
@@ -110,7 +112,8 @@ export const equipItem = (
         epCost: weapon.epCost || 1,
         coolDown: weapon.coolDown || 0,
         coolDownCounter: character.rangedCombat.coolDownCounter, // Preserve current counter
-        range: weapon.range || 1
+        range: weapon.range || 1,
+        armourPiercing: weapon.armourPiercing || 0
       };
     } else {
       // Update close combat with weapon properties (except coolDownCounter)
@@ -121,7 +124,8 @@ export const equipItem = (
         epCost: weapon.epCost || 1,
         coolDown: weapon.coolDown || 0,
         coolDownCounter: character.closeCombat.coolDownCounter, // Preserve current counter
-        range: weapon.range || 1
+        range: weapon.range || 1,
+        armourPiercing: weapon.armourPiercing || 0
       };
     }
   }

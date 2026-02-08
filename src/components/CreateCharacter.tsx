@@ -4,10 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { races } from '../data/races.ts';
 import { Ability, Character, Profession, Race, Skill, Stats, Resists } from '../interfaces/sharedInterfaces.tsx';
 import { professions } from '../data/professions.ts';
-import { npcs } from '../data/npcs.ts';
+import { defaultCharacter, npcs } from '../data/npcs.ts';
 
 const CreateCharacter: React.FC = (): React.ReactElement => {
     const [initialCharacter, setInitialCharacter] = useState<Character>({
+        ...defaultCharacter,
         id: '0',
         title: '',
         name: '',
@@ -40,7 +41,16 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         maxMagicPoints: 50,
         endurancePoints: 50,
         maxEndurancePoints: 50,
-        equipment: {},
+        equipment: {
+            head: 'empty',
+            neck: 'empty',
+            upperBody: 'empty',
+            legs: 'empty',
+            hands: 'empty',
+            feet: 'empty',
+            leftHand: 'empty',
+            rightHand: 'empty'
+        },
         npc: false,
         aggressive: false,
         status: [],
@@ -93,6 +103,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
 
     // Function to merge stats
     const mergeStats = (raceStats: Partial<Stats> = {}, professionStats: Partial<Stats> = {}): Stats => {
+        /*
         const baseResists: Resists = {
             physical: 0,
             magic: 0,
@@ -101,7 +112,7 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
             cold: 0,
             psionic: 0
         };
-
+        */
         return {
             strength: (raceStats.strength || 0) + (professionStats.strength || 0),
             dexterity: (raceStats.dexterity || 0) + (professionStats.dexterity || 0),
