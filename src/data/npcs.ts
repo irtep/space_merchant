@@ -4,8 +4,8 @@ import { smallBase, mediumBase, largeBase } from "../measures/measures";
 export const defaultCharacter: Character = {
     id: 'p0',
     title: '',
-    name: '',
-    race: '',
+    name: 'defaultman',
+    race: 'human',
     profession: '',
     team: 'npcteam',
         stats: {
@@ -32,7 +32,8 @@ export const defaultCharacter: Character = {
         epCost: 1,
         coolDown: 0,
         coolDownCounter: 0,
-        range: 1
+        range: 1,
+        armourPiercing: 0
     },
     rangedCombat: {
         damage: 0,
@@ -41,7 +42,8 @@ export const defaultCharacter: Character = {
         epCost: 1,
         coolDown: 0,
         coolDownCounter: 0,
-        range: 1
+        range: 1,
+        armourPiercing: 0
     },
     location: { x: 0, y: 0 },
     world: 'Earth',
@@ -52,7 +54,16 @@ export const defaultCharacter: Character = {
     maxMagicPoints: 50,
     endurancePoints: 50,
     maxEndurancePoints: 50,
-    equipment: {},
+    equipment: {
+        head: 'empty',
+        neck: 'empty',
+        upperBody: 'empty',
+        legs: 'empty',
+        hands: 'empty',
+        feet: 'empty',
+        leftHand: 'empty',
+        rightHand: 'empty'
+    },
     npc: false,
     aggressive: false,
     status: [],
@@ -150,6 +161,7 @@ export const npcs: Character[] = [
             }
         ],
         equipment: {
+            ...clonedDefaultChar.equipment,
             head: 'steel-helmet0'
         },
         inventory: [
@@ -173,7 +185,6 @@ export const npcs: Character[] = [
         stats: {
             ...clonedDefaultChar.stats
         },
-        equipment: {},
         location: { x: 350, y: 450 },
         skills: [
             {
@@ -228,7 +239,6 @@ export const npcs: Character[] = [
         ...clonedDefaultChar,
         id: 'ogre1',
         name: 'a big ogre',
-        equipment: {},
         race: 'ogre',
         profession: 'mercenary',
         team: 'big guns',
@@ -308,7 +318,6 @@ export const npcs: Character[] = [
         maxMagicPoints: 20,
         endurancePoints: 50,
         maxEndurancePoints: 50,
-        equipment: {},
         inventory: [{itemId: "pistol-01", quantity: 1}],
         npc: false,
         aggressive: false,

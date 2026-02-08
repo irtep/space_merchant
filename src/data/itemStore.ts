@@ -150,6 +150,28 @@ export const itemStore: Record<string, AnyItem> = {
     stackable: true,
     armourPiercing: 5,
   },
+  "shield0": {
+    id: "shield0",
+    name: "a wooden medium shield",
+    shortName: "shield",
+    desc: "A wooden medium shield.",
+    type: "weapon",
+    handlingSkill: "shields",
+    range: 1,
+    rangedWeapon: false,
+    slotsNeeded: 1,
+    value: 8,
+    weight: 3.5,
+    stats: [],
+    combatSpeed: 5,
+    effects: ["shield"],
+    damage: 2,
+    damageTypes: ['physical'],
+    epCost: 2,
+    rarity: "common",
+    stackable: true,
+    armourPiercing: 0,
+  },
   "bow0": {
     id: "bow0",
     name: "a simple hunting bow",
@@ -215,7 +237,7 @@ export const itemStore: Record<string, AnyItem> = {
     stackable: true,
     effects: ["head protected"],
     coverage: 80,
-    tougness: 10
+    hardness: 10
   },
   "steel-breastplate0": {
     id: "steel-breastplate0",
@@ -234,7 +256,7 @@ export const itemStore: Record<string, AnyItem> = {
     stackable: true,
     effects: [],
     coverage: 100,
-    tougness: 10
+    hardness: 10
   },
   "iron-breastplate0": {
     id: "iron-breastplate0",
@@ -253,6 +275,6 @@ export const itemStore: Record<string, AnyItem> = {
     stackable: true,
     effects: [],
     coverage: 100,
-    tougness: 5
+    hardness: 5
   },
 };
