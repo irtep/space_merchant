@@ -43,13 +43,9 @@ const CreateCharacter: React.FC = (): React.ReactElement => {
         maxEndurancePoints: 50,
         equipment: {
             head: 'empty',
-            neck: 'empty',
             upperBody: 'empty',
             legs: 'empty',
-            hands: 'empty',
-            feet: 'empty',
-            leftHand: 'empty',
-            rightHand: 'empty'
+            hands: 'empty'
         },
         npc: false,
         aggressive: false,

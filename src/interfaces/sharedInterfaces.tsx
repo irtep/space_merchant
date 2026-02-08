@@ -32,7 +32,7 @@ export interface Weapon extends ItemBase {
 
 export interface Armour extends ItemBase {
     type: "armour";
-    slot: "head" | "neck" | "torso" | "legs" | "hands" | "feet" | "torso and legs" | "arms" | "torso and arms" | "torso, arms and legs";
+    slot: "head" | "upperBody" | "legs" | "hands" | "upperBody and legs" | "arms" | "upperBody and arms" | "upperBody, arms and legs";
     stats: StatMod[];
     effects: string[];
     coverage: number; // percent of coverage of that/those slots
@@ -88,13 +88,11 @@ export interface Character {
     // Equipped items store IDs, not full objects
     equipment: {
         head: string;
-        neck: string;
         upperBody: string;
         legs: string;
         hands: string;
-        feet: string;
-        leftHand: string;
-        rightHand: string;
+        leftHand?: string;
+        rightHand?: string;
     };
 
     // Inventory is just a list of item IDs
@@ -117,7 +115,7 @@ export interface Character {
     abilities: Ability[];
     skills: Skill[];
     path: number[][];
-    img? : string;
+    img?: string;
 }
 
 // Inventory entries always store quantity
@@ -178,12 +176,12 @@ export interface StatMod {
 };
 
 export type DamageTypes =
-  | 'physical'
-  | 'magic'
-  | 'fire'
-  | 'poison'
-  | 'cold'
-  | 'psionic';
+    | 'physical'
+    | 'magic'
+    | 'fire'
+    | 'poison'
+    | 'cold'
+    | 'psionic';
 
 export interface RectObstacle {
     x: number;
@@ -205,10 +203,10 @@ export interface CircleObstacle {
 };
 
 export interface Loot {
-  id: string;            // unique instance ID (e.g. uuid)
-  itemId: string;        // references itemStore
-  quantity: number;
-  location: { x: number; y: number };
+    id: string;            // unique instance ID (e.g. uuid)
+    itemId: string;        // references itemStore
+    quantity: number;
+    location: { x: number; y: number };
 }
 
 export interface GameMap {
@@ -264,3 +262,19 @@ export interface Profession {
 export interface Background {
     name: string;
 };
+
+export const HIT_LOCATIONS = [
+    { part: "head", chance: 10 },
+    { part: "upperBody", chance: 60 },
+    { part: "hands", chance: 10 },
+    { part: "legs", chance: 20 },
+] as const;
+
+export type HitPart = typeof HIT_LOCATIONS[number]["part"];
+
+export interface DamageResult {
+    damage: number;
+    hitPart: HitPart;
+    armorHit: boolean;
+    penetrated: boolean;
+}

@@ -245,7 +245,7 @@ export const itemStore: Record<string, AnyItem> = {
     shortName: "breastplate",
     desc: "A good looking shiny steel breastplate, that grants fine protections.",
     type: "armour",
-    slot: "torso",
+    slot: "upperBody",
     value: 50,
     weight: 10,
     stats: [
@@ -264,7 +264,7 @@ export const itemStore: Record<string, AnyItem> = {
     shortName: "breastplate",
     desc: "A heavy, but should protect you nicely!",
     type: "armour",
-    slot: "torso",
+    slot: "upperBody",
     value: 10,
     weight: 20,
     stats: [

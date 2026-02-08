@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Grid, AStarFinder } from "pathfinding";
 import { Box, Container } from "@mui/material";
 import { useSMContext } from "../context/smContext";
-import { AnyItem, Character, GameObject, Weapon, } from "../interfaces/sharedInterfaces";
-import { placeCharactersRandomly, getDistance } from "../functions/playScreenV3/pSv3functions";
+import { AnyItem, Character, GameObject, Weapon, HitPart, HIT_LOCATIONS } from "../interfaces/sharedInterfaces";
+import { placeCharactersRandomly, getDistance, findPathToWithinRange, resolveDamage, rollHitLocation } from "../functions/playScreenV3/pSv3functions";
 import { drawGame } from "../functions/playScreenV3/drawGame";
 import { getItem, equipItem, unequipItem } from "../functions/playScreenV3/equipmentHandling";
 import { itemStore } from "../data/itemStore";
@@ -119,224 +119,250 @@ const PlayScreenV3: React.FC = () => {
 
     /** Process all combat actions (ranged attacks) */
     const processCombatActions = (gameState: GameObject): GameObject => {
-        console.log('combat actions called - counter:', gameState.updateCounter);
+        console.log('⚔️ Combat tick — counter:', gameState.updateCounter);
+
         const projectilesToSpawn: { shooter: Character; target: Character }[] = [];
         const damageMap = new Map<string, number>();
         const actedThisTurn = new Set<string>();
 
-        // First pass: identify all valid attacks and collect damage
         const charactersAfterAnalysis = gameState.characters.map(c => {
-            if (actedThisTurn.has(c.id)) {
-                return c;
+            if (actedThisTurn.has(c.id)) return c;
+
+            if (c.action !== "ranged" || !c.actionTarget?.id) return c;
+
+            const target = gameState.characters.find(t => t.id === c.actionTarget!.id);
+            if (!target) return c;
+
+            console.log(`\n🔫 ${c.name} starts ranged attack on ${target.name}`);
+
+            const distance = getDistance(c.location, target.location);
+            console.log(`📏 Distance to target: ${distance}`);
+
+            const obstacles = getObstacles(gameState, [c.id, target.id]);
+            const hasLoS = hasLineOfSight(
+                { x: Math.round(c.location.x), y: Math.round(c.location.y) },
+                { x: Math.round(target.location.x), y: Math.round(target.location.y) },
+                obstacles
+            );
+
+            if (!hasLoS) {
+                console.log(`🚫 No line of sight — attack cancelled`);
+                return { ...c, action: "wait", path: [] };
             }
 
-            if (c.action === "ranged" && c.actionTarget?.id) {
-                const target = gameState.characters.find(t => t.id === c.actionTarget?.id);
-                const distanceToTarget: number = getDistance(c.location, target!.location);
+            console.log(`👁️ Line of sight confirmed`);
+            addGameMessage(`${c.name} shoots at ${target.name}`, 'combat');
+            actedThisTurn.add(c.id);
 
-                console.log('distance: ', distanceToTarget);
+            // ===== ENDURANCE CHECK =====
+            console.log(
+                `🔋 Endurance check: ${c.endurancePoints} / ${c.rangedCombat.epCost}`
+            );
 
-                if (target) {
-                    const obstacles = getObstacles(gameState, [c.id, c.actionTarget.id]);
-                    const hasLoS = hasLineOfSight(
-                        { x: Math.round(c.location.x), y: Math.round(c.location.y) },
-                        { x: Math.round(target.location.x), y: Math.round(target.location.y) },
-                        obstacles
+            if (c.endurancePoints < c.rangedCombat.epCost) {
+                console.log(`❌ Not enough endurance — attack aborted`);
+                addGameMessage(`${c.name} is too exhausted to shoot`, 'combat');
+                return { ...c, action: "wait", path: [] };
+            }
+
+            // Deduct endurance
+            const attackerAfterEP: Character = {
+                ...c,
+                endurancePoints: c.endurancePoints - c.rangedCombat.epCost,
+            };
+
+            console.log(
+                `✅ Endurance spent: -${c.rangedCombat.epCost} → remaining ${attackerAfterEP.endurancePoints}`
+            );
+
+            // ===== RANGE CHECK =====
+            console.log(
+                `🎯 Weapon range: ${c.rangedCombat.range}`
+            );
+
+            // ===== RANGE CHECK =====
+            if (distance > c.rangedCombat.range) {
+                console.log(`🚶 ${c.name} is out of range — moving into firing distance`);
+
+                const obstacles = getObstacles(gameState, [c.id, target.id]);
+
+                const path = findPathToWithinRange(
+                    { x: Math.round(c.location.x), y: Math.round(c.location.y) },
+                    { x: Math.round(target.location.x), y: Math.round(target.location.y) },
+                    c.rangedCombat.range,
+                    obstacles,
+                    GRID_WIDTH,
+                    GRID_HEIGHT
+                );
+
+                return {
+                    ...c,
+                    path,
+                    action: "ranged",
+                    actionTarget: target,
+                    targetLocation: { ...target.location }
+                };
+            }
+
+            // ===== AUTO HIT =====
+            /*
+            if (target.endurancePoints < 1) {
+                console.log(`💀 ${target.name} is exhausted — automatic HIT`);
+                damageMap.set(
+                    target.id,
+                    (damageMap.get(target.id) || 0) + c.rangedCombat.damage
+                );
+                projectilesToSpawn.push({ shooter: attackerAfterEP, target });
+                return { ...attackerAfterEP, action: "wait", path: [] };
+            }
+            */
+            // ===== ATTACK & DEFENCE FACTORS =====
+            let attackFactor = 0;
+            let defenceFactor = 0;
+
+            // --- Attacker perception ---
+            const perceptionDelta = c.stats.perception - 5;
+            attackFactor += perceptionDelta;
+            console.log(
+                `Attacker perception ${c.stats.perception} → attackFactor ${perceptionDelta >= 0 ? '+' : ''}${perceptionDelta}`
+            );
+
+            // --- Attacker skills ---
+            const rangedSkill = c.skills.find(s => s.name.toLowerCase() === "ranged combat");
+            if (rangedSkill) {
+                attackFactor += rangedSkill.level;
+                console.log(`Ranged combat skill +${rangedSkill.level}`);
+            }
+
+            const weaponSkill = c.skills.find(
+                s => s.name.toLowerCase() === c.rangedCombat.skill.toLowerCase()
+            );
+            if (weaponSkill) {
+                attackFactor += weaponSkill.level;
+                console.log(`Weapon skill (${c.rangedCombat.skill}) +${weaponSkill.level}`);
+            }
+
+            // --- Range modifiers ---
+            if (distance <= 5) {
+                attackFactor -= 20;
+                console.log(`Too close (0–5) → -20 attack`);
+            } else if (distance <= 10) {
+                attackFactor += 10;
+                console.log(`Close range (6–10) → +10 attack`);
+            } else {
+                attackFactor -= 5;
+                console.log(`Long range → -5 attack`);
+            }
+
+            // ===== DEFENDER FACTORS =====
+            const targetRanged = target.skills.find(s => s.name.toLowerCase() === "ranged combat");
+            if (targetRanged) {
+                defenceFactor += targetRanged.level;
+                console.log(`Defender ranged skill +${targetRanged.level}`);
+            }
+
+            const dodge = target.skills.find(s => s.name.toLowerCase() === "dodge");
+            if (dodge) {
+                defenceFactor += dodge.level;
+                console.log(`Dodge skill +${dodge.level}`);
+            }
+
+            const dexDelta = target.stats.dexterity - 8;
+            if (dexDelta > 0) {
+                defenceFactor += dexDelta;
+                console.log(`Dexterity bonus +${dexDelta}`);
+            }
+
+            defenceFactor += target.stats.size;
+            console.log(`Size modifier ${target.stats.size >= 0 ? '+' : ''}${target.stats.size}`);
+
+            const targetPerceptionDelta = target.stats.perception - 5;
+            defenceFactor += targetPerceptionDelta;
+            console.log(`Perception modifier +${targetPerceptionDelta}`);
+
+            // ===== D10 ROLLS =====
+            const attackerRoll = Math.ceil(Math.random() * 10);
+            const defenderRoll = Math.ceil(Math.random() * 10);
+
+            console.log(`Attacker rolls: ${attackerRoll}`);
+            console.log(`Defender rolls: ${defenderRoll}`);
+
+            if (defenderRoll === 1 || attackerRoll === 10) {
+                console.log(`AUTOMATIC HIT`);
+                /*
+                damageMap.set(
+                    target.id,
+                    (damageMap.get(target.id) || 0) + c.rangedCombat.damage
+                );
+                */
+                projectilesToSpawn.push({ shooter: attackerAfterEP, target });
+                //return { ...attackerAfterEP, path: [] };
+            }
+
+            if (defenderRoll === 10 || attackerRoll === 1) {
+                console.log(`AUTOMATIC MISS`);
+                addGameMessage(`${c.name} misses ${target.name}`, 'combat');
+                return { ...attackerAfterEP, path: [] };
+            }
+
+            const attackTotal = attackerRoll + attackFactor;
+            const defenceTotal = defenderRoll + defenceFactor;
+
+            console.log(`Attack total: ${attackTotal}`);
+            console.log(`Defence total: ${defenceTotal}`);
+
+            if (attackTotal > defenceTotal) {
+                console.log(`HIT`);
+
+                const hitPart = rollHitLocation();
+
+                const result = resolveDamage(c.rangedCombat, target, hitPart, itemStore);
+
+                console.log(
+                    `💥 Hit ${target.name}'s ${result.hitPart} | ` +
+                    (result.armorHit
+                        ? result.penetrated
+                            ? "armor penetrated"
+                            : "armor stopped it"
+                        : "no armor")
+                );
+
+                if (result.damage > 0) {
+                    damageMap.set(
+                        target.id,
+                        (damageMap.get(target.id) || 0) + result.damage
                     );
-
-                    if (hasLoS) {
-                        console.log(`🟡 ${c.name} attempts a ranged attack on ${target.name}`);
-
-                        addGameMessage(`${c.name} shoots at ${target.name}`, 'combat');
-                        actedThisTurn.add(c.id);
-
-                        // ===== ENDURANCE CHECK =====
-                        if (c.endurancePoints < c.rangedCombat.epCost) {
-                            console.log(
-                                `❌ ${c.name} does NOT have enough endurance (${c.endurancePoints}/${c.rangedCombat.epCost})`
-                            );
-                            addGameMessage(`${c.name} is too exhausted to shoot`, 'combat');
-                            return c;
-                        }
-
-                        console.log(
-                            `✅ ${c.name} has enough endurance (${c.endurancePoints}), cost is ${c.rangedCombat.epCost}`
-                        );
-
-                        // Deduct endurance (locally; real deduction should happen when state is finalized)
-                        console.log(
-                            `🔋 ${c.name} spends ${c.rangedCombat.epCost} endurance`
-                        );
-
-                        // ===== RANGE CHECK =====
-                        const range = getDistance(c.location, target.location);
-                        console.log(`📏 Distance to target: ${range}, weapon range: ${c.rangedCombat.range}`);
-
-                        if (range > c.rangedCombat.range) {
-                            console.log(`❌ Target is out of range — automatic miss`);
-                            addGameMessage(`${c.name} fires but the target is out of range`, 'combat');
-                            return { ...c, path: [] };
-                        }
-
-                        // ===== AUTO-HIT CASE =====
-                        if (target.endurancePoints < 1) {
-                            console.log(`💀 ${target.name} is exhausted — automatic hit`);
-                            damageMap.set(target.id, (damageMap.get(target.id) || 0) + c.rangedCombat.damage);
-                            projectilesToSpawn.push({ shooter: c, target });
-                            return { ...c, path: [] };
-                        }
-
-                        // ===== ATTACK & DEFENCE FACTORS =====
-                        let attackFactor = 0;
-                        let defenceFactor = 0;
-
-                        // --- Attacker perception ---
-                        const perceptionDelta = c.stats.perception - 5;
-                        attackFactor += perceptionDelta;
-                        console.log(
-                            `🎯 Attacker perception ${c.stats.perception} → attackFactor ${perceptionDelta >= 0 ? '+' : ''}${perceptionDelta}`
-                        );
-
-                        // --- Attacker skills ---
-                        const rangedSkill = c.skills.find(s => s.name.toLowerCase() === 'ranged combat');
-                        if (rangedSkill) {
-                            attackFactor += rangedSkill.level;
-                            console.log(`🎯 Ranged Combat skill level ${rangedSkill.level} → +${rangedSkill.level}`);
-                        }
-
-                        const weaponSkill = c.skills.find(
-                            s => s.name.toLowerCase() === c.rangedCombat.skill.toLowerCase()
-                        );
-                        if (weaponSkill) {
-                            attackFactor += weaponSkill.level;
-                            console.log(
-                                `🎯 Weapon skill (${c.rangedCombat.skill}) level ${weaponSkill.level} → +${weaponSkill.level}`
-                            );
-                        }
-
-                        // --- Range modifiers ---
-                        if (range <= 5) {
-                            attackFactor -= 20;
-                            console.log(`📉 Too close (0–5) → attackFactor -20`);
-                        } else if (range <= 10) {
-                            attackFactor += 10;
-                            console.log(`📈 Close range (6–10) → attackFactor +10`);
-                        } else {
-                            attackFactor -= 5;
-                            console.log(`📉 Long range → attackFactor -5`);
-                        }
-
-                        // ===== DEFENDER MODIFIERS =====
-
-                        const targetRangedSkill = target.skills.find(s => s.name.toLowerCase() === 'ranged combat');
-                        if (targetRangedSkill) {
-                            defenceFactor += targetRangedSkill.level;
-                            console.log(
-                                `🛡 Defender ranged skill level ${targetRangedSkill.level} → defence +${targetRangedSkill.level}`
-                            );
-                        }
-
-                        const dodgeSkill = target.skills.find(s => s.name.toLowerCase() === 'dodge');
-                        if (dodgeSkill) {
-                            defenceFactor += dodgeSkill.level;
-                            console.log(`🛡 Dodge skill level ${dodgeSkill.level} → defence +${dodgeSkill.level}`);
-                        }
-
-                        const dexDelta = target.stats.dexterity - 8;
-                        if (dexDelta > 0) {
-                            defenceFactor += dexDelta;
-                            console.log(`🛡 Dexterity ${target.stats.dexterity} → defence +${dexDelta}`);
-                        }
-
-                        const sizeDelta = target.stats.size;
-                        defenceFactor += sizeDelta;
-                        console.log(
-                            `🛡 Target size ${target.stats.size} → defence ${sizeDelta >= 0 ? '+' : ''}${sizeDelta}`
-                        );
-
-                        const targetPerceptionDelta = target.stats.perception - 5;
-                        defenceFactor += targetPerceptionDelta;
-                        console.log(
-                            `🛡 Target perception ${target.stats.perception} → defence +${targetPerceptionDelta}`
-                        );
-
-                        // ===== D10 ROLLS =====
-                        const attackerRoll = Math.ceil(Math.random() * 10);
-                        const defenderRoll = Math.ceil(Math.random() * 10);
-
-                        console.log(`🎲 Attacker rolls d10: ${attackerRoll}`);
-                        console.log(`🎲 Defender rolls d10: ${defenderRoll}`);
-
-                        // Auto outcomes
-                        if (defenderRoll === 1) {
-                            console.log(`💥 Defender rolled 1 → automatic HIT`);
-                        } else if (defenderRoll === 10) {
-                            console.log(`🛑 Defender rolled 10 → automatic MISS`);
-                            return { ...c, path: [] };
-                        }
-
-                        if (attackerRoll === 10) {
-                            console.log(`💥 Attacker rolled 10 → automatic HIT`);
-                        } else if (attackerRoll === 1) {
-                            console.log(`🛑 Attacker rolled 1 → automatic MISS`);
-                            return { ...c, path: [] };
-                        }
-
-                        const attackTotal = attackerRoll + attackFactor;
-                        const defenceTotal = defenderRoll + defenceFactor;
-
-                        console.log(
-                            `⚔️ Attack total: ${attackerRoll} + ${attackFactor} = ${attackTotal}`
-                        );
-                        console.log(
-                            `🛡 Defence total: ${defenderRoll} + ${defenceFactor} = ${defenceTotal}`
-                        );
-
-                        if (attackTotal > defenceTotal) {
-                            console.log(`💥 HIT! ${attackTotal} > ${defenceTotal}`);
-                            damageMap.set(
-                                target.id,
-                                (damageMap.get(target.id) || 0) + c.rangedCombat.damage
-                            );
-                            projectilesToSpawn.push({ shooter: c, target });
-                        } else {
-                            console.log(`❌ MISS! ${attackTotal} ≤ ${defenceTotal}`);
-                            addGameMessage(`${c.name} misses ${target.name}`, 'combat');
-                        }
-
-                        return { ...c, path: [] };
-                    }
-
                 }
+                projectilesToSpawn.push({ shooter: attackerAfterEP, target });
+            } else {
+                console.log(`MISS`);
+                addGameMessage(`${c.name} misses ${target.name}`, 'combat');
+            }
+
+            return { ...attackerAfterEP, path: [] };
+        });
+
+        // ===== APPLY DAMAGE =====
+        const finalCharacters = charactersAfterAnalysis.map(c => {
+            const dmg = damageMap.get(c.id);
+            if (dmg) {
+                console.log(`💔 ${c.name} takes ${dmg} damage`);
+                return { ...c, hitPoints: c.hitPoints - dmg };
             }
             return c;
         });
 
-        // Apply all damage in a single pass
-        let finalCharacters = charactersAfterAnalysis;
-        if (damageMap.size > 0) {
-            finalCharacters = charactersAfterAnalysis.map(c => {
-                const damage = damageMap.get(c.id);
-                if (damage) {
-                    console.log(`Applying ${damage} damage to ${c.name}`);
-                    return { ...c, hitPoints: c.hitPoints - damage };
-                }
-                return c;
-            });
-        }
-
-        // Spawn projectiles for visuals
-        if (projectilesToSpawn.length > 0) {
-            projectilesToSpawn.forEach(({ shooter, target }) => {
-                shootAtCharacter(shooter, target, "laser");
-            });
-        }
+        // ===== SPAWN PROJECTILES =====
+        projectilesToSpawn.forEach(({ shooter, target }) => {
+            shootAtCharacter(shooter, target, "laser");
+        });
 
         return {
             ...gameState,
             characters: finalCharacters,
         };
     };
+
 
     /** Update projectile positions and check for hits */
     const updateProjectiles = (projectiles: Projectile[]): Projectile[] => {
@@ -773,6 +799,7 @@ const PlayScreenV3: React.FC = () => {
                 >
                     {hoverChar ? (
                         <>
+                            <h2>{(paused) ? <>PAUSED</> : <></>}</h2>
                             <h3>{hoverChar.name}</h3>
                             <button
                                 onClick={() => {
