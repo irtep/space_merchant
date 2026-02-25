@@ -243,12 +243,12 @@ const PlayScreenV3: React.FC = () => {
             }
 
             // --- Range modifiers ---
-            if (distance <= 5) {
+            if (distance <= 1) {
                 attackFactor -= 20;
-                console.log(`Too close (0–5) → -20 attack`);
+                console.log(`Too close (0–1) → -20 attack`);
             } else if (distance <= 10) {
                 attackFactor += 10;
-                console.log(`Close range (6–10) → +10 attack`);
+                console.log(`Close range (2–10) → +10 attack`);
             } else {
                 attackFactor -= 5;
                 console.log(`Long range → -5 attack`);
@@ -317,6 +317,7 @@ const PlayScreenV3: React.FC = () => {
                 const hitPart = rollHitLocation();
 
                 const result = resolveDamage(c.rangedCombat, target, hitPart, itemStore);
+                console.log('hit resulst: ', result);
 
                 console.log(
                     `💥 Hit ${target.name}'s ${result.hitPart} | ` +
@@ -328,10 +329,13 @@ const PlayScreenV3: React.FC = () => {
                 );
 
                 if (result.damage > 0) {
+                    console.log('damage: ', result.damage);
                     damageMap.set(
                         target.id,
                         (damageMap.get(target.id) || 0) + result.damage
                     );
+                } else {
+                    console.log('armour holds');
                 }
                 projectilesToSpawn.push({ shooter: attackerAfterEP, target });
             } else {
@@ -362,7 +366,6 @@ const PlayScreenV3: React.FC = () => {
             characters: finalCharacters,
         };
     };
-
 
     /** Update projectile positions and check for hits */
     const updateProjectiles = (projectiles: Projectile[]): Projectile[] => {
@@ -522,6 +525,7 @@ const PlayScreenV3: React.FC = () => {
                     })
                 }));
             }
+            setSelectedAction(null);
         }
 
         // close combat
@@ -569,6 +573,7 @@ const PlayScreenV3: React.FC = () => {
                     })
                 }));
             }
+            setSelectedAction(null);
         }
 
         // Selection
